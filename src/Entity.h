@@ -6,9 +6,13 @@ public:
     virtual ~Entity() = default;
     virtual void draw() = 0;
     virtual void update(float dt) = 0;
-    Vector2 GetPos() const
-    {
+    Vector2 GetPos()    {
         return pos;
     }
-    Vector2 pos;
+    void SetPos(Vector2 pos_in)
+    {
+        pos = pos_in;
+    }
+protected:
+    Vector2 pos = { 0,0 };
 };

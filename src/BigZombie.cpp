@@ -6,12 +6,8 @@
 
 BigZombie::BigZombie()
 {
-	pos = { -50,-50 };
-	m_animations = new Animations();
-	m_animations->InitializeBigZAnimations();
-	m_animation = m_animations->GetAnimation("BIG_ZOMBIE_IDLE");
-	sprite = m_animations->GetTexture();
-
+	SetPos({ -50,-50 });
+	InitAnimations();
 	EnitityManager::Add(this);
 	std::cout << "Created Big Zombie" << std::endl;
  }
@@ -19,36 +15,33 @@ BigZombie::BigZombie()
 BigZombie::~BigZombie()
 {
 	EnitityManager::Remove(this);
-	UnloadTexture(sprite);
-	delete m_animations;
 }
 
 void BigZombie::update(float dt)
 {
-	m_animation->SwitchFrames(dt);
-	m_animation = m_animations->GetAnimation("BIG_ZOMBIE_IDLE");
+	SetAnimation("BIG_ZOMBIE_IDLE");
 	if (IsKeyDown(KEY_LEFT))
 	{
 		pos.x += 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_LEFT");
+		SetAnimation("BIG_ZOMBIE_LEFT");
 
 	}
 	if (IsKeyDown(KEY_RIGHT))
 	{
 		pos.x -= 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_RIGHT");
+		SetAnimation("BIG_ZOMBIE_RIGHT");
 
 	}
 	if (IsKeyDown(KEY_UP))
 	{
 		pos.y += 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_UP");
+		SetAnimation("BIG_ZOMBIE_UP");
 
 	}
 	if (IsKeyDown(KEY_DOWN))
 	{
 		pos.y -= 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_DOWN");
+		SetAnimation("BIG_ZOMBIE_DOWN");
 	}
 	if (IsKeyDown(KEY_E))
 	{
@@ -59,15 +52,19 @@ void BigZombie::update(float dt)
 
 void BigZombie::draw()
 {
-	DrawTexturePro(sprite,
-		m_animation->GetCurrentFrame(),
+	DrawTexturePro(*sprite,
+		CurrentFrame(),
 		Rectangle{ 0,0,64,64 },
-		pos,
+		GetPos(),
 		0.0f,
 		WHITE);
 }
 
-void BigZombie::SetPos(Vector2 pos_in)
+
+void BigZombie::InitAnimations()
 {
-	pos = pos_in;
+	sprite = TextureLoader::GetTexture("BIG_Z");
+	animations->InitializeBigZAnimations();
+	SetAnimation("BIG_ZOMBIE_IDLE");
+	
 }

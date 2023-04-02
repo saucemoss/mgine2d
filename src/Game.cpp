@@ -6,33 +6,32 @@
 #include <iostream>
 #include "Animations.h"
 #include "BigZombie.h"
+#include "ZSpawner.h"
 
-Player* player = nullptr;
-BigZombie* bz[3];
+//Player* player = nullptr;
+//Player* test = nullptr;
+ZSpawner* spawner = nullptr;
 
 Game::Game(int width, int height, int fps, std::string title)
 {
 	assert(!GetWindowHandle());	//If assertion triggers : Window is already opened
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
+	TextureLoader::LoadTextures();
 	
-	player = new Player();
-
-	for (int i = 0; i < 3; i++) 
-	{
-		bz[i] = new BigZombie();
-		bz[i]->SetPos({ (float)i * 10,(float)i * 10 });
-	}
-	
-
-	
+	//player = new Player();
+	spawner = new ZSpawner();
+	//bz = new BigZombie[10];
+	//for (int i = 0; i < 10; i++) 
+	//{
+	//	bz[i].SetPos({ (float)GetRandomValue(-600,0),(float)GetRandomValue(-600,0) });
+	//}
 }
 
 Game::~Game() noexcept
 {
 	assert(GetWindowHandle()); //if assertion triggers : Window is already closed
-	delete player;
-	delete[] bz;
+	//delete player;
 	CloseWindow();
 }
 
@@ -49,7 +48,6 @@ void Game::Tick()
 	EndDrawing();
 }
 
-
 void Game::Update()
 {
 	float dt = GetFrameTime();
@@ -60,10 +58,6 @@ void Game::Update()
 void Game::Draw()
 {
 	ClearBackground(RAYWHITE);
-	player->draw();
-	for (int i = 0; i < 3; i++)
-	{
-		bz[i]->draw();
-	}
+	EnitityManager::Draw();
 }
 

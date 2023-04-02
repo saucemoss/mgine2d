@@ -12,6 +12,14 @@ void EnitityManager::Update(float dt)
 	}
 }
 
+void EnitityManager::Draw()
+{
+	for (Entity* e : EntityList)
+	{
+		e->draw();
+	}
+}
+
 void EnitityManager::Add(Entity* e)
 {
 	EntityList.push_back(e);

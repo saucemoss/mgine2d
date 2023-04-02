@@ -6,47 +6,43 @@
 
 Player::Player()
 {
-	pos = { 0,0 };
-	m_animations = new Animations();
-	m_animations->InitializeBigZAnimations();
-	m_animation = m_animations->GetAnimation("BIG_ZOMBIE_IDLE");
-	sprite = m_animations->GetTexture();
+	SetPos({ 0,0 });
+	InitAnimations();
 	EnitityManager::Add(this);
 }
 
 Player::~Player()
 {
-	UnloadTexture(sprite);
-	delete m_animations;
+	EnitityManager::Remove(this);
 }
 
 
 void Player::update(float dt)
 {
-	m_animation->SwitchFrames(dt);
-	m_animation = m_animations->GetAnimation("BIG_ZOMBIE_IDLE");
+	SwitchFrames(dt);
+	SetAnimation("BIG_ZOMBIE_IDLE");
 	if (IsKeyDown(KEY_LEFT))
 	{
 		pos.x += 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_LEFT");
+		SetAnimation("BIG_ZOMBIE_LEFT");
 		
 	}
 	if (IsKeyDown(KEY_RIGHT))
 	{
 		pos.x -= 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_RIGHT");
+		SetAnimation("BIG_ZOMBIE_RIGHT");
 
 	}
 	if (IsKeyDown(KEY_UP))
 	{
 		pos.y += 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_UP");
+		SetAnimation("BIG_ZOMBIE_UP");
 
 	}
 	if (IsKeyDown(KEY_DOWN))
 	{
 		pos.y -= 1;
-		m_animation = m_animations->GetAnimation("BIG_ZOMBIE_DOWN");
+		SetAnimation("BIG_ZOMBIE_DOWN");
 
 	}
 	
@@ -54,12 +50,19 @@ void Player::update(float dt)
 
 void Player::draw()
 {
-	DrawTexturePro(sprite,
-		m_animation->GetCurrentFrame(),
+	DrawTexturePro(*sprite,
+		CurrentFrame(),
 		Rectangle{0,0,64,64},
-		pos,
+		GetPos(),
 		0.0f,
 		WHITE);
+}
+
+void Player::InitAnimations()
+{
+	sprite = TextureLoader::GetTexture("BIG_Z");
+	animations->InitializeBigZAnimations();
+	SetAnimation("BIG_ZOMBIE_IDLE");
 }
 
 

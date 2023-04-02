@@ -3,18 +3,14 @@
 #include <raylib.h>
 #include "Animations.h"
 
-class Player : public Entity
+class Player : public Entity, public Animated
 {
-private:
-    Texture2D sprite;
-    Animation* m_animation;
-    Animations* m_animations;
-
 public:
     Player();
     ~Player();
     
     void update(float dt) override;
     void draw() override;
+    void InitAnimations() override;
 
 };

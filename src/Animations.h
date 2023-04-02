@@ -5,18 +5,23 @@
 #include <vector>
 #include <iostream>
 
-class Animation
+class Animation 
 {
 public:
-
-	void SetCustomFrameTime(int frameNumber, float duration);
-	Rectangle GetCurrentFrame();
-	Animation(Texture2D& texture, int spriteSheetRow, int framesCount, int frameSize, float frameTime);
-	void SwitchFrames(float dt);
+	Animation(Texture2D* texture, int spriteSheetRow, int framesCount, int frameSize, float frameTime);
 	~Animation()
 	{
 		std::cout << "Deleted animation" << std::endl;
 	}
+
+	void SetCustomFrameTime(int frameNumber, float duration);
+	Rectangle GetCurrentFrame();
+	void SwitchFrames(float dt);
+	void PlayOnce();
+	bool Stopped();
+	void SetActive();
+	void Deactivate();
+	bool IsActive();
 
 private:
 	const Texture2D* m_texture;
@@ -31,18 +36,69 @@ private:
 	void BuildFrameTimes(int framesCount);
 	Rectangle m_currentFrame;
 	int m_currentFrameNum;
-
+	bool m_playOnce = false;
+	bool m_reachedEnd = false;
+	bool m_active = false;
 };
 
 class Animations
 {
 public:
-	const Texture2D& GetTexture();
-	Texture2D m_texture;
 	void InitializeBigZAnimations();
+	void InitializeZSpawnerAnimations();
+	void Deactivate();
 	Animation* GetAnimation(std::string name);
+	std::string m_CurrentActiveAnimation;
 private:
 	std::unordered_map<std::string, Animation> animations;
 	
+};
 
+class TextureLoader
+{
+public:
+	static std::unordered_map<std::string, Texture2D> m_Textures;
+	static void LoadTextures();
+	static Texture2D* GetTexture(std::string name);
+};
+
+class Animated
+{
+public:
+	Animation* animation = nullptr;
+	Animations* animations = new Animations();
+	Texture2D* sprite = nullptr;
+	~Animated()
+	{
+		delete animations;
+	}
+	virtual void InitAnimations() = 0;
+	void SetAnimation(std::string name)
+	{
+		if (!animations->m_CurrentActiveAnimation.compare(name))
+		{
+			animations->Deactivate();
+			animation = animations->GetAnimation(name);
+			animation->SetActive();
+			animations->m_CurrentActiveAnimation = name;
+		}
+
+	}
+	void SwitchFrames(float dt) const
+	{
+		animation->SwitchFrames(dt);
+	}
+	Rectangle CurrentFrame() const
+	{
+		return animation->GetCurrentFrame();
+	}
+	void PlayOnce(std::string name)
+	{
+		SetAnimation(name);
+		animation->PlayOnce();
+	}
+	bool Stopped()
+	{
+		return animation->Stopped();
+	}
 };

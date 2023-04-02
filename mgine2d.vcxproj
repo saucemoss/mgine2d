@@ -141,6 +141,7 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\ZSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Animations.h" />
@@ -150,15 +151,18 @@
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\Settings.h" />
+    <ClInclude Include="src\ZSpawner.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\GameProject\Content\Sprites\bigzombie.png" />
+    <Image Include="..\GameProject\Content\Sprites\zSpawner.png" />
     <Image Include="resources\zombie_sheet.png" />
     <Image Include="res\bigzombie.png" />
     <Image Include="res\zombie_sheet.png" />
+    <Image Include="res\zSpawner.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
