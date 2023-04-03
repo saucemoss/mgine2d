@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include <map>
 #include <raylib.h>
 #include <vector>
 #include <iostream>
@@ -11,17 +12,15 @@ public:
 	Animation(Texture2D* texture, int spriteSheetRow, int framesCount, int frameSize, float frameTime);
 	~Animation()
 	{
-		std::cout << "Deleted animation" << std::endl;
+		//std::cout << "Deleted animation" << std::endl;
 	}
 
 	void SetCustomFrameTime(int frameNumber, float duration);
-	Rectangle GetCurrentFrame();
+	const Rectangle GetCurrentFrame();
 	void SwitchFrames(float dt);
 	void PlayOnce();
-	bool Stopped();
-	void SetActive();
-	void Deactivate();
-	bool IsActive();
+	bool AnimationEnded();
+
 
 private:
 	const Texture2D* m_texture;
@@ -46,11 +45,10 @@ class Animations
 public:
 	void InitializeBigZAnimations();
 	void InitializeZSpawnerAnimations();
-	void Deactivate();
 	Animation* GetAnimation(std::string name);
 	std::string m_CurrentActiveAnimation;
 private:
-	std::unordered_map<std::string, Animation> animations;
+	std::map<std::string, Animation> animations;
 	
 };
 
@@ -75,13 +73,8 @@ public:
 	virtual void InitAnimations() = 0;
 	void SetAnimation(std::string name)
 	{
-		if (!animations->m_CurrentActiveAnimation.compare(name))
-		{
-			animations->Deactivate();
-			animation = animations->GetAnimation(name);
-			animation->SetActive();
-			animations->m_CurrentActiveAnimation = name;
-		}
+		animation = animations->GetAnimation(name);
+		animations->m_CurrentActiveAnimation = name;
 
 	}
 	void SwitchFrames(float dt) const
@@ -97,8 +90,8 @@ public:
 		SetAnimation(name);
 		animation->PlayOnce();
 	}
-	bool Stopped()
+	bool AnimationEnded()
 	{
-		return animation->Stopped();
+		return animation->AnimationEnded();
 	}
 };

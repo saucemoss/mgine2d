@@ -8,8 +8,8 @@
 #include "BigZombie.h"
 #include "ZSpawner.h"
 
-//Player* player = nullptr;
-//Player* test = nullptr;
+Player* player = nullptr;
+BigZombie* bz = nullptr;
 ZSpawner* spawner = nullptr;
 
 Game::Game(int width, int height, int fps, std::string title)
@@ -19,19 +19,20 @@ Game::Game(int width, int height, int fps, std::string title)
 	InitWindow(width, height, title.c_str());
 	TextureLoader::LoadTextures();
 	
-	//player = new Player();
+	player = new Player();
 	spawner = new ZSpawner();
-	//bz = new BigZombie[10];
-	//for (int i = 0; i < 10; i++) 
-	//{
-	//	bz[i].SetPos({ (float)GetRandomValue(-600,0),(float)GetRandomValue(-600,0) });
-	//}
+	bz = new BigZombie[15];
+	for (int i = 0; i < 15; i++) 
+	{
+		bz[i].SetPos({ (float)GetRandomValue(-800,0),(float)GetRandomValue(-600,0) });
+	}
 }
 
 Game::~Game() noexcept
 {
 	assert(GetWindowHandle()); //if assertion triggers : Window is already closed
-	//delete player;
+	delete player;
+	delete[] bz;
 	CloseWindow();
 }
 
@@ -51,6 +52,18 @@ void Game::Tick()
 void Game::Update()
 {
 	float dt = GetFrameTime();
+
+	if (IsKeyPressed(KEY_ONE))
+	{
+		BigZombie* bigz = new BigZombie();
+		bigz->SetPos({ (float)GetRandomValue(-800,0),(float)GetRandomValue(-600,0) });
+	}
+
+	if (IsKeyPressed(KEY_R))
+	{
+		delete[] bz;
+	}
+
 	EnitityManager::Update(dt);
 }
 
@@ -58,6 +71,10 @@ void Game::Update()
 void Game::Draw()
 {
 	ClearBackground(RAYWHITE);
+	
 	EnitityManager::Draw();
+	DrawFPS(5, 5);
+	std::string txt = "Entity count: " + std::to_string(EnitityManager::EntityList.size());
+	DrawText(txt.c_str(), 5, 20, 20, BLACK);
 }
 

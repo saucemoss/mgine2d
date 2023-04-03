@@ -20,7 +20,7 @@ ZSpawner::~ZSpawner()
 void ZSpawner::update(float dt)
 {
 	SwitchFrames(dt);
-	if (Stopped() && animation->IsActive()) {
+	if (AnimationEnded()) {
 		SetAnimation("ZSPAWNER_IDLE");
 	}
 	if (IsKeyPressed(KEY_E))

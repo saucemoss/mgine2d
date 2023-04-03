@@ -14,11 +14,11 @@ void TextureLoader::LoadTextures()
 void Animations::InitializeBigZAnimations()
 {
 	Texture2D* texture = TextureLoader::GetTexture("BIG_Z");
-	animations.emplace("BIG_ZOMBIE_IDLE", *(new Animation(texture, 0, 10, 32, 0.1f)));
-	animations.emplace("BIG_ZOMBIE_DOWN", *(new Animation(texture, 1, 8, 32, 0.1f)));
-	animations.emplace("BIG_ZOMBIE_UP", *(new Animation(texture, 2, 8, 32, 0.1f)));
-	animations.emplace("BIG_ZOMBIE_RIGHT", *(new Animation(texture, 3, 9, 32, 0.1f)));
-	animations.emplace("BIG_ZOMBIE_LEFT", *(new Animation(texture, 4, 9, 32, 0.1f)));
+	animations.emplace("BIGZ_IDLE", *(new Animation(texture, 0, 10, 32, 0.1f)));
+	animations.emplace("BIGZ_DOWN", *(new Animation(texture, 1, 8, 32, 0.1f)));
+	animations.emplace("BIGZ_UP", *(new Animation(texture, 2, 8, 32, 0.1f)));
+	animations.emplace("BIGZ_RIGHT", *(new Animation(texture, 3, 9, 32, 0.1f)));
+	animations.emplace("BIGZ_LEFT", *(new Animation(texture, 4, 9, 32, 0.1f)));
 }
 void Animations::InitializeZSpawnerAnimations()
 {
@@ -29,14 +29,6 @@ void Animations::InitializeZSpawnerAnimations()
 	animations.emplace("ZSPAWNER_IDLE", *idle_anim);
 	
 	animations.emplace("ZSPAWNER_EMERGE", *(new Animation(texture, 1, 10, 32, 0.1f))); // standard animation
-}
-
-void Animations::Deactivate()
-{
-	for (auto& [key, value] : animations) 
-	{ 
-		value.Deactivate();
-	}
 }
 
 
@@ -60,7 +52,6 @@ Animation::Animation(Texture2D* texture, int spriteSheetRow, int framesCount, in
 	m_frameSize(frameSize),
 	m_frameTime(frameTime)
 {
-	std::cout << "Creating Animation" << std::endl;
 	BuildFrameRectangles(framesCount);
 	BuildFrameTimes(framesCount);
 	m_currentFrame = m_frames[0];
@@ -96,28 +87,14 @@ void Animation::SwitchFrames(float dt)
 
 void Animation::PlayOnce()
 {
+	m_currentFrameNum = 0;
+	m_reachedEnd = false;
 	m_playOnce = true;
 }
 
-bool Animation::Stopped()
+bool Animation::AnimationEnded()
 {
 	return m_reachedEnd;
-}
-
-void Animation::SetActive()
-{
-	m_active = true;
-}
-
-void Animation::Deactivate()
-{
-	m_active = false;
-	std::cout << "deactivated" << std::endl;
-}
-
-bool Animation::IsActive()
-{
-	return m_active;
 }
 
 void Animation::BuildFrameRectangles(int framesCount)
@@ -144,7 +121,7 @@ void Animation::SetCustomFrameTime(int frameNumber, float duration)
 	m_framesTimes[frameNumber] = duration;
 }
 
-Rectangle Animation::GetCurrentFrame()
+const Rectangle Animation::GetCurrentFrame()
 {
 	return m_currentFrame;
 }

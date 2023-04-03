@@ -20,29 +20,29 @@ Player::~Player()
 void Player::update(float dt)
 {
 	SwitchFrames(dt);
-	SetAnimation("BIG_ZOMBIE_IDLE");
+	SetAnimation("BIGZ_IDLE");
 	if (IsKeyDown(KEY_LEFT))
 	{
 		pos.x += 1;
-		SetAnimation("BIG_ZOMBIE_LEFT");
-		
+		SetAnimation("BIGZ_LEFT");
+
 	}
 	if (IsKeyDown(KEY_RIGHT))
 	{
 		pos.x -= 1;
-		SetAnimation("BIG_ZOMBIE_RIGHT");
+		SetAnimation("BIGZ_RIGHT");
 
 	}
 	if (IsKeyDown(KEY_UP))
 	{
 		pos.y += 1;
-		SetAnimation("BIG_ZOMBIE_UP");
+		SetAnimation("BIGZ_UP");
 
 	}
 	if (IsKeyDown(KEY_DOWN))
 	{
 		pos.y -= 1;
-		SetAnimation("BIG_ZOMBIE_DOWN");
+		SetAnimation("BIGZ_DOWN");
 
 	}
 	
@@ -62,7 +62,7 @@ void Player::InitAnimations()
 {
 	sprite = TextureLoader::GetTexture("BIG_Z");
 	animations->InitializeBigZAnimations();
-	SetAnimation("BIG_ZOMBIE_IDLE");
+	SetAnimation("BIGZ_IDLE");
 }
 
 
