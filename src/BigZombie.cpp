@@ -16,7 +16,7 @@ BigZombie::~BigZombie()
 	EnitityManager::Remove(this);
 }
 
-void BigZombie::update(float dt)
+void BigZombie::Update(float dt)
 {
 	SwitchFrames(dt);
 	SetAnimation("BIGZ_IDLE");
@@ -50,7 +50,7 @@ void BigZombie::update(float dt)
 	
 }
 
-void BigZombie::draw()
+void BigZombie::Draw()
 {
 	DrawTexturePro(*sprite,
 		CurrentFrame(),

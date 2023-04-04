@@ -4,8 +4,8 @@ class Entity
 {
 public:
     virtual ~Entity() = default;
-    virtual void draw() = 0;
-    virtual void update(float dt) = 0;
+    virtual void Draw() = 0;
+    virtual void Update(float dt) = 0;
     Vector2 GetPos()    {
         return pos;
     }

@@ -139,18 +139,25 @@
     <ClCompile Include="src\BigZombie.cpp" />
     <ClCompile Include="src\EntityManager.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\GameScreen.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\TitleScreen.cpp" />
     <ClCompile Include="src\ZSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Animations.h" />
+    <ClInclude Include="src\BaseScreen.h" />
     <ClInclude Include="src\BigZombie.h" />
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\EntityManager.h" />
     <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\GameScreen.h" />
     <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\Screens.h" />
+    <ClInclude Include="src\ScreensManager.h" />
     <ClInclude Include="src\Settings.h" />
+    <ClInclude Include="src\TitleScreen.h" />
     <ClInclude Include="src\ZSpawner.h" />
   </ItemGroup>
   <ItemGroup>

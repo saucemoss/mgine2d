@@ -11,7 +11,7 @@ public:
     ZSpawner();
     ~ZSpawner();
 
-    void update(float dt) override;
-    void draw() override;
+    void Update(float dt) override;
+    void Draw() override;
     void InitAnimations() override;
 };

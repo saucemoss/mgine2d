@@ -8,7 +8,7 @@ void EnitityManager::Update(float dt)
 {
 	for (Entity* e : EntityList)
 	{
-		e->update(dt);
+		e->Update(dt);
 	}
 }
 
@@ -16,7 +16,7 @@ void EnitityManager::Draw()
 {
 	for (Entity* e : EntityList)
 	{
-		e->draw();
+		e->Draw();
 	}
 }
 

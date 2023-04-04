@@ -17,7 +17,7 @@ Player::~Player()
 }
 
 
-void Player::update(float dt)
+void Player::Update(float dt)
 {
 	SwitchFrames(dt);
 	SetAnimation("BIGZ_IDLE");
@@ -48,7 +48,7 @@ void Player::update(float dt)
 	
 }
 
-void Player::draw()
+void Player::Draw()
 {
 	DrawTexturePro(*sprite,
 		CurrentFrame(),

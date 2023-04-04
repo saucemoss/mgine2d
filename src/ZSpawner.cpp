@@ -17,7 +17,7 @@ ZSpawner::~ZSpawner()
 	EnitityManager::Remove(this);
 }
 
-void ZSpawner::update(float dt)
+void ZSpawner::Update(float dt)
 {
 	SwitchFrames(dt);
 	if (AnimationEnded()) {
@@ -31,7 +31,7 @@ void ZSpawner::update(float dt)
 	
 }
 
-void ZSpawner::draw()
+void ZSpawner::Draw()
 {
 	DrawTexturePro(*sprite,
 		CurrentFrame(),

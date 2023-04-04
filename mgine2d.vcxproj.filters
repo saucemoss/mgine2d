@@ -25,6 +25,15 @@
     <Filter Include="Pliki nagłówkowe\Entities">
       <UniqueIdentifier>{c56edadf-0d39-49af-9811-aa6780af8613}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems">
+      <UniqueIdentifier>{3c434ff6-8fbf-483f-8e12-b723bd7f7e9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Screens">
+      <UniqueIdentifier>{5c57f24f-f2ef-4dc5-ac48-40134d5ed38f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Screens">
+      <UniqueIdentifier>{bca0bb6a-e110-4fa3-98b5-4e8c4b032f9a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -48,6 +57,12 @@
     <ClCompile Include="src\ZSpawner.cpp">
       <Filter>Pliki źródłowe\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="src\TitleScreen.cpp">
+      <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameScreen.cpp">
+      <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -62,9 +77,6 @@
     <ClInclude Include="src\Player.h">
       <Filter>Pliki nagłówkowe\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="src\Animations.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="src\BigZombie.h">
       <Filter>Pliki nagłówkowe\Entities</Filter>
     </ClInclude>
@@ -73,6 +85,24 @@
     </ClInclude>
     <ClInclude Include="src\ZSpawner.h">
       <Filter>Pliki nagłówkowe\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Animations.h">
+      <Filter>Pliki nagłówkowe\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TitleScreen.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ScreensManager.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameScreen.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BaseScreen.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Screens.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

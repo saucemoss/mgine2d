@@ -3,6 +3,7 @@
 namespace settings
 {
 	//Window settings
+	const int ScreenScale = 2;
 	inline constexpr int screenWidth = 1600;
 	inline constexpr int screenHeight = 900;
 	inline constexpr int fps = 60;
