@@ -34,6 +34,12 @@
     <Filter Include="Pliki źródłowe\Systems\Screens">
       <UniqueIdentifier>{bca0bb6a-e110-4fa3-98b5-4e8c4b032f9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Entities\Objects">
+      <UniqueIdentifier>{dfa45fa0-d32e-45ab-bb28-833e1c145094}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Entities\Objects">
+      <UniqueIdentifier>{0ba5da31-1f48-4079-a6d3-65887dbc996d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -62,6 +68,9 @@
     </ClCompile>
     <ClCompile Include="src\GameScreen.cpp">
       <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ground.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="src\Screens.h">
       <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ground.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

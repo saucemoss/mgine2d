@@ -4,10 +4,10 @@ namespace settings
 {
 	//Window settings
 	const int ScreenScale = 2;
-	inline constexpr int screenWidth = 1600;
-	inline constexpr int screenHeight = 900;
-	inline constexpr int fps = 60;
-	inline const std::string windowTitle = "Test";
-
+	constexpr int screenWidth = 1600;
+	constexpr int screenHeight = 900;
+	constexpr int fps = 60;
+	const std::string windowTitle = "Test";
+	constexpr int PhysicsWorldScale = 16.0f / ScreenScale;
 
 }

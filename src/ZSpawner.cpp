@@ -7,7 +7,6 @@
 ZSpawner::ZSpawner()
 {
 	SetPos({ -150,-150 });
-	std::cout << GetPos().x << std::endl;
 	InitAnimations();
 	EnitityManager::Add(this);
 }

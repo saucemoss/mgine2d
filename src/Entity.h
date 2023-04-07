@@ -13,6 +13,10 @@ public:
     {
         pos = pos_in;
     }
+    void SetPos(float x, float y)
+    {
+        pos = { x,y };
+    }
 protected:
     Vector2 pos = { 0,0 };
 };
