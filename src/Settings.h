@@ -8,6 +8,6 @@ namespace settings
 	constexpr int screenHeight = 900;
 	constexpr int fps = 60;
 	const std::string windowTitle = "Test";
-	constexpr int PhysicsWorldScale = 16.0f / ScreenScale;
+	constexpr int PhysicsWorldScale = 32.0f / ScreenScale;
 
 }

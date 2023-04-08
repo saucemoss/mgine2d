@@ -5,6 +5,7 @@
 class Ground : public Entity
 {
 public:
+    Ground();
     Ground(b2World* physicsWorld);
     ~Ground();
 

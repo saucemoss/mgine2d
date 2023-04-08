@@ -2,15 +2,20 @@
 #include "Settings.h"
 #include "EntityManager.h"
 
+Ground::Ground()
+{
+}
+
 Ground::Ground(b2World* physicsWorld)
 	:
 	physicsWorld(physicsWorld)
 {
-	EnitityManager::Add(this);
-	this->SetPos(0, 600);
 
-	Vector2 level_spawn_position = { (float)pos.x / settings::PhysicsWorldScale,
-						(float)pos.y / settings::PhysicsWorldScale };
+	EnitityManager::Add(this);
+	
+
+	Vector2 level_spawn_position = { (float)GetPos().x / settings::PhysicsWorldScale,
+									 (float)GetPos().y / settings::PhysicsWorldScale };
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_staticBody;
 	bodyDef.fixedRotation = true;
@@ -19,7 +24,7 @@ Ground::Ground(b2World* physicsWorld)
 	this->body = physicsWorld->CreateBody(&bodyDef);
 
 	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(50, 50);
+	dynamicBox.SetAsBox(1, 1);
 
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &dynamicBox;
@@ -35,13 +40,14 @@ Ground::~Ground()
 
 void Ground::Update(float dt)
 {
+	
 }
 
 void Ground::Draw()
 {
-	auto spritePosX = (body->GetPosition().x * settings::PhysicsWorldScale);
-	auto spritePosY = (body->GetPosition().y * settings::PhysicsWorldScale);
+	auto spritePosX = (body->GetPosition().x * settings::PhysicsWorldScale) - 16;
+	auto spritePosY = (body->GetPosition().y * settings::PhysicsWorldScale) - 16;
 
-	DrawRectangle(spritePosX, spritePosY, 64, 64, RED);
+	DrawRectangleLines(spritePosX, spritePosY, 32, 32, RED);
 
 }

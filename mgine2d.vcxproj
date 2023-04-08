@@ -179,6 +179,7 @@
     <ClInclude Include="src\Settings.h" />
     <ClInclude Include="src\TitleScreen.h" />
     <ClInclude Include="src\ZSpawner.h" />
+    <ClInclude Include="src\Util.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />

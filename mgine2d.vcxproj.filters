@@ -116,6 +116,9 @@
     <ClInclude Include="src\Ground.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="src\Util.h">
+      <Filter>Pliki nagłówkowe\Systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt">

@@ -5,24 +5,16 @@
 #include "BigZombie.h"
 #include "EntityManager.h"
 #include "Ground.h"
+#include "Util.h"
+#include "Settings.h"
 
 Player* player = nullptr;
 ZSpawner* spawner = nullptr;
 BigZombie* bz = nullptr;
 b2World* GameScreen::b2world = nullptr;
-Ground* ground = nullptr;
 
 GameScreen::GameScreen()
 {
-	
-	spawner = new ZSpawner();
-	
-	bz = new BigZombie[15];
-	for (int i = 0; i < 15; i++)
-	{
-		bz[i].SetPos({ (float)GetRandomValue(-800,0),(float)GetRandomValue(-600,0) });
-	}
-
 	if (b2world != nullptr)
 	{
 		// if we had an old world then delete it and recreate
@@ -30,10 +22,29 @@ GameScreen::GameScreen()
 		delete b2world;
 		b2world = nullptr;
 	}
-
 	b2Vec2 gravity(0.0f, 60.0f);
 	b2world = new b2World(gravity);
+
+
+	spawner = new ZSpawner();
 	
+	Ground* ground = new Ground[8];
+
+	for (int i = 0; i < 8; i++)
+	{
+		ground[i] = *(new Ground(b2world));
+
+
+		ground[i].body->SetTransform({ (float)((50 + i * 32) / settings::PhysicsWorldScale), 
+									(float)300 / settings::PhysicsWorldScale }, 0);
+	}
+
+	Ground* ground2 = new Ground(b2world);
+
+	ground2->body->SetTransform({ (float)114 / settings::PhysicsWorldScale,
+									(float)268 / settings::PhysicsWorldScale }, 0);
+	
+
 
 }
 
@@ -56,11 +67,7 @@ Screens GameScreen::Update(float dt)
 	{
 		player = new Player(b2world);
 	}
-	
-	if (IsKeyPressed(KEY_C))
-	{
-		ground = new Ground(b2world);
-	}
+
 	
 	
 	return Screens::NONE;
@@ -72,6 +79,12 @@ void GameScreen::Draw()
 	DrawFPS(5, 5);
 	std::string txt = "Entity count: " + std::to_string(EnitityManager::EntityList.size());
 	DrawText(txt.c_str(), 5, 20, 20, BLACK);
+	if (player != nullptr)
+	{
+		std::string txt2 = "Player POS: " + VecToString(player->GetPos());
+		DrawText(txt2.c_str(), 5, 40, 20, BLACK);
+	}
+
 }
 
 

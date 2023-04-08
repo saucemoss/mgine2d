@@ -6,7 +6,7 @@
 
 ZSpawner::ZSpawner()
 {
-	SetPos({ -150,-150 });
+	SetPos({ -550,-550 });
 	InitAnimations();
 	EnitityManager::Add(this);
 }
