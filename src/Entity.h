@@ -18,5 +18,5 @@ public:
         pos = { x,y };
     }
 protected:
-    Vector2 pos = { 0,0 };
+    Vector2 pos;
 };

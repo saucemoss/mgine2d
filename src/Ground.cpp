@@ -20,16 +20,16 @@ Ground::Ground(b2World* physicsWorld)
 	bodyDef.type = b2_staticBody;
 	bodyDef.fixedRotation = true;
 	bodyDef.position.Set(level_spawn_position.x, level_spawn_position.y);
-
+	bodyDef.userData.pointer = (uintptr_t)"SOLID_BLOCK";
 	this->body = physicsWorld->CreateBody(&bodyDef);
 
 	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(1, 1);
+	dynamicBox.SetAsBox(settings::PhysicsTileUnit, settings::PhysicsTileUnit); //full collider 1sqm = 32px x 32px
 
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &dynamicBox;
 	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 10.0f;
+	fixtureDef.friction = 1.0f;
 
 	body->CreateFixture(&fixtureDef);
 }
@@ -45,9 +45,8 @@ void Ground::Update(float dt)
 
 void Ground::Draw()
 {
-	auto spritePosX = (body->GetPosition().x * settings::PhysicsWorldScale) - 16;
-	auto spritePosY = (body->GetPosition().y * settings::PhysicsWorldScale) - 16;
-
-	DrawRectangleLines(spritePosX, spritePosY, 32, 32, RED);
+	auto spritePosX = (body->GetPosition().x * settings::PhysicsWorldScale) - settings::tileSize; // -16 to center draw origin
+	auto spritePosY = (body->GetPosition().y * settings::PhysicsWorldScale) - settings::tileSize; // -16 to center draw origin
+	DrawRectangleLines(spritePosX, spritePosY, settings::drawSize, settings::drawSize, RED);
 
 }

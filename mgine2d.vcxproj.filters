@@ -144,5 +144,17 @@
     <Image Include="res\zSpawner.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
+    <Image Include="res\Treasure Hunters\Palm Tree Island\Sprites\Terrain\Terrain (32x32).png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="res\PlayerTextures\player.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="res\PlayerTextures\player32.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\level\TestLevel.ldtk" />
   </ItemGroup>
 </Project>

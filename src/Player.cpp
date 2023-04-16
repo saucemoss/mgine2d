@@ -5,6 +5,8 @@
 #include <iostream>
 #include <box2d.h>
 #include "Settings.h"
+#include "GameScreen.h"
+#include "Util.h"
 
 
 Player::Player(b2World* physicsWorld)
@@ -17,7 +19,7 @@ Player::Player(b2World* physicsWorld)
 
 	//
 	Vector2 collider_pos_center = { ((float)GetPos().x )  / settings::PhysicsWorldScale,
-									((float)GetPos().y ) / settings::PhysicsWorldScale };
+									((float)GetPos().y )  / settings::PhysicsWorldScale };
 
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_dynamicBody;
@@ -27,13 +29,13 @@ Player::Player(b2World* physicsWorld)
 	this->body = physicsWorld->CreateBody(&bodyDef);
 
 	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(0.5, 0.5); // set only half of unit (1m=32px) of collider = (16px x 16px)
+	dynamicBox.SetAsBox(settings::PhysicsTileUnit /2, settings::PhysicsTileUnit / 2); // set only half of unit (1m=32px) of collider = (16px x 16px)
 
 
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &dynamicBox;
 	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 5.0f;
+	fixtureDef.friction = 1.0f;
 
 	body->CreateFixture(&fixtureDef);
 
@@ -50,15 +52,14 @@ void Player::Update(float dt)
 {
 	UpdatePosition();
 	SwitchFrames(dt);
-	SetAnimation("BIGZ_IDLE");
+	SetAnimation("P_IDLE");
 	PlayerMovementControl(dt);
 
 }
 
 void Player::UpdatePosition()
 {
-	//pos.x = body->GetPosition().x;
-	//pos.y = body->GetPosition().y;
+	SetPos({ body->GetPosition().x * settings::PhysicsWorldScale, body->GetPosition().y * settings::PhysicsWorldScale });
 }
 
 void Player::PlayerMovementControl(float dt)
@@ -99,7 +100,7 @@ void Player::check_if_on_floor()
 	is_touching_floor = false;
 
 	// check left, center, and right touch points
-	float x_deviations[] = { -1.0f, 0.0f, 1.0f };
+	float x_deviations[] = { -2.0f, 0.0f, 2.0f };
 
 	for (auto x_dev : x_deviations)
 	{
@@ -110,12 +111,12 @@ void Player::check_if_on_floor()
 		auto target = body->GetPosition();
 		target.x += x_dev;
 		target.y += 1.1;
-
-		//is_touching_floor = RaycastCheckCollisionWithUserData(
-		//	GameScene::world,
-		//	source,
-		//	target,
-		//	PhysicsTypes::SolidBlock);
+		
+		is_touching_floor = RaycastCheckCollisionWithUserData(
+			physicsWorld,
+			source,
+			target,
+			"SOLID_BLOCK");
 
 		if (is_touching_floor)
 		{
@@ -163,11 +164,7 @@ void Player::check_if_jump()
 
 	if (abs(body->GetLinearVelocity().x) > 0)
 	{
-		SetAnimation("BIGZ_LEFT");
-	}
-	else
-	{
-		SetAnimation("BIGZ_IDLE");
+		SetAnimation("P_RUN");
 	}
 
 	if (!is_touching_floor)
@@ -177,15 +174,15 @@ void Player::check_if_jump()
 
 		if (vel > jump_threshold)
 		{
-			//anim_state = JUMP_FALL;
+			SetAnimation("P_FALL");
 		}
 		else if (vel < -jump_threshold)
 		{
-			//anim_state = JUMP_START;
+			SetAnimation("P_JUMP");
 		}
 		else
 		{
-			//anim_state = JUMP_APEX;
+			FreezeFrame("P_JUMP", 3);
 		}
 	}
 }
@@ -209,16 +206,23 @@ void Player::check_if_move()
 
 void Player::Draw()
 {
-	auto spritePosX = (body->GetPosition().x* settings::PhysicsWorldScale) - 16;
-	auto spritePosY = (body->GetPosition().y* settings::PhysicsWorldScale) - 20;
+	auto spritePosX = (body->GetPosition().x* settings::PhysicsWorldScale) - 32;
+	auto spritePosY = (body->GetPosition().y* settings::PhysicsWorldScale) - 48;
 
 	auto colliderPosX = (body->GetPosition().x * settings::PhysicsWorldScale);
 	auto colliderPosY = (body->GetPosition().y * settings::PhysicsWorldScale);
-	DrawRectangleLines(colliderPosX-8, colliderPosY-6 , 16, 16, RED);
+	DrawRectangleLines(colliderPosX-16, colliderPosY-16 , settings::tileSize, settings::tileSize, RED);
 
+
+
+	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
+																	CurrentFrame().y,
+																	CurrentFrame().width * -1,
+																	CurrentFrame().height};
+	
 	DrawTexturePro(*sprite,
-		CurrentFrame(),
-		Rectangle{ spritePosX,spritePosY,32,32},
+		cframe,
+		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
 		{0,0},
 		0.0f,
 		WHITE);
@@ -226,9 +230,11 @@ void Player::Draw()
 
 void Player::InitAnimations()
 {
-	sprite = TextureLoader::GetTexture("BIG_Z");
-	animations->InitializeBigZAnimations();
-	SetAnimation("BIGZ_IDLE");
+	sprite = TextureLoader::GetTexture("PLAYER");
+	animations->InitializePlayerAnimations();
+	SetAnimation("P_IDLE");
 }
+
+
 
 

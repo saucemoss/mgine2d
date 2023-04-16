@@ -20,6 +20,7 @@ public:
 	void SwitchFrames(float dt);
 	void PlayOnce();
 	bool AnimationEnded();
+	void FreezeFrame(int frameNumber);
 
 
 private:
@@ -43,6 +44,7 @@ private:
 class Animations
 {
 public:
+	void InitializePlayerAnimations();
 	void InitializeBigZAnimations();
 	void InitializeZSpawnerAnimations();
 	Animation* GetAnimation(std::string name);
@@ -76,6 +78,11 @@ public:
 		animation = animations->GetAnimation(name);
 		animations->m_CurrentActiveAnimation = name;
 
+	}
+	void FreezeFrame(std::string name, int frameNumber)
+	{
+		SetAnimation(name);
+		animation->FreezeFrame(frameNumber);
 	}
 	void SwitchFrames(float dt) const
 	{
