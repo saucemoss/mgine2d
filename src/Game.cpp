@@ -40,7 +40,7 @@ void Game::Tick()
 	
 
 	BeginTextureMode(frameBuffer);
-	ClearBackground(WHITE);
+	ClearBackground(DARKBLUE);
 
 	ScreensManager::Draw();
 	EndTextureMode();

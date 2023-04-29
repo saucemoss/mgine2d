@@ -40,6 +40,21 @@
     <Filter Include="Pliki źródłowe\Entities\Objects">
       <UniqueIdentifier>{0ba5da31-1f48-4079-a6d3-65887dbc996d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Animations">
+      <UniqueIdentifier>{02f28b18-3528-491d-9ea1-8ceffda7495d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Physics">
+      <UniqueIdentifier>{3826a112-33ed-4774-b11a-b86a553ec923}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Utilities">
+      <UniqueIdentifier>{529470eb-6bb8-4dfd-a90b-6aacdb24ec6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Animations">
+      <UniqueIdentifier>{09ab1f88-8c3e-47bc-b867-72f1500f6cbb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Physics">
+      <UniqueIdentifier>{69b753fb-6338-4cd6-94b5-58e1227891db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -50,9 +65,6 @@
     </ClCompile>
     <ClCompile Include="src\Player.cpp">
       <Filter>Pliki źródłowe\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Animations.cpp">
-      <Filter>Pliki źródłowe\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\BigZombie.cpp">
       <Filter>Pliki źródłowe\Entities</Filter>
@@ -71,6 +83,15 @@
     </ClCompile>
     <ClCompile Include="src\Ground.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Animations.cpp">
+      <Filter>Pliki źródłowe\Systems\Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SolidTile.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Collisions.cpp">
+      <Filter>Pliki źródłowe\Systems\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +116,6 @@
     <ClInclude Include="src\ZSpawner.h">
       <Filter>Pliki nagłówkowe\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="src\Animations.h">
-      <Filter>Pliki nagłówkowe\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="src\TitleScreen.h">
       <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
     </ClInclude>
@@ -116,8 +134,17 @@
     <ClInclude Include="src\Ground.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="src\Animations.h">
+      <Filter>Pliki nagłówkowe\Systems\Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Collisions.h">
+      <Filter>Pliki nagłówkowe\Systems\Physics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Util.h">
-      <Filter>Pliki nagłówkowe\Systems</Filter>
+      <Filter>Pliki nagłówkowe\Systems\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SolidTile.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

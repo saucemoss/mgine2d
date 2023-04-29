@@ -69,3 +69,12 @@ static bool RaycastCheckCollisionWithUserData(b2World* world, b2Vec2 source, b2V
 
     return false;
 }
+
+//static void DrawColliders(b2World* world, b2Body body)
+//{
+//
+//}
+//static void DrawAllColliders(b2World* world) 
+//{
+//    world->DebugDraw();
+//}

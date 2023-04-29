@@ -45,8 +45,8 @@ void Ground::Update(float dt)
 
 void Ground::Draw()
 {
-	auto spritePosX = (body->GetPosition().x * settings::PhysicsWorldScale) - settings::tileSize; // -16 to center draw origin
-	auto spritePosY = (body->GetPosition().y * settings::PhysicsWorldScale) - settings::tileSize; // -16 to center draw origin
-	DrawRectangleLines(spritePosX, spritePosY, settings::drawSize, settings::drawSize, RED);
+	//auto spritePosX = (body->GetPosition().x * settings::PhysicsWorldScale) - settings::tileSize; // -16 to center draw origin
+	//auto spritePosY = (body->GetPosition().y * settings::PhysicsWorldScale) - settings::tileSize; // -16 to center draw origin
+	//DrawRectangleLines(spritePosX, spritePosY, settings::drawSize, settings::drawSize, RED);
 
 }

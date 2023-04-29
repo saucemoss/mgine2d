@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <vector>
 #include "Util.h"
 #include "GameScreen.h"
 #include "Player.h"
@@ -8,30 +9,20 @@
 #include "Ground.h"
 #include "Settings.h"
 #include "LDtkLoader/Project.hpp"
+#include "SolidTile.h"
+#include <raymath.h>
 
 
 Player* player = nullptr;
 ZSpawner* spawner = nullptr;
 BigZombie* bz = nullptr;
-b2World* GameScreen::b2world = nullptr;
 ldtk::Project ldtk_project;
-Camera2D camera;
+
+Camera2D GameScreen::camera;
 
 GameScreen::GameScreen()
 
 {
-
-	// Box2d setup
-	if (b2world != nullptr)
-	{
-		// if we had an old world then delete it and recreate
-		// a new one for the new level
-		delete b2world;
-		b2world = nullptr;
-	}
-	b2Vec2 gravity(0.0f, 60.0f);
-	b2world = new b2World(gravity);
-
 
 	ldtkProject = new ldtk::Project();
 
@@ -63,6 +54,8 @@ GameScreen::GameScreen()
 		{
 			int i = 0;
 			Ground* ground = new Ground[layer.allTiles().size()];
+			std::vector<SolidTile> solid_tiles;
+			solid_tiles.resize(layer.allTiles().size());
 	
 			for (auto&& tile : layer.allTiles())
 			{
@@ -81,10 +74,16 @@ GameScreen::GameScreen()
 					(float)tile.getPosition().y,
 				};
 				auto half_tile = tile_size / 2;
-				ground[i] = *(new Ground(b2world));
-				ground[i].body->SetTransform({((float)tile.getPosition().x + half_tile) / settings::PhysicsWorldScale * settings::ScreenScale,
-											  ((float)tile.getPosition().y + half_tile) / settings::PhysicsWorldScale * settings::ScreenScale }, 0);
-				i++;
+
+
+				//collision rectangles
+				Rectangle rec = {
+					(float)tile.getPosition().x * settings::ScreenScale,
+					(float)tile.getPosition().y * settings::ScreenScale,
+					settings::drawSize, settings::drawSize
+				};
+				solid_tiles.emplace_back(*(new SolidTile(rec)));
+
 				DrawTextureRec(currentTilesetTexture, source_rect, target_pos, WHITE);
 			}
 		}
@@ -96,9 +95,7 @@ GameScreen::GameScreen()
 
 	// Test entities
 
-	player = new Player(b2world);
-
-
+	player = new Player();
 
 	//Camera init
 	camera = { 0 };
@@ -135,8 +132,19 @@ Screens GameScreen::Update(float dt)
 		ToggleFullscreen();
 	}
 
-	camera.target = player->GetPos();
+	static float minSpeed = 200.0f;
+	static float minEffectLength = 3.0f;
+	static float fractionSpeed = 10.0f;
+
 	camera.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
+	Vector2 diff = Vector2Subtract(player->GetPos(), camera.target);
+	float length = Vector2Length(diff);
+
+	if (length > minEffectLength)
+	{
+		float speed = fmaxf(fractionSpeed * length, minSpeed);
+		camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed * dt / length));
+	}
 
 	auto levelSize = currentLdtkLevel->size;
 	float minX = 0, minY = 0, maxX = levelSize.x * settings::ScreenScale, maxY = levelSize.y * settings::ScreenScale;
@@ -148,11 +156,6 @@ Screens GameScreen::Update(float dt)
 	if (min.y > 0) camera.offset.y = settings::screenHeight / 2 - min.y;
 
 
-	// Box2d 
-	const float timeStep = 1.0f / 60.0f;
-	const int32 velocityIterations = 6;
-	const int32 positionIterations = 2;
-	b2world->Step(timeStep, velocityIterations, positionIterations);
 	EnitityManager::Update(dt);
 
 	return Screens::NONE;
@@ -166,16 +169,9 @@ void GameScreen::Draw()
 		{ 0, 0, (float)renderedLevelTexture.width, (float)-renderedLevelTexture.height },
 		{ 0, 0, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale }, { 0,0 }, 0, WHITE);
 	EnitityManager::Draw();
+	//CollisionManager::DrawColliders();
 	EndMode2D();
 
-
-	//auto levelSize = currentLdtkLevel->size;
-	//BeginMode2D(camera);
-	//DrawTexturePro(renderedLevelTexture,
-	//	{ 0, 0, (float)renderedLevelTexture.width, (float)-renderedLevelTexture.height },
-	//	{ 0, 0, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale }, { 0,0 }, 0, WHITE);
-	//EnitityManager::Draw();
-	//EndMode2D();
 
 
 	DrawFPS(5, 5);
@@ -187,6 +183,9 @@ void GameScreen::Draw()
 		DrawText(txt2.c_str(), 5, 40, 20, BLACK);
 		std::string txt3 = "Is touching floor: " + std::to_string(player->is_touching_floor);
 		DrawText(txt3.c_str(), 5, 60, 20, BLACK);
+
+		DrawText(("vx: " + std::to_string(player->vx)).c_str(), 5, 120, 20, BLACK);
+		DrawText(("vy: " + std::to_string(player->vy)).c_str(), 5, 140, 20, BLACK);
 	}
 	
 }

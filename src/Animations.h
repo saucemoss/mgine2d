@@ -64,6 +64,8 @@ public:
 
 class Animated
 {
+private:
+	bool m_uninterupt = false;
 public:
 	Animation* animation = nullptr;
 	Animations* animations = new Animations();
@@ -75,9 +77,24 @@ public:
 	virtual void InitAnimations() = 0;
 	void SetAnimation(std::string name)
 	{
-		animation = animations->GetAnimation(name);
-		animations->m_CurrentActiveAnimation = name;
-
+		if(m_uninterupt)
+		{ 
+			if (AnimationEnded())
+			{
+				animation = animations->GetAnimation(name);
+				animations->m_CurrentActiveAnimation = name;
+				m_uninterupt = false;
+			}
+			else
+			{
+				//wait
+			}
+		}
+		else
+		{
+			animation = animations->GetAnimation(name);
+			animations->m_CurrentActiveAnimation = name;
+		}
 	}
 	void FreezeFrame(std::string name, int frameNumber)
 	{
@@ -96,6 +113,11 @@ public:
 	{
 		SetAnimation(name);
 		animation->PlayOnce();
+	}
+	void PlayOnceUninterupt(std::string name)
+	{
+		PlayOnce(name);
+		m_uninterupt = true;
 	}
 	bool AnimationEnded()
 	{

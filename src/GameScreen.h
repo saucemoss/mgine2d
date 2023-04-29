@@ -13,14 +13,12 @@ public:
 
     void Draw() override;
     Screens Update(float dt) override;
-
+    static Camera2D camera;
     ldtk::Project *ldtkProject{};
     const ldtk::World *ldtkWorld{};
     const ldtk::Level *currentLdtkLevel{};
     const ldtk::Layer *bgLayer;
     Texture2D currentTilesetTexture;
     Texture2D renderedLevelTexture;
-
-    static b2World *b2world;
 
 };

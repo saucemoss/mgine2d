@@ -153,6 +153,8 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Collisions.cpp" />
+    <ClCompile Include="src\SolidTile.cpp" />
     <ClCompile Include="src\Animations.cpp" />
     <ClCompile Include="src\BigZombie.cpp" />
     <ClCompile Include="src\EntityManager.cpp" />
@@ -165,6 +167,8 @@
     <ClCompile Include="src\ZSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Collisions.h" />
+    <ClInclude Include="src\SolidTile.h" />
     <ClInclude Include="src\Animations.h" />
     <ClInclude Include="src\BaseScreen.h" />
     <ClInclude Include="src\BigZombie.h" />

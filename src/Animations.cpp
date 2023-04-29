@@ -18,7 +18,7 @@ void Animations::InitializePlayerAnimations()
 {
 	Texture2D* texture = TextureLoader::GetTexture("PLAYER");
 	animations.emplace("P_RUN", *(new Animation(texture, 0, 6, 32, 0.08f)));
-	animations.emplace("P_GROUND", *(new Animation(texture, 1, 2, 32, 0.08f)));
+	animations.emplace("P_GROUND", *(new Animation(texture, 1, 1, 32, 0.12f)));
 	animations.emplace("P_FALL", *(new Animation(texture, 2, 1, 32, 0.08f)));
 	animations.emplace("P_IDLE", *(new Animation(texture, 3, 5, 32, 0.08f)));
 	animations.emplace("P_JUMP", *(new Animation(texture, 4, 3, 32, 0.08f)));
@@ -36,9 +36,10 @@ void Animations::InitializeBigZAnimations()
 void Animations::InitializeZSpawnerAnimations()
 {
 	Texture2D* texture = TextureLoader::GetTexture("Z_SPAWNER");
-
-	Animation* idle_anim = new Animation(texture, 0, 10, 32, 0.1f); //Animation with custom frame times
-	idle_anim->SetCustomFrameTime(3, 0.3f);							//Set custom frame time before adding to vector
+	
+	//Animation with custom frame times
+	Animation* idle_anim = new Animation(texture, 0, 10, 32, 0.1f);		
+	idle_anim->SetCustomFrameTime(3, 0.3f);	//Set custom frame time before adding to vector
 	animations.emplace("ZSPAWNER_IDLE", *idle_anim);
 	
 	animations.emplace("ZSPAWNER_EMERGE", *(new Animation(texture, 1, 10, 32, 0.1f))); // standard animation
@@ -90,8 +91,8 @@ void Animation::SwitchFrames(float dt)
 			else
 			{
 				m_currentFrameNum = m_framesCount - 1;
-				m_reachedEnd = true;
 			}
+			m_reachedEnd = true;
 		}
 		m_currentFrame = m_frames[m_currentFrameNum];
 		m_animationTicker = m_framesTimes[m_currentFrameNum];
