@@ -6,16 +6,18 @@
 #include <functional>
 #include <array>
 
-enum ColliderType {
+enum ColliderTag {
 	SOLID,
 	PLAYER,
+	LEVEL_PORTAL
 };
 
 class Collidable
 {
 public:
-	ColliderType m_colliderType;
-	std::string m_colliderData;
+	ColliderTag m_colliderTag;
+	std::string m_colliderDataStr;
+	Vector2 m_colliderDataVector2;
 	std::array<Rectangle*,4> contact;
 	Rectangle rectangle;
 
@@ -47,6 +49,8 @@ public:
 	static bool ResolveDynamicRectVsRect(Collidable* r_dynamic, const float fTimeStep, Rectangle* r_static);
 	static bool RaycastPro(const Vector2& ray_origin, const Vector2& ray_dir, Vector2& contact_point, Vector2& contact_normal, float& t_hit_near);
 	static bool Raycast(const Vector2& ray_origin, const Vector2& ray_dir);
+	static ColliderTag GetCollisionTags(Rectangle& r);
+	static Collidable* GetCollisionObject(Rectangle& r);
 	static bool RectSensor(Rectangle& r);
 
 

@@ -55,6 +55,21 @@
     <Filter Include="Pliki źródłowe\Systems\Physics">
       <UniqueIdentifier>{69b753fb-6338-4cd6-94b5-58e1227891db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki źródłowe\Entities\Player">
+      <UniqueIdentifier>{ce7d0448-27a4-48f0-b334-ef145d7ae455}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Entities\Player">
+      <UniqueIdentifier>{9cf21d68-6514-4f85-babb-64acdce89f0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Entities\Player\States">
+      <UniqueIdentifier>{115d9f59-9f58-464d-8bb5-ea6657e8ede8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Level">
+      <UniqueIdentifier>{147085d2-8be9-4927-94c6-4300e2bcad3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Level">
+      <UniqueIdentifier>{575c5441-dab0-4d65-a300-af0e1a0b0a11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -62,9 +77,6 @@
     </ClCompile>
     <ClCompile Include="src\Main.cpp">
       <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Player.cpp">
-      <Filter>Pliki źródłowe\Entities</Filter>
     </ClCompile>
     <ClCompile Include="src\BigZombie.cpp">
       <Filter>Pliki źródłowe\Entities</Filter>
@@ -81,9 +93,6 @@
     <ClCompile Include="src\GameScreen.cpp">
       <Filter>Pliki źródłowe\Systems\Screens</Filter>
     </ClCompile>
-    <ClCompile Include="src\Ground.cpp">
-      <Filter>Pliki źródłowe\Entities\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="src\Animations.cpp">
       <Filter>Pliki źródłowe\Systems\Animations</Filter>
     </ClCompile>
@@ -92,6 +101,15 @@
     </ClCompile>
     <ClCompile Include="src\Collisions.cpp">
       <Filter>Pliki źródłowe\Systems\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Player.cpp">
+      <Filter>Pliki źródłowe\Entities\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LevelManager.cpp">
+      <Filter>Pliki źródłowe\Systems\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LevelPortal.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,9 +120,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\Entity.h">
-      <Filter>Pliki nagłówkowe\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Player.h">
       <Filter>Pliki nagłówkowe\Entities</Filter>
     </ClInclude>
     <ClInclude Include="src\BigZombie.h">
@@ -131,9 +146,6 @@
     <ClInclude Include="src\Screens.h">
       <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ground.h">
-      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="src\Animations.h">
       <Filter>Pliki nagłówkowe\Systems\Animations</Filter>
     </ClInclude>
@@ -144,6 +156,15 @@
       <Filter>Pliki nagłówkowe\Systems\Utilities</Filter>
     </ClInclude>
     <ClInclude Include="src\SolidTile.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Player.h">
+      <Filter>Pliki nagłówkowe\Entities\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LevelManager.h">
+      <Filter>Pliki nagłówkowe\Systems\Level</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LevelPortal.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>

@@ -147,7 +147,7 @@ bool CollisionManager::RaycastPro(const Vector2& ray_origin, const Vector2& ray_
 {
 	for (Collidable* c : colliders)
 	{
-		if (c->m_colliderType != PLAYER && RayVsRect(ray_origin, ray_dir, &c->rectangle, contact_point, contact_normal, t_hit_near))
+		if (c->m_colliderTag != PLAYER && RayVsRect(ray_origin, ray_dir, &c->rectangle, contact_point, contact_normal, t_hit_near))
 		{
 			return true;
 		}
@@ -161,7 +161,7 @@ bool CollisionManager::Raycast(const Vector2& ray_origin, const Vector2& ray_dir
 	float t;
 	for (Collidable* c : colliders)
 	{
-		if (c->m_colliderType != PLAYER && RayVsRect(ray_origin, ray_dir, &c->rectangle, cp, cn, t))
+		if (c->m_colliderTag != PLAYER && RayVsRect(ray_origin, ray_dir, &c->rectangle, cp, cn, t))
 		{
 			return true;
 		}
@@ -174,11 +174,39 @@ bool CollisionManager::Raycast(const Vector2& ray_origin, const Vector2& ray_dir
 	return false;
 }
 
+ColliderTag CollisionManager::GetCollisionTags(Rectangle& r)
+{
+	for (Collidable* b : CollisionManager::colliders)
+	{
+		if (b->m_colliderTag != PLAYER)
+		{
+			if (CheckCollisionRecs(b->rectangle, r))
+			{
+				return b->m_colliderTag;
+			}
+		}
+	}
+}
+
+Collidable* CollisionManager::GetCollisionObject(Rectangle& r)
+{
+	for (Collidable* b : CollisionManager::colliders)
+	{
+		if (b->m_colliderTag != PLAYER)
+		{
+			if (CheckCollisionRecs(b->rectangle, r))
+			{
+				return b;
+			}
+		}
+	}
+}
+
 bool CollisionManager::RectSensor(Rectangle& r)
 {
 	for (Collidable* b : CollisionManager::colliders)
 	{
-		if (b->m_colliderType != PLAYER)
+		if (b->m_colliderTag != PLAYER)
 		{
 			if (CheckCollisionRecs(b->rectangle, r))
 			{
@@ -199,7 +227,7 @@ void CollisionManager::ResolveCollisions(Collidable* c, float fElapsedTime)
 	// Work out collision point, add it to vector along with rect ID
 	for (size_t i = 0; i < CollisionManager::colliders.size(); i++)
 	{
-		if (CollisionManager::colliders[i]->m_colliderType != PLAYER) {
+		if (CollisionManager::colliders[i]->m_colliderTag != PLAYER) {
 			if (DynamicRectVsRect(c, fElapsedTime, CollisionManager::colliders[i]->rectangle, cp, cn, t))
 			{
 				z.push_back({ i, t });

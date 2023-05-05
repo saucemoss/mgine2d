@@ -19,6 +19,7 @@ SolidTile::SolidTile(const Rectangle& rect)
 
 SolidTile::~SolidTile()
 {
+	CollisionManager::Remove(this);
 }
 
 void SolidTile::DrawCollider()

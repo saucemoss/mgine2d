@@ -18,7 +18,7 @@ void Animations::InitializePlayerAnimations()
 {
 	Texture2D* texture = TextureLoader::GetTexture("PLAYER");
 	animations.emplace("P_RUN", *(new Animation(texture, 0, 6, 32, 0.08f)));
-	animations.emplace("P_GROUND", *(new Animation(texture, 1, 1, 32, 0.12f)));
+	animations.emplace("P_GROUND", *(new Animation(texture, 1, 1, 32, 0.08f)));
 	animations.emplace("P_FALL", *(new Animation(texture, 2, 1, 32, 0.08f)));
 	animations.emplace("P_IDLE", *(new Animation(texture, 3, 5, 32, 0.08f)));
 	animations.emplace("P_JUMP", *(new Animation(texture, 4, 3, 32, 0.08f)));
@@ -102,6 +102,8 @@ void Animation::SwitchFrames(float dt)
 void Animation::PlayOnce()
 {
 	m_currentFrameNum = 0;
+	m_animationTicker = m_framesTimes[m_currentFrameNum];
+	m_currentFrame = m_frames[m_currentFrameNum];
 	m_reachedEnd = false;
 	m_playOnce = true;
 }

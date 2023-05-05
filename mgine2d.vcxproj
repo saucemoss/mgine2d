@@ -81,14 +81,14 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\include;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\lib\Debug;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>box2d.lib;LDtkLoader-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LDtkLoader-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -100,7 +100,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\include;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -108,8 +108,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>box2d.lib;LDtkLoader.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\lib\Release;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LDtkLoader.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
   </ItemDefinitionGroup>
@@ -120,14 +120,14 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\include;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\lib\Debug;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>box2d.lib;LDtkLoader-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LDtkLoader-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,7 +139,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\include;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -147,26 +147,29 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>box2d.lib;LDtkLoader.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\box2d\lib\Release;C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LDtkLoader.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\maciek\source\repos\mgine2d\external libraries\LDtkLoader\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Collisions.cpp" />
+    <ClCompile Include="src\LevelManager.cpp" />
+    <ClCompile Include="src\LevelPortal.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
     <ClCompile Include="src\Animations.cpp" />
     <ClCompile Include="src\BigZombie.cpp" />
     <ClCompile Include="src\EntityManager.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GameScreen.cpp" />
-    <ClCompile Include="src\Ground.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\TitleScreen.cpp" />
     <ClCompile Include="src\ZSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\LevelPortal.h" />
+    <ClInclude Include="src\LevelManager.h" />
     <ClInclude Include="src\Collisions.h" />
     <ClInclude Include="src\SolidTile.h" />
     <ClInclude Include="src\Animations.h" />
@@ -176,7 +179,6 @@
     <ClInclude Include="src\EntityManager.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameScreen.h" />
-    <ClInclude Include="src\Ground.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\Screens.h" />
     <ClInclude Include="src\ScreensManager.h" />
