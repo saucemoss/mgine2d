@@ -116,10 +116,20 @@ void GameScreen::Draw()
 	BeginMode2D(camera);
 	LevelMgr->Draw();
 	EnitityManager::Draw();
-	CollisionManager::DrawColliders();
+
+	//DEBUG:
+	// 
+	//CollisionManager::DrawColliders();
+	//player states
+	//std::string stateStr = player->StatesStrMap[player->state];
+	//DrawText(stateStr.c_str(), player->x, player->y-50, 20, BLACK);
+	//player animations
+	//std::string animStr = player->animations->m_CurrentActiveAnimation;
+	//DrawText(animStr.c_str(), player->x, player->y - 50, 20, BLACK);
+
 	EndMode2D();
 
-
+	//DEBUG:
 	DrawFPS(5, 5);
 	std::string txt = "Entity count: " + std::to_string(EnitityManager::EntityList.size());
 	DrawText(txt.c_str(), 5, 20, 20, BLACK);

@@ -16,8 +16,6 @@ class Collidable
 {
 public:
 	ColliderTag m_colliderTag;
-	std::string m_colliderDataStr;
-	Vector2 m_colliderDataVector2;
 	std::array<Rectangle*,4> contact;
 	Rectangle rectangle;
 

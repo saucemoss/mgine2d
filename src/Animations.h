@@ -19,6 +19,7 @@ public:
 	const Rectangle GetCurrentFrame();
 	void SwitchFrames(float dt);
 	void PlayOnce();
+	void Reset();
 	bool AnimationEnded();
 	void FreezeFrame(int frameNumber);
 
@@ -29,16 +30,16 @@ private:
 	const int m_framesCount;
 	const int m_frameSize;
 	const float m_frameTime;
+	int m_currentFrameNum;
 	float m_animationTicker;
 	std::vector<Rectangle> m_frames;
 	std::vector<float> m_framesTimes;
 	void BuildFrameRectangles(int framesCount);
 	void BuildFrameTimes(int framesCount);
 	Rectangle m_currentFrame;
-	int m_currentFrameNum;
+	
 	bool m_playOnce = false;
 	bool m_reachedEnd = false;
-	bool m_active = false;
 };
 
 class Animations
@@ -83,6 +84,7 @@ public:
 			{
 				animation = animations->GetAnimation(name);
 				animations->m_CurrentActiveAnimation = name;
+				animation->Reset();
 				m_uninterupt = false;
 			}
 			else
@@ -93,6 +95,7 @@ public:
 		else
 		{
 			animation = animations->GetAnimation(name);
+			animation->Reset();
 			animations->m_CurrentActiveAnimation = name;
 		}
 	}

@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include "Animations.h"
 #include "Collisions.h"
+#include <map>
 
 enum class PlayerState
 {
@@ -43,6 +44,7 @@ public:
 
     //States
     PlayerState state;
+    std::map<PlayerState, std::string> StatesStrMap{};
 
     void UpdateIdleState(float dt);
     void UpdateRunningState(float dt);

@@ -101,11 +101,15 @@ void Animation::SwitchFrames(float dt)
 
 void Animation::PlayOnce()
 {
+	m_playOnce = true;
+}
+
+void Animation::Reset()
+{
 	m_currentFrameNum = 0;
 	m_animationTicker = m_framesTimes[m_currentFrameNum];
 	m_currentFrame = m_frames[m_currentFrameNum];
 	m_reachedEnd = false;
-	m_playOnce = true;
 }
 
 bool Animation::AnimationEnded()

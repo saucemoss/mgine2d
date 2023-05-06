@@ -17,8 +17,6 @@ LevelPortal::LevelPortal(const Rectangle& rect, std::string to_level, float xNew
 	w = rectangle.width;
 	h = rectangle.height;
 	m_colliderTag = LEVEL_PORTAL;
-	m_colliderDataStr = to_level;
-	m_colliderDataVector2 = { m_xNewPlayerPos * settings::ScreenScale ,m_yNewPlayerPos * settings::ScreenScale };
 	CollisionManager::Add(this);
 	EnitityManager::Add(this);
 

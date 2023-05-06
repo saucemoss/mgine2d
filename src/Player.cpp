@@ -17,6 +17,7 @@ std::string collisionPointText = "";
 std::string collisionResText = "";
 std::string sometxt = "";
 
+
 Player::Player()
 {
 
@@ -29,12 +30,15 @@ Player::Player()
 	InitAnimations();
 	state = PlayerState::Idle;
 	m_colliderTag = PLAYER;
-	m_colliderDataStr = "player";
 	feetSensor = Rectangle{ x,y + h - 4, 32, 8 };
 	EnitityManager::Add(this);
 	CollisionManager::Add(this);
-	
 
+	// Add mappings for debug purposes
+	StatesStrMap[PlayerState::Idle] = "Idle";
+	StatesStrMap[PlayerState::Running] = "Running";
+	StatesStrMap[PlayerState::Jumping] = "Jumping";
+	StatesStrMap[PlayerState::Falling] = "Falling";
 }
 
 Player::~Player()
@@ -49,6 +53,7 @@ void Player::Update(float dt)
 	SwitchFrames(dt);
 
 	// Update player in one possible state
+	is_touching_floor = CollisionManager::RectSensor(feetSensor);
 	switch (state)
 	{
 	case PlayerState::Idle:
@@ -73,8 +78,10 @@ void Player::Update(float dt)
 	Collidable* c = CollisionManager::GetCollisionObject(r);
 	if (c->m_colliderTag == LEVEL_PORTAL)
 	{
-		TransformPos(c->m_colliderDataVector2);
-		GameScreen::LevelMgr->LoadLevel(c->m_colliderDataStr);
+		LevelPortal* lpptr = dynamic_cast<LevelPortal*>(c);
+		Vector2 newPos{ lpptr->m_xNewPlayerPos * settings::ScreenScale ,lpptr->m_yNewPlayerPos * settings::ScreenScale };
+		TransformPos(newPos);
+		GameScreen::LevelMgr->LoadLevel(lpptr->m_to_level);
 	}
 
 	// Resolve collisions
@@ -137,7 +144,6 @@ void Player::DrawCollider()
 	//	DrawRectangleLinesEx(feetSensor, 1, GREEN);
 	//}
 
-
 	//DrawText(collisionRecText.c_str(), 5, 80, 20, BLACK);
 	//DrawText(("csize: " + std::to_string(CollisionManager::colliders.size())).c_str(), 5, 100, 20, BLACK);
 
@@ -145,7 +151,6 @@ void Player::DrawCollider()
 	//DrawText(std::to_string(colliding).c_str(), 5, 180, 20, BLACK);
 	//DrawText(("time: " + std::to_string(contactTime)).c_str(), 5, 200, 20, BLACK);
 	//Vector2 raydir = GetScreenToWorld2D({ float(GetMousePosition().x),float(GetMousePosition().y) }, GameScreen::camera);
-
 	
 	//DrawCircle(contactPoint.x, contactPoint.y, 5, GREEN);
 	//DrawLine(contactPoint.x, contactPoint.y, contactPoint.x + normals.x * 10, contactPoint.y+normals.y * 10, YELLOW);
@@ -212,15 +217,15 @@ void Player::TransformPos(Vector2 pos_in)
 
 void Player::UpdateIdleState(float dt)
 {
-	is_touching_floor = CollisionManager::RectSensor(feetSensor);
 	if (IsKeyPressed(KEY_UP) && is_touching_floor)
 	{
 		vy = -jump_force;
 		state = PlayerState::Jumping;
-		PlayOnceUninterupt("P_JUMP");
+		SetAnimation("P_JUMP");
 	}
 	else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT))
 	{
+		SetAnimation("P_RUN");
 		state = PlayerState::Running;
 	}
 
@@ -233,12 +238,11 @@ void Player::UpdateIdleState(float dt)
 
 void Player::UpdateRunningState(float dt)
 {
-	is_touching_floor = CollisionManager::RectSensor(feetSensor);
 	if (IsKeyPressed(KEY_UP) && (is_touching_floor || coyote_time_counter > 0))
 	{
 		vy = -jump_force;
 		state = PlayerState::Jumping;
-		PlayOnceUninterupt("P_JUMP");
+		SetAnimation("P_JUMP");
 	}
 	else if (!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT))
 	{
@@ -251,14 +255,12 @@ void Player::UpdateRunningState(float dt)
 		state = PlayerState::Running;
 		vx = -speed;
 		looking_right = false;
-		SetAnimation("P_RUN");
 	}
 	else if (IsKeyDown(KEY_RIGHT))
 	{
 		state = PlayerState::Running;
 		vx = speed;
 		looking_right = true;
-		SetAnimation("P_RUN");
 	}
 
 	if (vy >= 0 && !is_touching_floor)
@@ -270,20 +272,28 @@ void Player::UpdateRunningState(float dt)
 
 void Player::UpdateJumpingState(float dt)
 {
+	
 	coyote_time_counter = 0;
 	if (vy < 0.0f && IsKeyDown(KEY_UP))
 	{
 		vy -= acceleration * 4 * dt;
+	}
+
+	if (vy < 0.0f)
+	{
 		if (AnimationEnded())
 		{
 			FreezeFrame("P_JUMP", 3);
 		}
 	}
-	else if (vy >= 0)
+
+
+	else if (vy >= 0.0f)
 	{
 		state = PlayerState::Falling;
 		SetAnimation("P_FALL");
 	}
+
 	
 	if (IsKeyDown(KEY_LEFT))
 	{
@@ -299,7 +309,6 @@ void Player::UpdateJumpingState(float dt)
 
 void Player::UpdateFallingState(float dt)
 {
-	is_touching_floor = CollisionManager::RectSensor(feetSensor);
 
 	if (is_touching_floor)
 	{
@@ -325,7 +334,7 @@ void Player::UpdateFallingState(float dt)
 		jump_buffer_counter = 0.0f;
 		vy = -jump_force;
 		state = PlayerState::Jumping;
-		PlayOnceUninterupt("P_JUMP");
+		PlayOnce("P_JUMP");
 	}
 
 	if (is_touching_floor && vy > 500)
@@ -350,7 +359,6 @@ void Player::UpdateFallingState(float dt)
 		vx = speed;
 		looking_right = true;
 	}
-
 
 }
 
