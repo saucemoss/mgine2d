@@ -1,6 +1,7 @@
 #include "EntityManager.h"
 #include <algorithm>
 #include <vector>
+#include <string>
 
 std::vector<Entity*> EnitityManager::EntityList;
 
@@ -27,6 +28,8 @@ void EnitityManager::Add(Entity* e)
 
 void EnitityManager::Remove(Entity* e)
 {
-	auto newEnd = std::remove(EntityList.begin(), EntityList.end(), e);
-	EntityList.erase(newEnd, EntityList.end());
+	std::vector<Entity*>::iterator new_end;
+	new_end = remove(EntityList.begin(), EntityList.end(), e);
+	std::cout << "entity list size " + std::to_string(EntityList.size()) << std::endl;
+	
 }

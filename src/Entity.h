@@ -1,9 +1,11 @@
 #pragma once
 #include <raylib.h>
+#include <iostream>
 class Entity
 {
 public:
     virtual ~Entity() = default;
+
     virtual void Draw() = 0;
     virtual void Update(float dt) = 0;
     Vector2 GetPos()    {
@@ -20,3 +22,4 @@ public:
 protected:
     Vector2 pos;
 };
+

@@ -1,11 +1,13 @@
 #include "LevelManager.h"
+#include <raymath.h>
 #include "SolidTile.h"
 #include "Settings.h"
+#include "GameScreen.h"
 #include <LDtkLoader/Project.hpp>
 #include <LDtkLoader/World.hpp>
+#include <LDtkLoader/Level.hpp>
 #include <iostream>
 #include <string>
-
 
 
 LevelManager::LevelManager()
@@ -15,8 +17,34 @@ LevelManager::LevelManager()
 	p->loadFromFile("res\\level\\TestLevel.ldtk");
 	ldtkProject = p;
 
-	currentTilesetTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Terrain\\Terrain (32x32).png");
+	terrainTilesetTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Terrain\\Terrain (32x32).png");
+	bgTilesetTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Background\\Big Clouds.png");
+
 	ldtkWorld = &ldtkProject->getWorld();
+
+	currentLdtkLevel = &ldtkWorld->getLevel("Level_0");
+	levelSize = currentLdtkLevel->size;
+	renderBGTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+	
+
+	//level portals 
+	
+	for (const ldtk::Level& l : ldtkWorld->allLevels())
+	{
+		for (auto&& e : l.getLayer("Entities").getEntitiesByName("LevelPortal_in"))
+		{
+			auto& entity = e.get();
+			Rectangle rect = { ((float)entity.getPosition().x - (float)entity.getSize().x / 2) * settings::ScreenScale,
+							   ((float)entity.getPosition().y - (float)entity.getSize().y / 2 ) * settings::ScreenScale,
+							   (float)entity.getSize().x * settings::ScreenScale,
+							   (float)entity.getSize().y * settings::ScreenScale };
+
+			std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
+			ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
+			
+			level_portals.emplace_back(new LevelPortal(rect, entity, l.name, target_lvl, portal_out));
+		}
+	}
 }
 
 LevelManager::~LevelManager()
@@ -32,28 +60,18 @@ void LevelManager::LoadLevel(std::string level_name)
 	}
 
 	currentLdtkLevel = &ldtkWorld->getLevel(level_name);
-	auto testTileLayerTileset = currentLdtkLevel->getLayer("IntGrid").getTileset();
-	auto levelSize = currentLdtkLevel->size;
+	levelSize = currentLdtkLevel->size;
 	renderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+	renderBGTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+	backgroundTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Background\\BG Image.png");
 
 	BeginTextureMode(renderTexture);
-
-	if (currentLdtkLevel->hasBgImage())
-	{
-		backgroundTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Background\\BG Image.png");
-		DrawTextureEx(backgroundTexture, { 0, 0 }, 0, 4, WHITE);
-
-	}
 
 	// draw all tileset layers
 	for (auto&& layer : currentLdtkLevel->allLayers())
 	{
 		if (layer.hasTileset())
 		{
-			int i = 0;
-			
-			solid_tiles.resize(layer.allTiles().size());
-
 			for (auto&& tile : layer.allTiles())
 			{
 				auto source_pos = tile.getTextureRect();
@@ -70,46 +88,78 @@ void LevelManager::LoadLevel(std::string level_name)
 					(float)tile.getPosition().x,
 					(float)tile.getPosition().y,
 				};
-				auto half_tile = tile_size / 2;
-
 
 				//collision rectangles
-				Rectangle rec = {
-					(float)tile.getPosition().x * settings::ScreenScale,
-					(float)tile.getPosition().y * settings::ScreenScale,
-					settings::drawSize, settings::drawSize
-				};
-				solid_tiles.emplace_back(new SolidTile(rec));
+				if (layer.getName() == "Solids")
+				{
+					Rectangle rec = {(float)tile.getPosition().x * settings::ScreenScale,
+									 (float)tile.getPosition().y * settings::ScreenScale,
+									 settings::drawSize, settings::drawSize};
+					solid_tiles.emplace_back(new SolidTile(rec));
+					DrawTextureRec(terrainTilesetTexture, source_rect, target_pos, WHITE);
+				}
 
-				DrawTextureRec(currentTilesetTexture, source_rect, target_pos, WHITE);
 			}
 		}
 	}
-
 
 	EndTextureMode();
 	renderedLevelTexture = renderTexture.texture;
 
 
-	//Load entities
-	for (auto&& entity : currentLdtkLevel->getLayer("Entities").allEntities())
+	//paralax layers?
+	BeginTextureMode(renderBGTexture);
+
+	for (auto&& layer : currentLdtkLevel->allLayers())
 	{
-		level_entities.resize(currentLdtkLevel->getLayer("Entities").allEntities().size());
-		if (entity.getName() == "LevelPortal")
+		if (layer.getName() == "BGTiles")
 		{
-			Rectangle rec = {(float)entity.getPosition().x * settings::ScreenScale,
-							 (float)entity.getPosition().y * settings::ScreenScale,
-							 (float)entity.getSize().x * settings::ScreenScale,
-							 (float)entity.getSize().y * settings::ScreenScale};
+			for (auto&& tile : layer.allTiles())
+			{
+				auto source_pos = tile.getTextureRect();
+				auto tile_size = float(layer.getTileset().tile_size);
 
-			std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
- 
-			float x = entity.getArrayField<float>("PlayerPos").at(0).value();
-			float y = entity.getArrayField<float>("PlayerPos").at(1).value();
+				Rectangle source_rect = {
+					float(source_pos.x),
+					float(source_pos.y),
+					(tile.flipX ? -tile_size : tile_size),
+					(tile.flipY ? -tile_size : tile_size)
+				};
 
-			level_entities.emplace_back(new LevelPortal(rec, target_lvl, x, y));
+				Vector2 target_paralax_pos = {
+					(float)tile.getPosition().x ,
+					(float)tile.getPosition().y ,
+				};
+				DrawTextureRec(bgTilesetTexture, source_rect, target_paralax_pos, WHITE);
+
+			}
+
 		}
 	}
+	EndTextureMode();
+	renderedBGTexture = renderBGTexture.texture;
+
+
+	//Load entities
+	//level_portals.reserve(currentLdtkLevel->getLayer("Entities").getEntitiesByName("LevelPortal_in").size());
+
+	//level_portals.reserve(currentLdtkLevel->getLayer("Entities").getEntitiesByName("LevelPortal_in").size());
+	//for (auto&& entity : currentLdtkLevel->getLayer("Entities").allEntities())
+	//{
+	//	if (entity.getName() == "LevelPortal_in")
+	//	{
+	//		Rectangle rect = {(float)entity.getPosition().x * settings::ScreenScale,
+	//						  (float)entity.getPosition().y * settings::ScreenScale,
+	//						  (float)entity.getSize().x * settings::ScreenScale,
+	//						  (float)entity.getSize().y * settings::ScreenScale};
+
+	//		std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
+	//		ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
+
+	//		//level_entities.emplace_back(new LevelPortal(rect, target_lvl, portal_out));
+	//		level_portals.emplace_back(new LevelPortal(rect, target_lvl, portal_out));
+	//	}
+	//}
 
 }
 
@@ -117,26 +167,49 @@ void LevelManager::UnloadLevel()
 {
 
 	UnloadTexture(renderedLevelTexture);
+	UnloadTexture(renderedBGTexture);
 	UnloadTexture(backgroundTexture);
 	UnloadRenderTexture(renderTexture);
+	UnloadRenderTexture(renderBGTexture);
 	for (SolidTile* s : solid_tiles)
 	{
 		delete s;
 	}
 	solid_tiles.clear();
-	for (Entity* e : level_entities)
-	{
-		delete e;
-	}
-	level_entities.clear();
+}
+
+
+void LevelManager::Update(float dt)
+{
+
 
 }
 
 void LevelManager::Draw()
 {
-	auto levelSize = currentLdtkLevel->size;
+
+	Player& p = *GameScreen::player;
+	Camera2D c = GameScreen::camera;
+
+
+	Vector2 c_position = { (c.offset.x / c.zoom - c.target.x) , (c.offset.y / c.zoom - c.target.y) };
+
+	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
+	Vector2 parallaxed_far = Vector2Multiply(c_position, { 0.03f,0.03f });
+
+	if (currentLdtkLevel->hasBgImage())
+	{
+		DrawTextureEx(backgroundTexture, parallaxed_far, 0, 6, WHITE);
+	}
+
+	DrawTexturePro(renderedBGTexture,
+		{ 0, 0, (float)renderedBGTexture.width, (float)-renderedBGTexture.height },//source
+		{ parallaxed.x ,parallaxed.y, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale }, //dest
+		{ 0,0 }, 0, WHITE);
+
 	DrawTexturePro(renderedLevelTexture,
 		{ 0, 0, (float)renderedLevelTexture.width, (float)-renderedLevelTexture.height },
-		{ 0, 0, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale }, { 0,0 }, 0, WHITE);
+		{ 0, 0, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale }, 
+		{ 0,0 }, 0, WHITE);
 
 }

@@ -5,7 +5,6 @@
 #include <raymath.h>
 #include <limits>
 
-
 std::vector<Collidable*> CollisionManager::colliders;
 
 
@@ -167,7 +166,6 @@ bool CollisionManager::Raycast(const Vector2& ray_origin, const Vector2& ray_dir
 		}
 	}
 
-
 	cp = { 0,0 };
 	cn = { 0,0 };
 	t = 0;
@@ -227,7 +225,8 @@ void CollisionManager::ResolveCollisions(Collidable* c, float fElapsedTime)
 	// Work out collision point, add it to vector along with rect ID
 	for (size_t i = 0; i < CollisionManager::colliders.size(); i++)
 	{
-		if (CollisionManager::colliders[i]->m_colliderTag != PLAYER) {
+		if (CollisionManager::colliders[i]->m_colliderTag != PLAYER &&
+			CollisionManager::colliders[i]->m_colliderTag != LEVEL_PORTAL) {
 			if (DynamicRectVsRect(c, fElapsedTime, CollisionManager::colliders[i]->rectangle, cp, cn, t))
 			{
 				z.push_back({ i, t });

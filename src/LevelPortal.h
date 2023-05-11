@@ -3,22 +3,30 @@
 #include "Collisions.h"
 #include "EntityManager.h"
 #include "Settings.h"
+#include "LDtkLoader/Entity.hpp"
 
 class LevelPortal : public Collidable, public Entity
 {
 public:
-    LevelPortal();
-    LevelPortal(const Rectangle& rectangle, std::string to_level, float xNewPlayerPos, float yNewPlayerPos);
+    LevelPortal(const Rectangle& rectangle, const ldtk::Entity& ldtk_entity, const std::string m_level, const std::string to_level,const ldtk::IID iid_reference);
 
     ~LevelPortal();
-    void Draw() override;
-    void DrawCollider() override;
-    std::string m_to_level;
-    float m_xNewPlayerPos;
-    float m_yNewPlayerPos;
 
+    const std::string m_to_level;
+    const std::string m_level;
+    const ldtk::IID m_iid_reference;
+    bool is_active = false;
+    const ldtk::Entity& ldtk_entity;
 
     // Inherited via Entity
     virtual void Update(float dt) override;
+
+
+    // Inherited via Entity
+    virtual void Draw() override;
+
+
+    // Inherited via Collidable
+    virtual void DrawCollider() override;
 
 };

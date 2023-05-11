@@ -12,10 +12,9 @@
 #include <raymath.h>
 
 
-
-
 Camera2D GameScreen::camera;
 LevelManager* GameScreen::LevelMgr;
+Player* GameScreen::player;
 
 GameScreen::GameScreen()
 
@@ -29,7 +28,7 @@ GameScreen::GameScreen()
 
 	//Camera init
 	camera = { 0 };
-	camera.target = player->GetPos();
+	camera.target = {player->x, player->y};
 	camera.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
 	camera.rotation = 0.0f;
 	camera.zoom = settings::zoom;
@@ -80,6 +79,8 @@ void GameScreen::UpdateCamera(float dt)
 	if (max.y < settings::screenHeight) camera.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
 	if (min.x > 0) camera.offset.x = settings::screenWidth / 2 - min.x;
 	if (min.y > 0) camera.offset.y = settings::screenHeight / 2 - min.y;
+
+
 }
 
 Screens GameScreen::Update(float dt)
@@ -106,7 +107,7 @@ Screens GameScreen::Update(float dt)
 	
 	UpdateCamera(dt);
 	EnitityManager::Update(dt);
-
+	LevelMgr->Update(dt);
 	return Screens::NONE;
 }
 

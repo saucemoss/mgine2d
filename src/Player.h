@@ -5,6 +5,7 @@
 #include "Collisions.h"
 #include <map>
 
+
 enum class PlayerState
 {
     Idle,
@@ -21,6 +22,7 @@ public:
     ~Player();
     
     void Update(float dt) override;
+    void LevelPortalCheck();
     void SyncColliders();
     void Draw() override;
     void DrawCollider() override;
@@ -50,6 +52,20 @@ public:
     void UpdateRunningState(float dt);
     void UpdateJumpingState(float dt);
     void UpdateFallingState(float dt);
+
+
+
+
+
+    Shader shdrOutline;
+
+    float outlineSize = 1.0f;
+    float outlineColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };      // Normalized RED color 
+    float textureSize[2] = { 192.0f,160.0f };
+
+    int outlineSizeLoc;
+    int outlineColorLoc;
+    int textureSizeLoc;
 };
 
 

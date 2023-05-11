@@ -16,7 +16,7 @@ public:
     Screens Update(float dt) override;
     static Camera2D camera;
    
-    Player* player = nullptr;
+    static Player* player;
     static LevelManager* LevelMgr;
 
     void Draw() override;

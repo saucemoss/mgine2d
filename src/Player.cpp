@@ -9,14 +9,11 @@
 #include "SolidTile.h"
 #include "raymath.h"
 #include <algorithm>
-
-
-
-std::string collisionRecText = "";
-std::string collisionPointText = "";
-std::string collisionResText = "";
-std::string sometxt = "";
-
+#if defined(PLATFORM_DESKTOP)
+#define GLSL_VERSION            330
+#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+#define GLSL_VERSION            100
+#endif
 
 Player::Player()
 {
@@ -39,6 +36,21 @@ Player::Player()
 	StatesStrMap[PlayerState::Running] = "Running";
 	StatesStrMap[PlayerState::Jumping] = "Jumping";
 	StatesStrMap[PlayerState::Falling] = "Falling";
+
+
+	shdrOutline = LoadShader(0, TextFormat("res/shaders/glsl%i/outline.fs", GLSL_VERSION));
+
+	// Get shader locations
+	int outlineSizeLoc = GetShaderLocation(shdrOutline, "outlineSize");
+	int outlineColorLoc = GetShaderLocation(shdrOutline, "outlineColor");
+	int textureSizeLoc = GetShaderLocation(shdrOutline, "textureSize");
+
+	// Set shader values (they can be changed later)
+	SetShaderValue(shdrOutline, outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
+	SetShaderValue(shdrOutline, outlineColorLoc, outlineColor, SHADER_UNIFORM_VEC4);
+	SetShaderValue(shdrOutline, textureSizeLoc, textureSize, SHADER_UNIFORM_VEC2);
+
+
 }
 
 Player::~Player()
@@ -49,6 +61,11 @@ Player::~Player()
 
 void Player::Update(float dt)
 {
+
+	SetShaderValue(shdrOutline, outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
+
+
+
 	// Swtich animation frames for current anim
 	SwitchFrames(dt);
 
@@ -74,21 +91,31 @@ void Player::Update(float dt)
 	ApplyForces(dt);
 
 	// Check if level portal
-	Rectangle r = { x-10,y,50,32 };
-	Collidable* c = CollisionManager::GetCollisionObject(r);
-	if (c->m_colliderTag == LEVEL_PORTAL)
-	{
-		LevelPortal* lpptr = dynamic_cast<LevelPortal*>(c);
-		Vector2 newPos{ lpptr->m_xNewPlayerPos * settings::ScreenScale ,lpptr->m_yNewPlayerPos * settings::ScreenScale };
-		TransformPos(newPos);
-		GameScreen::LevelMgr->LoadLevel(lpptr->m_to_level);
-	}
+	LevelPortalCheck();
 
 	// Resolve collisions
 	CollisionManager::ResolveCollisions(this, dt);
 
 	// Sync colliders and pos
 	SyncColliders();
+}
+
+void Player::LevelPortalCheck()
+{
+	Rectangle r = { x - 1,y,34,32 };  
+	Collidable* c = CollisionManager::GetCollisionObject(r);
+	if (c->m_colliderTag == LEVEL_PORTAL)
+	{
+		const LevelPortal& lpptr = dynamic_cast<LevelPortal&>(*c);
+		if (lpptr.is_active)
+		{
+			GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
+			const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(lpptr.m_iid_reference);
+			Vector2 newPos{ (connected_portal.getPosition().x + connected_portal.getSize().x / 2) * settings::ScreenScale,
+							(connected_portal.getPosition().y + connected_portal.getSize().y / 2) * settings::ScreenScale };
+			TransformPos(newPos);
+		}
+	}
 }
 
 void Player::SyncColliders()
@@ -101,7 +128,6 @@ void Player::SyncColliders()
 	pos.y = y;
 }
 
-
 void Player::Draw()
 {
 
@@ -110,16 +136,26 @@ void Player::Draw()
 
 
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
-																	CurrentFrame().y,
+																	CurrentFrame().y - 4,
 																	CurrentFrame().width * -1,
 																	CurrentFrame().height};
 	
 	DrawTexturePro(*sprite,
 		cframe,
 		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
-		{0,0},
+		{ 0,0 },
 		0.0f,
 		WHITE);
+
+	BeginShaderMode(shdrOutline);
+	DrawTexturePro(*sprite,
+		cframe,
+		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
+		{ 0,0 },
+		0.0f,
+		WHITE);
+
+	EndShaderMode();
 }
 
 void Player::DrawCollider()
