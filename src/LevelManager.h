@@ -30,6 +30,7 @@ public:
     Texture2D renderedLevelTexture;
     Texture2D renderedBGTexture;
     Texture2D backgroundTexture;
+    Texture2D laboratoryTilesetTexture;
     RenderTexture2D renderTexture;
     RenderTexture2D renderBGTexture;
     

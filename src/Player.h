@@ -40,7 +40,7 @@ public:
     float jump_force = 700.0f;
     float coyote_time = 0.15f;
     float coyote_time_counter = coyote_time;
-    float jump_buffer_time = 0.04f;
+    float jump_buffer_time = 0.10f;
     float jump_buffer_counter = jump_buffer_time;
     Rectangle feetSensor;
 

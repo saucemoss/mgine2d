@@ -18,6 +18,7 @@ LevelManager::LevelManager()
 	ldtkProject = p;
 
 	terrainTilesetTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Terrain\\Terrain (32x32).png");
+	laboratoryTilesetTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Terrain\\lab.png");
 	bgTilesetTexture = LoadTexture("res\\Treasure Hunters\\Palm Tree Island\\Sprites\\Background\\Big Clouds.png");
 
 	ldtkWorld = &ldtkProject->getWorld();
@@ -41,6 +42,7 @@ LevelManager::LevelManager()
 
 			std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
 			ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
+			
 			
 			level_portals.emplace_back(new LevelPortal(rect, entity, l.name, target_lvl, portal_out));
 		}
@@ -97,6 +99,14 @@ void LevelManager::LoadLevel(std::string level_name)
 									 settings::drawSize, settings::drawSize};
 					solid_tiles.emplace_back(new SolidTile(rec));
 					DrawTextureRec(terrainTilesetTexture, source_rect, target_pos, WHITE);
+				}
+				if (layer.getName() == "TestTiles")
+				{
+					Rectangle rec = { (float)tile.getPosition().x * settings::ScreenScale,
+									 (float)tile.getPosition().y * settings::ScreenScale,
+									 settings::drawSize, settings::drawSize };
+					solid_tiles.emplace_back(new SolidTile(rec));
+					DrawTextureRec(laboratoryTilesetTexture, source_rect, target_pos, WHITE);
 				}
 
 			}

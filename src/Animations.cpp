@@ -11,16 +11,17 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("BIG_Z", LoadTexture("res/bigzombie.png"));
 	m_Textures.emplace("Z_SPAWNER", LoadTexture("res/zSpawner.png"));
 	m_Textures.emplace("PLAYER", LoadTexture("res/PlayerTextures/player32.png"));
+	m_Textures.emplace("NP1", LoadTexture("res/PlayerTextures/new_player1.png"));
 
 }
 
 void Animations::InitializePlayerAnimations()
 {
-	Texture2D* texture = TextureLoader::GetTexture("PLAYER");
+	Texture2D* texture = TextureLoader::GetTexture("NP1");
 	animations.emplace("P_RUN", *(new Animation(texture, 0, 6, 32, 0.08f)));
 	animations.emplace("P_GROUND", *(new Animation(texture, 1, 1, 32, 0.08f)));
 	animations.emplace("P_FALL", *(new Animation(texture, 2, 1, 32, 0.08f)));
-	animations.emplace("P_IDLE", *(new Animation(texture, 3, 5, 32, 0.08f)));
+	animations.emplace("P_IDLE", *(new Animation(texture, 3, 2, 32, 0.28f)));
 	animations.emplace("P_JUMP", *(new Animation(texture, 4, 3, 32, 0.08f)));
 }
 

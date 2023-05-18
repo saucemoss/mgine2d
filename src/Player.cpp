@@ -9,6 +9,7 @@
 #include "SolidTile.h"
 #include "raymath.h"
 #include <algorithm>
+
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION            330
 #else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
@@ -38,8 +39,8 @@ Player::Player()
 	StatesStrMap[PlayerState::Falling] = "Falling";
 
 
+	//Shader test
 	shdrOutline = LoadShader(0, TextFormat("res/shaders/glsl%i/outline.fs", GLSL_VERSION));
-
 	// Get shader locations
 	int outlineSizeLoc = GetShaderLocation(shdrOutline, "outlineSize");
 	int outlineColorLoc = GetShaderLocation(shdrOutline, "outlineColor");
@@ -61,10 +62,7 @@ Player::~Player()
 
 void Player::Update(float dt)
 {
-
 	SetShaderValue(shdrOutline, outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
-
-
 
 	// Swtich animation frames for current anim
 	SwitchFrames(dt);
@@ -90,7 +88,7 @@ void Player::Update(float dt)
 	// Apply gravity, friction, acceleration
 	ApplyForces(dt);
 
-	// Check if level portal
+	// Check if level portal entered
 	LevelPortalCheck();
 
 	// Resolve collisions
@@ -106,6 +104,7 @@ void Player::LevelPortalCheck()
 	Collidable* c = CollisionManager::GetCollisionObject(r);
 	if (c->m_colliderTag == LEVEL_PORTAL)
 	{
+		std::cout << "level portal collision" << std::endl;
 		const LevelPortal& lpptr = dynamic_cast<LevelPortal&>(*c);
 		if (lpptr.is_active)
 		{
@@ -113,6 +112,7 @@ void Player::LevelPortalCheck()
 			const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(lpptr.m_iid_reference);
 			Vector2 newPos{ (connected_portal.getPosition().x + connected_portal.getSize().x / 2) * settings::ScreenScale,
 							(connected_portal.getPosition().y + connected_portal.getSize().y / 2) * settings::ScreenScale };
+			GameScreen::camera.target = newPos;
 			TransformPos(newPos);
 		}
 	}
@@ -136,10 +136,12 @@ void Player::Draw()
 
 
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
-																	CurrentFrame().y - 4,
+																	CurrentFrame().y,
 																	CurrentFrame().width * -1,
 																	CurrentFrame().height};
 	
+
+	//BeginShaderMode(shdrOutline);
 	DrawTexturePro(*sprite,
 		cframe,
 		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
@@ -147,15 +149,7 @@ void Player::Draw()
 		0.0f,
 		WHITE);
 
-	BeginShaderMode(shdrOutline);
-	DrawTexturePro(*sprite,
-		cframe,
-		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
-		{ 0,0 },
-		0.0f,
-		WHITE);
-
-	EndShaderMode();
+	//EndShaderMode();
 }
 
 void Player::DrawCollider()
@@ -195,7 +189,7 @@ void Player::DrawCollider()
 
 void Player::InitAnimations()
 {
-	sprite = TextureLoader::GetTexture("PLAYER");
+	sprite = TextureLoader::GetTexture("NP1");
 	animations->InitializePlayerAnimations();
 	SetAnimation("P_IDLE");
 }
@@ -221,6 +215,12 @@ void Player::ApplyForces(float dt)
 	else if (vy < 0.0f)
 	{
 		vy = std::min(0.0f, vy + friction * dt);
+	}
+
+	// Cap falling velocity
+	if (vy > 2000.0f)
+	{
+		vy = 2000.0f;
 	}
 
 	// Apply acceleration

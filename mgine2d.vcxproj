@@ -196,8 +196,10 @@
     <Image Include="..\GameProject\Content\Sprites\zSpawner.png" />
     <Image Include="resources\zombie_sheet.png" />
     <Image Include="res\bigzombie.png" />
+    <Image Include="res\PlayerTextures\new_player1.png" />
     <Image Include="res\PlayerTextures\player.png" />
     <Image Include="res\PlayerTextures\player32.png" />
+    <Image Include="res\Treasure Hunters\Palm Tree Island\Sprites\Terrain\lab.png" />
     <Image Include="res\Treasure Hunters\Palm Tree Island\Sprites\Terrain\Terrain (32x32).png" />
     <Image Include="res\zombie_sheet.png" />
     <Image Include="res\zSpawner.png" />
