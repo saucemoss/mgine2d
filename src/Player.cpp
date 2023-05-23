@@ -1,5 +1,5 @@
 #include "Player.h"
-#include "EntityManager.h"
+//#include "EntityManager.h"
 #include "Settings.h"
 #include "Animations.h"
 #include <iostream>
@@ -19,7 +19,7 @@
 Player::Player()
 {
 
-	rectangle = { 150,150,32,32 };
+	rectangle = { 150,500,18,56 };
 	x = rectangle.x;
 	y = rectangle.y;
 	w = rectangle.width;
@@ -28,9 +28,11 @@ Player::Player()
 	InitAnimations();
 	state = PlayerState::Idle;
 	m_colliderTag = PLAYER;
-	feetSensor = Rectangle{ x,y + h - 4, 32, 8 };
-	EnitityManager::Add(this);
+	feetSensor = Rectangle{ x,y + h - 4, 18, 8 };
+	//EnitityManager::Add(this);
 	CollisionManager::Add(this);
+	std::cout << "PLAYER CREATED " << std::endl;
+	std::cout << "entity list size " + std::to_string(EnitityManager::EntityList.size()) << std::endl;
 
 	// Add mappings for debug purposes
 	StatesStrMap[PlayerState::Idle] = "Idle";
@@ -101,19 +103,22 @@ void Player::Update(float dt)
 void Player::LevelPortalCheck()
 {
 	Rectangle r = { x - 1,y,34,32 };  
-	Collidable* c = CollisionManager::GetCollisionObject(r);
-	if (c->m_colliderTag == LEVEL_PORTAL)
+	std::vector<Collidable*> collisions = CollisionManager::GetCollisionObjects(r);
+
+	for (Collidable* c : collisions)
 	{
-		std::cout << "level portal collision" << std::endl;
-		const LevelPortal& lpptr = dynamic_cast<LevelPortal&>(*c);
-		if (lpptr.is_active)
+		if (c->m_colliderTag == LEVEL_PORTAL)
 		{
-			GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
-			const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(lpptr.m_iid_reference);
-			Vector2 newPos{ (connected_portal.getPosition().x + connected_portal.getSize().x / 2) * settings::ScreenScale,
-							(connected_portal.getPosition().y + connected_portal.getSize().y / 2) * settings::ScreenScale };
-			GameScreen::camera.target = newPos;
-			TransformPos(newPos);
+			const LevelPortal& lpptr = dynamic_cast<LevelPortal&>(*c);
+			if (lpptr.is_active)
+			{
+				GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
+				const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(lpptr.m_iid_reference);
+				Vector2 newPos{ (connected_portal.getPosition().x) * settings::ScreenScale,
+								(connected_portal.getPosition().y) * settings::ScreenScale };
+				GameScreen::camera.target = newPos;
+				TransformPos(newPos);
+			}
 		}
 	}
 }
@@ -131,8 +136,8 @@ void Player::SyncColliders()
 void Player::Draw()
 {
 
-	auto spritePosX = x - 16;
-	auto spritePosY = y - 32;
+	auto spritePosX = x - 22;
+	auto spritePosY = y - 8;
 
 
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
@@ -165,14 +170,14 @@ void Player::DrawCollider()
 		
 	}
 
-	//if (CollisionManager::RectSensor(feetSensor))
-	//{
-	//	DrawRectangleLinesEx(feetSensor, 1, RED);
-	//}
-	//else
-	//{
-	//	DrawRectangleLinesEx(feetSensor, 1, GREEN);
-	//}
+	if (CollisionManager::RectSensor(feetSensor))
+	{
+		DrawRectangleLinesEx(feetSensor, 1, RED);
+	}
+	else
+	{
+		DrawRectangleLinesEx(feetSensor, 1, GREEN);
+	}
 
 	//DrawText(collisionRecText.c_str(), 5, 80, 20, BLACK);
 	//DrawText(("csize: " + std::to_string(CollisionManager::colliders.size())).c_str(), 5, 100, 20, BLACK);

@@ -153,31 +153,27 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Collisions.cpp" />
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LevelPortal.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
     <ClCompile Include="src\Animations.cpp" />
-    <ClCompile Include="src\BigZombie.cpp" />
-    <ClCompile Include="src\EntityManager.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GameScreen.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\TitleScreen.cpp" />
-    <ClCompile Include="src\ZSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Door.h" />
     <ClInclude Include="src\LevelPortal.h" />
     <ClInclude Include="src\LevelManager.h" />
     <ClInclude Include="src\Collisions.h" />
     <ClInclude Include="src\SolidTile.h" />
     <ClInclude Include="src\Animations.h" />
     <ClInclude Include="src\BaseScreen.h" />
-    <ClInclude Include="src\BigZombie.h" />
     <ClInclude Include="src\Entity.h" />
-    <ClInclude Include="src\EntityManager.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameScreen.h" />
     <ClInclude Include="src\Player.h" />
@@ -185,7 +181,6 @@
     <ClInclude Include="src\ScreensManager.h" />
     <ClInclude Include="src\Settings.h" />
     <ClInclude Include="src\TitleScreen.h" />
-    <ClInclude Include="src\ZSpawner.h" />
     <ClInclude Include="src\Util.h" />
   </ItemGroup>
   <ItemGroup>

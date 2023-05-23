@@ -22,6 +22,8 @@ public:
 	void Reset();
 	bool AnimationEnded();
 	void FreezeFrame(int frameNumber);
+	void SetToFrame(int frameNumber);
+	int GetCurrentFrameNum();
 
 
 private:
@@ -48,6 +50,7 @@ public:
 	void InitializePlayerAnimations();
 	void InitializeBigZAnimations();
 	void InitializeZSpawnerAnimations();
+	void InitializeDoorAnimations();
 	Animation* GetAnimation(std::string name);
 	std::string m_CurrentActiveAnimation;
 private:
@@ -99,10 +102,38 @@ public:
 			animations->m_CurrentActiveAnimation = name;
 		}
 	}
+	void PlayAnimation(std::string name)
+	{
+		if (m_uninterupt)
+		{
+			if (AnimationEnded())
+			{
+				animation = animations->GetAnimation(name);
+				animations->m_CurrentActiveAnimation = name;
+				m_uninterupt = false;
+			}
+			else
+			{
+				//wait
+			}
+		}
+		else
+		{
+			animation = animations->GetAnimation(name);
+			animations->m_CurrentActiveAnimation = name;
+		}
+	}
 	void FreezeFrame(std::string name, int frameNumber)
 	{
-		SetAnimation(name);
+		animation = animations->GetAnimation(name);
 		animation->FreezeFrame(frameNumber);
+		animations->m_CurrentActiveAnimation = name;
+		
+	}
+	void PlayFromFrame(int frameNum, std::string name)
+	{
+		SetAnimation(name);
+		animation->SetToFrame(frameNum);
 	}
 	void SwitchFrames(float dt) const
 	{
@@ -125,5 +156,9 @@ public:
 	bool AnimationEnded()
 	{
 		return animation->AnimationEnded();
+	}
+	bool IsCurrentAnimation(std::string name)
+	{
+		return name == animations->m_CurrentActiveAnimation;
 	}
 };

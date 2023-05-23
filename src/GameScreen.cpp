@@ -3,18 +3,17 @@
 #include "Util.h"
 #include "GameScreen.h"
 #include "Player.h"
-#include "ZSpawner.h"
-#include "BigZombie.h"
-#include "EntityManager.h"
+//#include "EntityManager.h"
 #include "Settings.h"
 #include "LDtkLoader/Project.hpp"
 #include "SolidTile.h"
 #include <raymath.h>
 
-
+std::vector<Entity*> EnitityManager::EntityList;
 Camera2D GameScreen::camera;
 LevelManager* GameScreen::LevelMgr;
 Player* GameScreen::player;
+bool GameScreen::debug = false;
 
 GameScreen::GameScreen()
 
@@ -34,7 +33,6 @@ GameScreen::GameScreen()
 	camera.zoom = settings::zoom;
 
 }
-
 
 GameScreen::~GameScreen()
 {
@@ -85,6 +83,7 @@ void GameScreen::UpdateCamera(float dt)
 
 Screens GameScreen::Update(float dt)
 {
+	
 
 	//full screen at current screensize
 	if (IsKeyPressed(KEY_F11))
@@ -92,22 +91,20 @@ Screens GameScreen::Update(float dt)
 		ToggleFullscreen();
 	}
 
-	if (IsKeyPressed(KEY_TWO))
+	if (IsKeyPressed(KEY_ONE) && debug == false)
 	{
-		LevelMgr->LoadLevel("Level_1");
+		debug = true;
 	}
-	if (IsKeyPressed(KEY_ONE))
+	else if(IsKeyPressed(KEY_ONE))
 	{
-		LevelMgr->LoadLevel("Level_0");
+		debug = false;
 	}
 
-
-
-	
-	
 	UpdateCamera(dt);
-	EnitityManager::Update(dt);
 	LevelMgr->Update(dt);
+	player->Update(dt);
+	EnitityManager::Update(dt);
+	
 	return Screens::NONE;
 }
 
@@ -117,32 +114,41 @@ void GameScreen::Draw()
 	BeginMode2D(camera);
 	LevelMgr->Draw();
 	EnitityManager::Draw();
+	player->Draw();
 
 	//DEBUG:
-	// 
-	//CollisionManager::DrawColliders();
-	//player states
-	//std::string stateStr = player->StatesStrMap[player->state];
-	//DrawText(stateStr.c_str(), player->x, player->y-50, 20, BLACK);
-	//player animations
-	//std::string animStr = player->animations->m_CurrentActiveAnimation;
-	//DrawText(animStr.c_str(), player->x, player->y - 50, 20, BLACK);
+	if (debug)
+	{
+		CollisionManager::DrawColliders();
+		//player states
+		std::string stateStr = "State: " + player->StatesStrMap[player->state];
+		DrawText(stateStr.c_str(), player->x, player->y-50, 20, BLACK);
+		//player animations
+		std::string animStr = "Anim: " + player->animations->m_CurrentActiveAnimation + " :: " +
+			std::to_string(player->animations->GetAnimation(player->animations->m_CurrentActiveAnimation)->GetCurrentFrameNum());
+		DrawText(animStr.c_str(), player->x, player->y-70, 20, BLACK);
+	}
+	
+
 
 	EndMode2D();
 
 	//DEBUG:
-	DrawFPS(5, 5);
-	std::string txt = "Entity count: " + std::to_string(EnitityManager::EntityList.size());
-	DrawText(txt.c_str(), 5, 20, 20, BLACK);
-	if (player != nullptr)
+	if (debug)
 	{
-		std::string txt2 = "Player POS: " + VecToString(player->GetPos());
-		DrawText(txt2.c_str(), 5, 40, 20, BLACK);
-		std::string txt3 = "Is touching floor: " + std::to_string(player->is_touching_floor);
-		DrawText(txt3.c_str(), 5, 60, 20, BLACK);
+		DrawFPS(5, 5);
+		std::string txt = "Entity count: " + std::to_string(EnitityManager::EntityList.size());
+		DrawText(txt.c_str(), 5, 20, 20, BLACK);
+		if (player != nullptr)
+		{
+			std::string txt2 = "Player POS: " + VecToString(player->GetPos());
+			DrawText(txt2.c_str(), 5, 40, 20, BLACK);
+			std::string txt3 = "Is touching floor: " + std::to_string(player->is_touching_floor);
+			DrawText(txt3.c_str(), 5, 60, 20, BLACK);
 
-		DrawText(("vx: " + std::to_string(player->vx)).c_str(), 5, 120, 20, BLACK);
-		DrawText(("vy: " + std::to_string(player->vy)).c_str(), 5, 140, 20, BLACK);
+			DrawText(("vx: " + std::to_string(player->vx)).c_str(), 5, 120, 20, BLACK);
+			DrawText(("vy: " + std::to_string(player->vy)).c_str(), 5, 140, 20, BLACK);
+		}
 	}
 	
 }

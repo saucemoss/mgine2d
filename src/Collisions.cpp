@@ -7,7 +7,6 @@
 
 std::vector<Collidable*> CollisionManager::colliders;
 
-
 void CollisionManager::DrawColliders()
 {
 	for (Collidable* c : colliders)
@@ -200,6 +199,23 @@ Collidable* CollisionManager::GetCollisionObject(Rectangle& r)
 	}
 }
 
+std::vector<Collidable*> CollisionManager::GetCollisionObjects(Rectangle& r)
+{
+
+	std::vector<Collidable*> objs;
+
+	for (Collidable* b : CollisionManager::colliders)
+	{
+		if (CheckCollisionRecs(b->rectangle, r))
+		{
+				objs.push_back(b);
+		}
+		
+	}
+
+	return objs;
+}
+
 bool CollisionManager::RectSensor(Rectangle& r)
 {
 	for (Collidable* b : CollisionManager::colliders)
@@ -212,6 +228,20 @@ bool CollisionManager::RectSensor(Rectangle& r)
 			}
 		}
 	} 
+	return false;
+}
+
+bool CollisionManager::IsCollisionWith(ColliderTag colliderTag, Rectangle& r)
+{
+	std::vector<Collidable*> collisions = GetCollisionObjects(r);
+
+	for (Collidable* c : collisions)
+	{
+		if (c->m_colliderTag == colliderTag)
+		{
+			return true;
+		}
+	}
 	return false;
 }
 

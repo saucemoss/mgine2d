@@ -78,15 +78,6 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\BigZombie.cpp">
-      <Filter>Pliki źródłowe\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EntityManager.cpp">
-      <Filter>Pliki źródłowe\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ZSpawner.cpp">
-      <Filter>Pliki źródłowe\Entities</Filter>
-    </ClCompile>
     <ClCompile Include="src\TitleScreen.cpp">
       <Filter>Pliki źródłowe\Systems\Screens</Filter>
     </ClCompile>
@@ -111,8 +102,8 @@
     <ClCompile Include="src\LevelPortal.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Entity.cpp">
-      <Filter>Pliki źródłowe\Entities</Filter>
+    <ClCompile Include="src\Door.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -123,15 +114,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\Entity.h">
-      <Filter>Pliki nagłówkowe\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BigZombie.h">
-      <Filter>Pliki nagłówkowe\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EntityManager.h">
-      <Filter>Pliki nagłówkowe\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ZSpawner.h">
       <Filter>Pliki nagłówkowe\Entities</Filter>
     </ClInclude>
     <ClInclude Include="src\TitleScreen.h">
@@ -168,6 +150,9 @@
       <Filter>Pliki nagłówkowe\Systems\Level</Filter>
     </ClInclude>
     <ClInclude Include="src\LevelPortal.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Door.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>

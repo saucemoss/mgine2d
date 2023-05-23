@@ -1,7 +1,6 @@
 #pragma once
 #include "Entity.h"
 #include "Collisions.h"
-#include "EntityManager.h"
 #include "Settings.h"
 #include "LDtkLoader/Entity.hpp"
 

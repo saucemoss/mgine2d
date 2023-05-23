@@ -19,7 +19,7 @@ LevelPortal::LevelPortal(const Rectangle& rect, const ldtk::Entity& entity, cons
 	CollisionManager::Add(this);
 	EnitityManager::Add(this);
 	std::cout << "created portal" << std::endl;
-
+	std::cout << "entity list size " + std::to_string(EnitityManager::EntityList.size()) << std::endl;
 }
 
 LevelPortal::~LevelPortal()
@@ -27,6 +27,7 @@ LevelPortal::~LevelPortal()
 	CollisionManager::Remove(this);
 	EnitityManager::Remove(this);
 	std::cout << "removing portal" << std::endl;
+	std::cout << "entity list size " + std::to_string(EnitityManager::EntityList.size()) << std::endl;
 }
 
 

@@ -11,8 +11,17 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("BIG_Z", LoadTexture("res/bigzombie.png"));
 	m_Textures.emplace("Z_SPAWNER", LoadTexture("res/zSpawner.png"));
 	m_Textures.emplace("PLAYER", LoadTexture("res/PlayerTextures/player32.png"));
-	m_Textures.emplace("NP1", LoadTexture("res/PlayerTextures/new_player1.png"));
+	m_Textures.emplace("NP1", LoadTexture("res/PlayerTextures/new_player2.png"));
+	m_Textures.emplace("DOOR", LoadTexture("res/level/door.png"));
 
+}
+
+void Animations::InitializeDoorAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("DOOR");
+	animations.emplace("D_OPEN", *(new Animation(texture, 0, 17, 32, 0.02f)));
+	animations.emplace("D_CLOSE", *(new Animation(texture, 1, 17, 32, 0.02f)));
+	
 }
 
 void Animations::InitializePlayerAnimations()
@@ -22,7 +31,13 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_GROUND", *(new Animation(texture, 1, 1, 32, 0.08f)));
 	animations.emplace("P_FALL", *(new Animation(texture, 2, 1, 32, 0.08f)));
 	animations.emplace("P_IDLE", *(new Animation(texture, 3, 2, 32, 0.28f)));
-	animations.emplace("P_JUMP", *(new Animation(texture, 4, 3, 32, 0.08f)));
+
+	Animation* jump_anim = new Animation(texture, 4, 3, 32, 0.08f);
+	jump_anim->SetCustomFrameTime(1, 0.10f);
+	jump_anim->SetCustomFrameTime(2, 0.14f);
+	jump_anim->SetCustomFrameTime(3, 0.5f);
+	animations.emplace("P_JUMP", *jump_anim);
+
 }
 
 void Animations::InitializeBigZAnimations()
@@ -79,6 +94,8 @@ void Animation::SwitchFrames(float dt)
 	m_animationTicker -= dt;
 	if (m_animationTicker <= 0)
 	{
+		m_currentFrame = m_frames[m_currentFrameNum];
+		m_animationTicker = m_framesTimes[m_currentFrameNum];
 		if (m_currentFrameNum < m_framesCount-1)
 		{
 			m_currentFrameNum +=1 ;
@@ -95,8 +112,6 @@ void Animation::SwitchFrames(float dt)
 			}
 			m_reachedEnd = true;
 		}
-		m_currentFrame = m_frames[m_currentFrameNum];
-		m_animationTicker = m_framesTimes[m_currentFrameNum];
 	}
 }
 
@@ -121,7 +136,15 @@ bool Animation::AnimationEnded()
 void Animation::FreezeFrame(int frameNumber)
 {
 	m_currentFrameNum = frameNumber;
-	m_animationTicker = m_framesTimes[frameNumber-1];
+	m_currentFrame = m_frames[m_currentFrameNum-1];
+	m_animationTicker = 1.0f;
+}
+
+void Animation::SetToFrame(int frameNumber)
+{
+	m_currentFrameNum = frameNumber-1;
+	m_currentFrame = m_frames[m_currentFrameNum];
+	m_animationTicker = m_framesTimes[m_currentFrameNum];
 }
 
 void Animation::BuildFrameRectangles(int framesCount)
@@ -145,12 +168,17 @@ void Animation::BuildFrameTimes(int framesCount)
 
 void Animation::SetCustomFrameTime(int frameNumber, float duration)
 {
-	m_framesTimes[frameNumber] = duration;
+	m_framesTimes[frameNumber-1] = duration;
 }
 
 const Rectangle Animation::GetCurrentFrame()
 {
 	return m_currentFrame;
+}
+
+int Animation::GetCurrentFrameNum()
+{
+	return m_currentFrameNum;
 }
 
 

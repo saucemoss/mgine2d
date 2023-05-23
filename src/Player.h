@@ -28,7 +28,7 @@ public:
     void DrawCollider() override;
     void InitAnimations() override;
 
-    //Movement Controll
+    //Movement Control
     void ApplyForces(float dt);
     void TransformPos(Vector2 pos);
     bool is_touching_floor = false;

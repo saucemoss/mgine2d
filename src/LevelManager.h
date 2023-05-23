@@ -6,6 +6,7 @@
 #include <raylib.h>
 #include "LevelPortal.h"
 #include "Entity.h"
+#include "Door.h"
 
 
 class LevelManager
@@ -31,13 +32,23 @@ public:
     Texture2D renderedBGTexture;
     Texture2D backgroundTexture;
     Texture2D laboratoryTilesetTexture;
+    Texture2D DecorTex;
+
+    RenderTexture2D staticBGRenderTexture;
+    Texture2D staticRenderedBGTexture;
+
+    RenderTexture2D staticDecorRenderTexture;
+    Texture2D staticDecorTexture;
+
+
     RenderTexture2D renderTexture;
     RenderTexture2D renderBGTexture;
     
 
 
-    std::vector<SolidTile*> solid_tiles;
-    std::vector<Entity*> level_entities;
+    std::vector< std::unique_ptr<SolidTile>> solid_tiles;
+    std::vector<std::unique_ptr<Entity>> level_entities_safe;
+    std::vector<std::unique_ptr<Door>> level_doors;
     std::vector<LevelPortal*> level_portals;
 
 };

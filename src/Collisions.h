@@ -9,7 +9,8 @@
 enum ColliderTag {
 	SOLID,
 	PLAYER,
-	LEVEL_PORTAL
+	LEVEL_PORTAL,
+	DOOR
 };
 
 class Collidable
@@ -49,7 +50,9 @@ public:
 	static bool Raycast(const Vector2& ray_origin, const Vector2& ray_dir);
 	static ColliderTag GetCollisionTags(Rectangle& r);
 	static Collidable* GetCollisionObject(Rectangle& r);
+	static std::vector<Collidable*> GetCollisionObjects(Rectangle& r);
 	static bool RectSensor(Rectangle& r);
+	static bool IsCollisionWith(ColliderTag m_colliderTag, Rectangle& r);
 
 
 	bool verlapLeft;

@@ -18,6 +18,6 @@ public:
    
     static Player* player;
     static LevelManager* LevelMgr;
-
+    static bool debug;
     void Draw() override;
 };
