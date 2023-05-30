@@ -105,6 +105,15 @@
     <ClCompile Include="src\Door.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\AnimatedDecor.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Elevator.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ElevatorCallSwitch.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -153,6 +162,15 @@
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
     <ClInclude Include="src\Door.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AnimatedDecor.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Elevator.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ElevatorCallSwitch.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>

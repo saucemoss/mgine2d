@@ -10,7 +10,8 @@ enum ColliderTag {
 	SOLID,
 	PLAYER,
 	LEVEL_PORTAL,
-	DOOR
+	DOOR,
+	ELEVATOR, ELEVATOR_CALL_SW
 };
 
 class Collidable
@@ -30,6 +31,10 @@ public:
 	float contactTime;
 
 	virtual void DrawCollider() = 0;
+	void DisableCollider() 
+	{
+		rectangle = { 0,0,0,0 };//disable collider, sensor only
+	}
 };
 
 class CollisionManager

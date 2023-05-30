@@ -48,8 +48,8 @@ class Animations
 {
 public:
 	void InitializePlayerAnimations();
-	void InitializeBigZAnimations();
-	void InitializeZSpawnerAnimations();
+	void InitializeElevatorAnimations();
+	void InitializeDecorAnimations();
 	void InitializeDoorAnimations();
 	Animation* GetAnimation(std::string name);
 	std::string m_CurrentActiveAnimation;

@@ -3,36 +3,51 @@
 #include "Util.h"
 #include "GameScreen.h"
 #include "Player.h"
-//#include "EntityManager.h"
 #include "Settings.h"
 #include "LDtkLoader/Project.hpp"
 #include "SolidTile.h"
 #include <raymath.h>
+#include "rlgl.h"
+
+
 
 std::vector<Entity*> EnitityManager::EntityList;
 Camera2D GameScreen::camera;
+Camera2D GameScreen::player_focused_cam;
 LevelManager* GameScreen::LevelMgr;
 Player* GameScreen::player;
 bool GameScreen::debug = false;
 
+
+
+
+
+
 GameScreen::GameScreen()
 
 {
+	//HideCursor();
+	
 	LevelMgr = new LevelManager();
 	LevelMgr->LoadLevel("Level_0");
 
 	// Test entities
 
 	player = new Player();
-
+	
 	//Camera init
+	player_focused_cam.target = { player->x, player->y };
+	player_focused_cam.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
+	player_focused_cam.zoom = settings::zoom;
 	camera = { 0 };
 	camera.target = {player->x, player->y};
 	camera.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
 	camera.rotation = 0.0f;
 	camera.zoom = settings::zoom;
 
+
 }
+
 
 GameScreen::~GameScreen()
 {
@@ -41,8 +56,11 @@ GameScreen::~GameScreen()
 
 void GameScreen::UpdateCamera(float dt)
 {
+	player_focused_cam.target = { player->x, player->y };
 	// Camera stuff
+	// 
 	// Camera zoom controls
+	
 	camera.zoom += ((float)GetMouseWheelMove() * 0.05f);
 
 	if (camera.zoom > 3.0f) camera.zoom = 3.0f;
@@ -73,10 +91,26 @@ void GameScreen::UpdateCamera(float dt)
 	float minX = 0.0f, minY = 0.0f, maxX = levelSize.x * settings::ScreenScale, maxY = levelSize.y * settings::ScreenScale;
 	Vector2 max = GetWorldToScreen2D({ maxX, maxY }, camera);
 	Vector2 min = GetWorldToScreen2D({ minX, minY }, camera);
-	if (max.x < settings::screenWidth) camera.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
-	if (max.y < settings::screenHeight) camera.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
-	if (min.x > 0) camera.offset.x = settings::screenWidth / 2 - min.x;
-	if (min.y > 0) camera.offset.y = settings::screenHeight / 2 - min.y;
+	if (max.x < settings::screenWidth)
+	{
+		camera.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
+		player_focused_cam.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
+	}
+	if (max.y < settings::screenHeight)
+	{
+		camera.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
+		player_focused_cam.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
+	}
+	if (min.x > 0)
+	{
+		camera.offset.x = settings::screenWidth / 2 - min.x;
+		player_focused_cam.offset.x = settings::screenWidth / 2 - min.x;
+	}
+	if (min.y > 0)
+	{
+		camera.offset.y = settings::screenHeight / 2 - min.y;
+		player_focused_cam.offset.y = settings::screenHeight / 2 - min.y;
+	}
 
 
 }
@@ -84,6 +118,8 @@ void GameScreen::UpdateCamera(float dt)
 Screens GameScreen::Update(float dt)
 {
 	
+
+
 
 	//full screen at current screensize
 	if (IsKeyPressed(KEY_F11))
@@ -110,11 +146,17 @@ Screens GameScreen::Update(float dt)
 
 void GameScreen::Draw()
 {
-	auto levelSize = LevelMgr->currentLdtkLevel->size;
-	BeginMode2D(camera);
-	LevelMgr->Draw();
-	EnitityManager::Draw();
-	player->Draw();
+	BeginMode2D(camera);		// DRAW ORDER:
+	LevelMgr->Draw();			// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
+	EnitityManager::Draw(0);	// Entities/Objects behind player
+	//TODO						// Entities Shader
+	player->Draw();				// Player							
+	EnitityManager::Draw(1);	// Entities/Objects in front of player
+	//TODO						// Paralaxed foreground Level layer		
+	LevelMgr->DrawSpotLights();	// Darkness and lights
+	
+	
+
 
 	//DEBUG:
 	if (debug)
@@ -128,10 +170,8 @@ void GameScreen::Draw()
 			std::to_string(player->animations->GetAnimation(player->animations->m_CurrentActiveAnimation)->GetCurrentFrameNum());
 		DrawText(animStr.c_str(), player->x, player->y-70, 20, BLACK);
 	}
-	
 
-
-	EndMode2D();
+	EndMode2D();				//END CAMERA MODE. UI:
 
 	//DEBUG:
 	if (debug)
@@ -152,6 +192,7 @@ void GameScreen::Draw()
 	}
 	
 }
+
 
 
 

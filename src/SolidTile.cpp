@@ -13,6 +13,7 @@ SolidTile::SolidTile(const Rectangle& rect)
 	y = rectangle.y;
 	w = rectangle.width;
 	h = rectangle.height;
+	m_colliderTag = SOLID;
 	CollisionManager::Add(this);
 }
 

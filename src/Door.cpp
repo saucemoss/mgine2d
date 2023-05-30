@@ -13,7 +13,7 @@ Door::Door(const Rectangle& rect, bool is_right)
 
 	rectangle.x += 15;
 	rectangle.width -= 30;
-	sensor = { x - 115,y,w + 230,h };
+	sensor = { x - 90,y,w + 180,h };
 	m_colliderTag = DOOR;
 	state = DoorState::Closed;
 	EnitityManager::Add(this);

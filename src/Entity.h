@@ -2,14 +2,16 @@
 #include <raylib.h>
 #include <iostream>
 #include <vector>
+#include "LDtkLoader/Project.hpp"
 
 class Entity
 {
 public:
     virtual ~Entity() = default;
-
+	int m_draw_layer = 0;
     virtual void Draw() = 0;
     virtual void Update(float dt) = 0;
+	ldtk::IID m_ldtkID;
 
     Vector2 GetPos()    {
         return pos;
@@ -39,11 +41,14 @@ public:
 			e->Update(dt);
 		}
 	}
-	static void Draw()
+	static void Draw(int draw_layer)
 	{
 		for (Entity* e : EntityList)
 		{
-			e->Draw();
+			if (e->m_draw_layer == draw_layer)
+			{
+				e->Draw();
+			}
 		}
 	}
 	static void Add(Entity* e)

@@ -16,7 +16,7 @@ Game::Game(int width, int height, int fps, std::string title)
 	frameBuffer = LoadRenderTexture(width, height);
 	TextureLoader::LoadTextures();
 	ScreensManager::Initialize();
-	ScreensManager::SetCurrentScreen(Screens::TITLE);
+	ScreensManager::SetCurrentScreen(Screens::GAME); //TO BE CHANGED TO TITLE
 	
 }
 

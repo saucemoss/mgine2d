@@ -9,11 +9,24 @@ std::unordered_map<std::string, Texture2D> TextureLoader::m_Textures;
 void TextureLoader::LoadTextures()
 {
 	m_Textures.emplace("BIG_Z", LoadTexture("res/bigzombie.png"));
-	m_Textures.emplace("Z_SPAWNER", LoadTexture("res/zSpawner.png"));
 	m_Textures.emplace("PLAYER", LoadTexture("res/PlayerTextures/player32.png"));
 	m_Textures.emplace("NP1", LoadTexture("res/PlayerTextures/new_player2.png"));
 	m_Textures.emplace("DOOR", LoadTexture("res/level/door.png"));
+	m_Textures.emplace("DECOR_ANIM", LoadTexture("res/level/decor_anim.png"));
 
+}
+
+
+void Animations::InitializeDecorAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("DECOR_ANIM");
+	animations.emplace("DECOR_169", *(new Animation(texture, 0, 5, 32, 0.12f)));
+	animations.emplace("DECOR_170", *(new Animation(texture, 1, 5, 32, 0.12f)));
+	animations.emplace("DECOR_244", *(new Animation(texture, 2, 6, 32, 0.25f)));
+	animations.emplace("DECOR_162", *(new Animation(texture, 3, 2, 32, 0.50f)));
+	//skip for elevator
+	//animations.emplace("tbd", *(new Animation(texture, 5, tbd, tbd, tbd)));
+	
 }
 
 void Animations::InitializeDoorAnimations()
@@ -40,26 +53,17 @@ void Animations::InitializePlayerAnimations()
 
 }
 
-void Animations::InitializeBigZAnimations()
+void Animations::InitializeElevatorAnimations()
 {
-	Texture2D* texture = TextureLoader::GetTexture("BIG_Z");
-	animations.emplace("BIGZ_IDLE", *(new Animation(texture, 0, 10, 32, 0.1f)));
-	animations.emplace("BIGZ_DOWN", *(new Animation(texture, 1, 8, 32, 0.1f)));
-	animations.emplace("BIGZ_UP", *(new Animation(texture, 2, 8, 32, 0.1f)));
-	animations.emplace("BIGZ_RIGHT", *(new Animation(texture, 3, 9, 32, 0.1f)));
-	animations.emplace("BIGZ_LEFT", *(new Animation(texture, 4, 9, 32, 0.1f)));
-}
-void Animations::InitializeZSpawnerAnimations()
-{
-	Texture2D* texture = TextureLoader::GetTexture("Z_SPAWNER");
+	Texture2D* texture = TextureLoader::GetTexture("DECOR_ANIM");
+	animations.emplace("ELEV_IDLE", *(new Animation(texture, 4, 1, 32, 0.12f)));
+	animations.emplace("ELEV_SW_IDLE", *(new Animation(texture, 5, 3, 32, 0.12f)));
+	animations.emplace("ELEV_SW_PRESSED", *(new Animation(texture, 6, 4, 32, 0.06f)));
+	animations.emplace("ELEV_CLOSE", *(new Animation(texture, 7, 8, 32, 0.05f)));
+	animations.emplace("ELEV_OPEN", *(new Animation(texture, 8, 8, 32, 0.05f)));
 	
-	//Animation with custom frame times
-	Animation* idle_anim = new Animation(texture, 0, 10, 32, 0.1f);		
-	idle_anim->SetCustomFrameTime(3, 0.3f);	//Set custom frame time before adding to vector
-	animations.emplace("ZSPAWNER_IDLE", *idle_anim);
-	
-	animations.emplace("ZSPAWNER_EMERGE", *(new Animation(texture, 1, 10, 32, 0.1f))); // standard animation
 }
+
 
 
 Animation* Animations::GetAnimation(std::string name)
@@ -135,8 +139,8 @@ bool Animation::AnimationEnded()
 
 void Animation::FreezeFrame(int frameNumber)
 {
-	m_currentFrameNum = frameNumber;
-	m_currentFrame = m_frames[m_currentFrameNum-1];
+	m_currentFrameNum = frameNumber-1;
+	m_currentFrame = m_frames[m_currentFrameNum];
 	m_animationTicker = 1.0f;
 }
 
