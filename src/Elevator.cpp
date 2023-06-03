@@ -12,20 +12,20 @@ Elevator::Elevator(const Rectangle& rect, ldtk::ArrayField<int> levels, const ld
 	w = rectangle.width;
 	h = rectangle.height;
 	rectangle.y += rectangle.height;
-
+	roof = { x,y - rectangle.height, w, h };
+	AddColliderElement(&roof, ELEVATOR);
+	
 	sensor = { x,y + h - 20,w, 20 };
 	m_levels = levels;
 	m_colliderTag = ELEVATOR;
 	state = ElevatorState::START_LEVEL;
 	EnitityManager::Add(this);
-	CollisionManager::Add(this);
 
 }
 
 Elevator::~Elevator()
 {
 	EnitityManager::Remove(this);
-	CollisionManager::Remove(this);
 }
 
 void Elevator::Update(float dt)
@@ -153,32 +153,53 @@ void Elevator::Update(float dt)
 
 void Elevator::ResetY(int next_level)
 {
-	FreezeFrame("ELEV_OPEN", 1);
+
 	rectangle.y = next_level + rectangle.height;
 	sensor = { x,next_level + h - 20,w, 20 };
+	roof.y = next_level - rectangle.height;
+	for (auto& e : elements)
+	{
+		e->rectangle.y = next_level - rectangle.height;
+	}
 	y = next_level;
 }
 
 void Elevator::MoveUp(int speed)
 {
-	FreezeFrame("ELEV_CLOSE", 8);
+	
 	rectangle.y -= speed;
 	sensor.y -= speed;
+	roof.y -= speed;
+	for (auto& e : elements)
+	{
+		e->rectangle.y -= speed;
+	}
 	y -= speed;
+
+	if(CollisionManager::IsCollisionWith(PLAYER, sensor))
 	GameScreen::player->y -= speed;
 }
 
 void Elevator::MoveDown(int speed)
 {
-	FreezeFrame("ELEV_CLOSE", 8);
+	
 	rectangle.y += speed;
 	sensor.y += speed;
+	roof.y += speed;
+	for (auto& e : elements)
+	{
+		e->rectangle.y += speed;
+	}
 	y += speed;
+
+	//if (CollisionManager::IsCollisionWith(PLAYER, sensor))
+		//GameScreen::player->y += speed;
+
 }
 
 void Elevator::MoveToSwitch(int y_in)
 {
-	FreezeFrame("ELEV_CLOSE", 8);
+	
 	next_level = y_in;
 	state = ElevatorState::GOING_TO_SW;
 }
@@ -198,7 +219,7 @@ void Elevator::Draw()
 
 void Elevator::DrawCollider()
 {
-	DrawRectangleLinesEx(rectangle, 1, BLUE);
+	DrawRectangleLinesEx(rectangle, 1, RED);
 	DrawRectangleLinesEx(sensor, 1, YELLOW);
 
 	std::map<ElevatorState, std::string> StatesStrMap{

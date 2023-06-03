@@ -90,7 +90,7 @@
     <ClCompile Include="src\SolidTile.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Collisions.cpp">
+    <ClCompile Include="src\CollisionManager.cpp">
       <Filter>Pliki źródłowe\Systems\Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\Player.cpp">
@@ -112,6 +112,9 @@
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
     <ClCompile Include="src\ElevatorCallSwitch.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MovingBlock.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,9 +146,6 @@
     <ClInclude Include="src\Animations.h">
       <Filter>Pliki nagłówkowe\Systems\Animations</Filter>
     </ClInclude>
-    <ClInclude Include="src\Collisions.h">
-      <Filter>Pliki nagłówkowe\Systems\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="src\Util.h">
       <Filter>Pliki nagłówkowe\Systems\Utilities</Filter>
     </ClInclude>
@@ -171,6 +171,12 @@
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
     <ClInclude Include="src\ElevatorCallSwitch.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Collidable.h">
+      <Filter>Pliki nagłówkowe\Systems\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MovingBlock.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>

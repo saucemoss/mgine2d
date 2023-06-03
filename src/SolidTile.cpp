@@ -1,6 +1,6 @@
 #include "SolidTile.h"
 #include "Settings.h"
-#include "Collisions.h"
+#include "Collidable.h"
 
 SolidTile::SolidTile()
 {

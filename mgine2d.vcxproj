@@ -155,11 +155,12 @@
   <ItemGroup>
     <ClCompile Include="src\AnimatedDecor.cpp" />
     <ClCompile Include="src\Door.cpp" />
-    <ClCompile Include="src\Collisions.cpp" />
+    <ClCompile Include="src\CollisionManager.cpp" />
     <ClCompile Include="src\Elevator.cpp" />
     <ClCompile Include="src\ElevatorCallSwitch.cpp" />
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LevelPortal.cpp" />
+    <ClCompile Include="src\MovingBlock.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
     <ClCompile Include="src\Animations.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -169,13 +170,14 @@
     <ClCompile Include="src\TitleScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MovingBlock.h" />
+    <ClInclude Include="src\Collidable.h" />
     <ClInclude Include="src\ElevatorCallSwitch.h" />
     <ClInclude Include="src\Elevator.h" />
     <ClInclude Include="src\AnimatedDecor.h" />
     <ClInclude Include="src\Door.h" />
     <ClInclude Include="src\LevelPortal.h" />
     <ClInclude Include="src\LevelManager.h" />
-    <ClInclude Include="src\Collisions.h" />
     <ClInclude Include="src\SolidTile.h" />
     <ClInclude Include="src\Animations.h" />
     <ClInclude Include="src\BaseScreen.h" />

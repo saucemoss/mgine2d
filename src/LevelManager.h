@@ -58,21 +58,20 @@ public:
     ldtk::IntPoint levelSize;
 
     //light methods
-    void SetupLight(int slot, float x, float y, float radius);
-    void MoveLight(int slot, float x, float y);
-    void ComputeShadowVolumeForEdge(int slot, Vector2 sp, Vector2 ep);
-    void DrawLightMask(int slot);
-    bool UpdateLight(int slot, std::vector<Rectangle*> m_light_walls, int count);
+    void SetupLight(float x, float y, float radius);
+    void MoveLight(LightInfo& light, float x, float y);
+    void ComputeShadowVolumeForEdge(LightInfo& light, Vector2 sp, Vector2 ep);
+    void DrawLightMask(LightInfo& light);
+    bool UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light_walls);
     void SetupBoxes();
     //m_lights
     void DrawSpotLights();
     int nextLight = 1;
-    //Rectangle m_light_walls[2000] = { 0 };
     bool showLines = false;
     RenderTexture lightMask;
-    //LightInfo m_lights[32];
     std::vector<LightInfo> m_lights;
     std::vector<Rectangle*> m_light_walls;
+    float m_darkness_strength;
   
     //Textures definition
     //static background

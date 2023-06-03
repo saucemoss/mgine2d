@@ -2,7 +2,7 @@
 #include "Entity.h"
 #include <raylib.h>
 #include "Animations.h"
-#include "Collisions.h"
+#include "Collidable.h"
 #include <map>
 
 
@@ -23,9 +23,10 @@ public:
     
     void Update(float dt) override;
     void LevelPortalCheck();
+    void MovingBlockCheck(float dt);
     void SyncColliders();
     void Draw() override;
-    void DrawCollider() override;
+    virtual void DrawCollider() override;
     void InitAnimations() override;
 
     //Movement Control

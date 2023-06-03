@@ -1,5 +1,4 @@
 #include "Player.h"
-//#include "EntityManager.h"
 #include "Settings.h"
 #include "Animations.h"
 #include <iostream>
@@ -71,6 +70,7 @@ void Player::Update(float dt)
 
 	// Update player in one possible state
 	is_touching_floor = CollisionManager::RectSensor(feetSensor);
+
 	switch (state)
 	{
 	case PlayerState::Idle:
@@ -93,6 +93,9 @@ void Player::Update(float dt)
 	// Check if level portal entered
 	LevelPortalCheck();
 
+	// Check moving blocks
+	MovingBlockCheck(dt);
+
 	// Resolve collisions
 	CollisionManager::ResolveCollisions(this, dt);
 
@@ -109,7 +112,7 @@ void Player::LevelPortalCheck()
 	{
 		if (c->m_colliderTag == LEVEL_PORTAL)
 		{
-			const LevelPortal& lpptr = dynamic_cast<LevelPortal&>(*c);
+			const LevelPortal& lpptr = static_cast<LevelPortal&>(*c);
 			if (lpptr.is_active)
 			{
 				GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
@@ -120,6 +123,23 @@ void Player::LevelPortalCheck()
 				TransformPos(newPos);
 			}
 		}
+	}
+}
+
+void Player::MovingBlockCheck(float dt)
+{
+	if (CollisionManager::IsCollisionWith(M_BLOCK, feetSensor))
+	{
+		auto collisions = CollisionManager::GetCollisionObjects(feetSensor);
+		for (auto& c : collisions)
+		{
+			if (c->m_colliderTag == M_BLOCK)
+			{
+				x += c->vx * dt;
+				y += c->vy * dt;
+			}
+		}
+
 	}
 }
 
@@ -202,8 +222,11 @@ void Player::InitAnimations()
 void Player::ApplyForces(float dt)
 {
 	// Apply gravity
-	vy = vy + gravity;
-
+	if (!CollisionManager::IsCollisionWith(M_BLOCK_TOP, feetSensor))
+	{
+		vy = vy + gravity;
+	}
+	
 	//Apply friction
 	if (vx > 0.0f)
 	{
@@ -223,9 +246,9 @@ void Player::ApplyForces(float dt)
 	}
 
 	// Cap falling velocity
-	if (vy > 2000.0f)
+	if (vy > 800.0f)
 	{
-		vy = 2000.0f;
+		vy = 800.0f;
 	}
 
 	// Apply acceleration

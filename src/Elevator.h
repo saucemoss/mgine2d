@@ -1,7 +1,7 @@
 #pragma once
 #include "Entity.h"
 #include "ElevatorCallSwitch.h"
-#include "Collisions.h"
+#include "Collidable.h"
 #include "Settings.h"
 #include "Animations.h"
 #include "LDtkLoader/Project.hpp"
@@ -29,6 +29,7 @@ public:
     ~Elevator();
     ElevatorState state;
     Rectangle sensor;
+    Rectangle roof;
     const ldtk::Entity& m_ldtk_elevator;
     void ResetY(int next_level);
 

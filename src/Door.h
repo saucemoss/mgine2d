@@ -1,6 +1,6 @@
 #pragma once
 #include "Entity.h"
-#include "Collisions.h"
+#include "Collidable.h"
 #include "Settings.h"
 #include "Animations.h"
 

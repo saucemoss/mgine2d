@@ -31,8 +31,6 @@ GameScreen::GameScreen()
 	LevelMgr = new LevelManager();
 	LevelMgr->LoadLevel("Level_0");
 
-	// Test entities
-
 	player = new Player();
 	
 	//Camera init
@@ -118,22 +116,15 @@ void GameScreen::UpdateCamera(float dt)
 Screens GameScreen::Update(float dt)
 {
 	
-
-
-
 	//full screen at current screensize
 	if (IsKeyPressed(KEY_F11))
 	{
 		ToggleFullscreen();
 	}
 
-	if (IsKeyPressed(KEY_ONE) && debug == false)
+	if (IsKeyPressed(KEY_ONE))
 	{
-		debug = true;
-	}
-	else if(IsKeyPressed(KEY_ONE))
-	{
-		debug = false;
+		debug = !debug;
 	}
 
 	UpdateCamera(dt);
@@ -149,7 +140,7 @@ void GameScreen::Draw()
 	BeginMode2D(camera);		// DRAW ORDER:
 	LevelMgr->Draw();			// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
 	EnitityManager::Draw(0);	// Entities/Objects behind player
-	//TODO						// Entities Shader
+	//TODO						// Entities Shaders?
 	player->Draw();				// Player							
 	EnitityManager::Draw(1);	// Entities/Objects in front of player
 	//TODO						// Paralaxed foreground Level layer		

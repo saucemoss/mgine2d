@@ -1,6 +1,6 @@
 #pragma once
 #include "Entity.h"
-#include "Collisions.h"
+#include "Collidable.h"
 
 
 class SolidTile : public Collidable
@@ -10,6 +10,8 @@ public:
     SolidTile(const Rectangle& rectangle);
 
     ~SolidTile();
-    void DrawCollider() override;
+    
+    // Inherited via Collidable
+    virtual void DrawCollider() override;
 
 };

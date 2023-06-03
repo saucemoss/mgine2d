@@ -1,41 +1,15 @@
 #pragma once
-#include <raylib.h>
+
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <functional>
 #include <array>
+#include <memory>
+#include <raylib.h>
+#include "ColliderTag.h"
 
-enum ColliderTag {
-	SOLID,
-	PLAYER,
-	LEVEL_PORTAL,
-	DOOR,
-	ELEVATOR, ELEVATOR_CALL_SW
-};
-
-class Collidable
-{
-public:
-	ColliderTag m_colliderTag;
-	std::array<Rectangle*,4> contact;
-	Rectangle rectangle;
-
-	bool colliding = false;;
-	float x, y;
-	float w, h;
-	float vx, vy;
-	float normalx, normaly;
-	Vector2 normals;
-	Vector2 contactPoint;
-	float contactTime;
-
-	virtual void DrawCollider() = 0;
-	void DisableCollider() 
-	{
-		rectangle = { 0,0,0,0 };//disable collider, sensor only
-	}
-};
+class Collidable;
 
 class CollisionManager
 {
@@ -58,6 +32,7 @@ public:
 	static std::vector<Collidable*> GetCollisionObjects(Rectangle& r);
 	static bool RectSensor(Rectangle& r);
 	static bool IsCollisionWith(ColliderTag m_colliderTag, Rectangle& r);
+
 
 
 	bool verlapLeft;

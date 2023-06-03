@@ -1,9 +1,10 @@
-#include "Collisions.h"
+#include "Collidable.h"
 #include <algorithm>
 #include <vector>
 #include <functional>
 #include <raymath.h>
 #include <limits>
+#include <iostream>
 
 std::vector<Collidable*> CollisionManager::colliders;
 
@@ -12,6 +13,7 @@ void CollisionManager::DrawColliders()
 	for (Collidable* c : colliders)
 	{
 		c->DrawCollider();
+		
 	}
 }
 
@@ -245,6 +247,7 @@ bool CollisionManager::IsCollisionWith(ColliderTag colliderTag, Rectangle& r)
 	return false;
 }
 
+
 void CollisionManager::ResolveCollisions(Collidable* c, float fElapsedTime)
 {
 	// Sort collisions in order of distance
@@ -255,13 +258,49 @@ void CollisionManager::ResolveCollisions(Collidable* c, float fElapsedTime)
 	// Work out collision point, add it to vector along with rect ID
 	for (size_t i = 0; i < CollisionManager::colliders.size(); i++)
 	{
-		if (CollisionManager::colliders[i]->m_colliderTag != PLAYER &&
-			CollisionManager::colliders[i]->m_colliderTag != LEVEL_PORTAL) {
+		if (CollisionManager::colliders[i]->m_colliderTag == M_BLOCK)
+		{
+			float x = c->rectangle.x + c->vx * fElapsedTime;
+			float y = c->rectangle.y + c->vy * fElapsedTime;
+			float w = c->rectangle.width;
+			float h = c->rectangle.height;
+
+			float bx = colliders[i]->rectangle.x + colliders[i]->vx * fElapsedTime;
+			float by = colliders[i]->rectangle.y + colliders[i]->vy * fElapsedTime;
+			float bw = colliders[i]->rectangle.width;
+			float bh = colliders[i]->rectangle.height;
+
+			Rectangle next_rect = { x,y,w,h };
+			Rectangle c_next_rect = { bx,by,bw,bh };
+
+			if (CheckCollisionRecs(next_rect, c_next_rect))
+			{
+				auto cr = GetCollisionRec(next_rect, c_next_rect);
+
+				if (cr.width < cr.height)
+				{
+					if (x + w > bx && x < bx)// collide from right
+						c->x = x - cr.width;
+					if (x < bx + bw && x > bx) // collide from left
+						c->x = x + cr.width;
+				}
+				else
+				{
+					if (y + h > by && y < by) // collide from top
+						c->y = y - cr.height;
+					if (y < by + bh && y > by) // collide from bottom
+						c->y = y + cr.height;
+				}
+			}
+		}
+		if (CollisionManager::colliders[i]->m_colliderTag != c->m_colliderTag &&
+			CollisionManager::colliders[i]->m_colliderTag != LEVEL_PORTAL ) {
 			if (DynamicRectVsRect(c, fElapsedTime, CollisionManager::colliders[i]->rectangle, cp, cn, t))
 			{
 				z.push_back({ i, t });
 			}
 		}
+
 	}
 
 	// Do the sort
@@ -271,10 +310,13 @@ void CollisionManager::ResolveCollisions(Collidable* c, float fElapsedTime)
 		});
 
 	// Now resolve the collision in correct order 
+
 	for (auto j : z)
 		ResolveDynamicRectVsRect(c, fElapsedTime, &CollisionManager::colliders[j.first]->rectangle);
 
 	// UPdate the player rectangles position, with its modified velocity
 	c->x += c->vx * fElapsedTime;
 	c->y += c->vy * fElapsedTime;
+	
+
 }

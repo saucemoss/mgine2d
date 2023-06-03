@@ -38,13 +38,10 @@ void Game::Tick()
 	float dt = GetFrameTime();
 	ScreensManager::Update(dt);
 	
-
 	BeginTextureMode(frameBuffer);
-	ClearBackground(DARKBLUE);
-
 	ScreensManager::Draw();
 	EndTextureMode();
-
+	ClearBackground(BLACK);
 	BeginDrawing();
 	// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
 	DrawTexturePro(frameBuffer.texture,
@@ -52,6 +49,7 @@ void Game::Tick()
 		{ 0, 0, settings::screenWidth, settings::screenHeight },
 		{ 0, 0 }, 0, WHITE);
 	EndDrawing();
+	
 }
 
 
