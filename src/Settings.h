@@ -2,10 +2,7 @@
 #include <string>
 namespace settings
 {
-	
 	const int tileSize = 32;
-	const int ScreenScale = 2;
-	const int drawSize = tileSize * ScreenScale;
 	//constexpr int screenWidth = 800;
 	//constexpr int screenHeight = 600;
 	//constexpr int screenWidth = 1280;
@@ -18,10 +15,11 @@ namespace settings
 	constexpr int screenHeight = 1080;
 	constexpr int viewSizeWidth = 640;
 	constexpr int viewSizeHeight = 320;
-	const float zoom =  (float)screenWidth / (float)viewSizeWidth / (float) ScreenScale * 1.00f;
+	const float zoom =  (float)screenWidth / (float)viewSizeWidth * 1.00f;
 	constexpr int fps = 60;
 	const std::string windowTitle = "Test";
-	constexpr int PhysicsWorldScale = tileSize / ScreenScale;
-	const int PhysicsTileUnit = tileSize / PhysicsWorldScale;
+
+	//Box2d settings
+	const float PPM = 16;
 
 }

@@ -1,9 +1,10 @@
 #include "AnimatedDecor.h"
-#include "GameScreen.h"
 
-AnimatedDecor::AnimatedDecor(int tile)
+
+AnimatedDecor::AnimatedDecor(Rectangle rect, int tile)
 	:
-	m_tile(tile)
+	m_tile(tile),
+	m_rectangle(rect)
 {
 	InitAnimations();
 	EnitityManager::Add(this);
@@ -40,8 +41,8 @@ void AnimatedDecor::InitAnimations()
 
 void AnimatedDecor::Draw()
 {
-	auto spritePosX = pos.x;
-	auto spritePosY = pos.y;
+	auto spritePosX = m_rectangle.x;
+	auto spritePosY = m_rectangle.y;
 
 	Rectangle cframe = m_is_right ? CurrentFrame() : Rectangle{ CurrentFrame().x,
 																	CurrentFrame().y,
@@ -51,7 +52,7 @@ void AnimatedDecor::Draw()
 	
 	DrawTexturePro(*sprite,
 		cframe,
-		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
+		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
 		{ 0,0 },
 		0.0f,
 		WHITE);
@@ -72,8 +73,8 @@ void AnimatedDecor::Update(float dt)
 	SwitchFrames(dt);
 
 
-		auto spritePosX = pos.x;
-		auto spritePosY = pos.y;
+		auto spritePosX = m_rectangle.x;
+		auto spritePosY = m_rectangle.y;
 
 		Rectangle cframe = m_is_right ? CurrentFrame() : Rectangle{ CurrentFrame().x,
 																		CurrentFrame().y,
@@ -82,7 +83,7 @@ void AnimatedDecor::Update(float dt)
 		BeginTextureMode(RenderShaderTexture);
 		DrawTexturePro(*sprite,
 			cframe,
-			Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
+			Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
 			{ 0,0 },
 			0.0f,
 			WHITE);

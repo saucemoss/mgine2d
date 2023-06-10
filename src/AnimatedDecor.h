@@ -5,7 +5,7 @@
 class AnimatedDecor : public Animated, public Entity
 {
 public:
-	AnimatedDecor(int tile);
+	AnimatedDecor(Rectangle rect, int tile);
 	~AnimatedDecor();
 	// Inherited via Animated
 	virtual void InitAnimations() override;
@@ -17,6 +17,7 @@ private:
 	std::string m_texture_name;
 	bool m_is_right = true;
 	int m_tile;
+	Rectangle m_rectangle;
 
 	//shader test
 	Shader shdrOutline;

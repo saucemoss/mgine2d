@@ -1,7 +1,8 @@
 #pragma once
-
+#include <box2d.h>
 #include "LDtkLoader/Project.hpp"
 #include "LDtkLoader/World.hpp"
+#include "Collidable.h"
 #include "SolidTile.h"
 #include <raylib.h>
 #include "LevelPortal.h"
@@ -72,6 +73,7 @@ public:
     std::vector<LightInfo> m_lights;
     std::vector<Rectangle*> m_light_walls;
     float m_darkness_strength;
+    b2Vec2 gravity = b2Vec2(0.0f, 80.0f);
   
     //Textures definition
     //static background
@@ -93,8 +95,18 @@ public:
     
 
     //Object containers
-    std::vector< std::unique_ptr<SolidTile>> solid_tiles;
+    std::vector<std::unique_ptr<Collidable>> solid_tiles;
     std::vector<std::unique_ptr<Entity>> level_entities_safe;
-    std::vector<LevelPortal*> level_portals;
 
+    //Box2d
+    static b2World* world;
+
+};
+
+class ContactListener : public b2ContactListener
+{
+private:
+    void BeginContact(b2Contact* contact);
+    void EndContact(b2Contact* contact);
+    
 };

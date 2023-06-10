@@ -17,21 +17,15 @@ public:
 
     ~ElevatorCallSwitch();
     ECallSwitchState state;
-    Rectangle sensor;
     // Inherited via Entity
     virtual void Update(float dt) override;
-
+    void CheckPlayerInSensor();
     bool ElevatorAtSwitch();
 
     void CallElevator();
 
     // Inherited via Entity
     virtual void Draw() override;
-
-
-    // Inherited via Collidable
-    virtual void DrawCollider() override;
-
 
     // Inherited via Animated
     virtual void InitAnimations() override;

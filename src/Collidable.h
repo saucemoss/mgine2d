@@ -6,8 +6,15 @@
 #include <array>
 #include <memory>
 #include <raylib.h>
+#include <box2d.h>
+#include "Settings.h"
+#include <iostream>
+#include <b2_settings.h>
+
+class Collidable;
 
 enum ColliderTag {
+	UNASSIGNED,
 	SOLID,
 	PLAYER,
 	LEVEL_PORTAL,
@@ -16,94 +23,113 @@ enum ColliderTag {
 	M_BLOCK, M_BLOCK_TOP
 };
 
-class Collidable;
-class CollisionElement;
-
-class CollisionManager
-{
-public:
-	static std::vector<Collidable*> colliders;
-	static void DrawColliders();
-	static void Add(Collidable*);
-	static void Remove(Collidable*);
-	static bool PointInRect(const Vector2& point);
-	static void ResolveCollisions(Collidable* c, float fElapsedTime);
-	static bool RectVsRect(const Rectangle* r1, const Rectangle* r2);
-	static bool RayVsRect(const Vector2& ray_origin, const Vector2& ray_dir, const Rectangle* target, Vector2& contact_point, Vector2& contact_normal, float& t_hit_near);
-	static bool DynamicRectVsRect(const Collidable* r_dynamic, const float fTimeStep, const Rectangle& r_static,
-		Vector2& contact_point, Vector2& contact_normal, float& contact_time);
-	static bool ResolveDynamicRectVsRect(Collidable* r_dynamic, const float fTimeStep, Rectangle* r_static);
-	static bool RaycastPro(const Vector2& ray_origin, const Vector2& ray_dir, Vector2& contact_point, Vector2& contact_normal, float& t_hit_near);
-	static bool Raycast(const Vector2& ray_origin, const Vector2& ray_dir);
-	static ColliderTag GetCollisionTags(Rectangle& r);
-	static Collidable* GetCollisionObject(Rectangle& r);
-	static std::vector<Collidable*> GetCollisionObjects(Rectangle& r);
-	static bool RectSensor(Rectangle& r);
-	static bool IsCollisionWith(ColliderTag m_colliderTag, Rectangle& r);
-
-	bool verlapLeft;
-	bool overlapRight;
-	bool overlapTop;
-	bool overlapBottom;
-};
 
 
 class Collidable
 {
 public:
-	Collidable()
+	Collidable(Rectangle rectangle, b2BodyType type)
 	{
-		CollisionManager::Add(this);
+		m_box.SetAsBox(float(rectangle.width / 2.0f / settings::PPM),
+			float(rectangle.height / 2.0f / settings::PPM));
+		m_bodyDef.fixedRotation = true;
+		m_bodyDef.position.Set(	(rectangle.x + rectangle.width / 2) / settings::PPM, 
+								(rectangle.y + rectangle.height / 2) / settings::PPM);
+
+		m_bodyDef.type = type;
+
+		m_bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
+		m_body = world->CreateBody(&m_bodyDef);
+		m_fixtureDef.friction = 1.0f;
+		switch (type)
+		{
+		case b2_dynamicBody:
+			m_fixtureDef.shape = &m_box;
+			m_fixture = m_body->CreateFixture(&m_box, 1.0f);
+			break;
+		case b2_kinematicBody:
+
+			m_fixture = m_body->CreateFixture(&m_box, 1.0f);
+			break;
+		case b2_staticBody:
+			
+			m_fixture = m_body->CreateFixture(&m_box, 0.0f);
+			break;
+		}
+
+		m_rectangle = rectangle;
+
 	}
+
 	~Collidable()
 	{
-		CollisionManager::Remove(this);
-		elements.clear();
+
 	}
 
-	ColliderTag m_colliderTag;
-	std::array<Rectangle*, 4> contact;
-	Rectangle rectangle;
-	std::vector<std::unique_ptr<CollisionElement>> elements;
+	b2Body* m_body = nullptr;
+	b2Fixture* m_fixture = nullptr;
+	ColliderTag m_colliderTag = UNASSIGNED;
+	b2FixtureDef m_fixtureDef;
+	b2BodyDef m_bodyDef;
+	b2PolygonShape m_box;
+	static b2World* world;
+	
 
-	bool colliding = false;;
-	float x, y;
-	float w, h;
-	float vx, vy;
-	float normalx, normaly;
-	Vector2 normals;
-	Vector2 contactPoint;
-	float contactTime;
-
-	virtual void DrawCollider() = 0;
-
-	void DisableCollider()
+	void RecreateBody()
 	{
-		rectangle = { 0,0,0,0 };//disable collider, sensor only
-		//elements.clear(); // not ideal - can't cascade to disable collision elements
+		if (m_body != nullptr)
+		{
+			m_body = world->CreateBody(&m_bodyDef);
+			m_fixture = m_body->CreateFixture(&m_box, 1.0f);
+		}
 	}
-	void AddColliderElement(Rectangle* rect, ColliderTag tag)
-	{
-		elements.push_back(std::make_unique<CollisionElement>(rect, tag));
-	}
-};
 
-class CollisionElement : public Collidable
-{
-public:
-	void DisableCollider()
+	void DrawCollider()
 	{
-		rectangle = { 0,0,0,0 };
+
+		m_rectangle =
+		{
+			pos().x - m_rectangle.width / 2,
+			pos().y - m_rectangle.height / 2,
+			m_rectangle.width,
+			m_rectangle.height
+		};
+		DrawRectangleLinesEx(m_rectangle, 1, RED);
 	};
-	CollisionElement(Rectangle* rect, ColliderTag tag)
-	{
-		rectangle = *rect;
-		m_colliderTag = tag;
-	}
 
-	// Inherited via Collidable
-	virtual void DrawCollider() override
+	Rectangle m_rectangle = { 0,0,0,0 };
+
+	Vector2 pos()
+	{ 
+		if (m_body != nullptr)
+		{
+			return {
+				m_body->GetPosition().x * settings::PPM,
+				m_body->GetPosition().y * settings::PPM
+			};
+		}
+		else
+		{
+			return { 0,0 };
+		}
+	};
+
+	Vector2 center_pos()
 	{
-		DrawRectangleLinesEx(rectangle, 1, RED);
-	}
+		if (m_body != nullptr)
+		{
+			return {
+				pos().x - m_rectangle.width / 2,
+				pos().y - m_rectangle.height / 2,
+			};
+		}
+		else
+		{
+			return { 0,0 };
+		}
+	};
+
+private:
+	Collidable();
 };
+

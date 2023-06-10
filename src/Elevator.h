@@ -33,22 +33,17 @@ public:
     const ldtk::Entity& m_ldtk_elevator;
     void ResetY(int next_level);
 
-    void MoveUp(int speed);
+    void MoveUp(float speed);
 
-    void MoveDown(int speed);
+    void MoveDown(float speed);
 
-    void MoveToSwitch(int y_in);
+    void MoveToSwitch(float y_in);
 
     // Inherited via Entity
     virtual void Update(float dt) override;
 
     // Inherited via Entity
     virtual void Draw() override;
-
-
-    // Inherited via Collidable
-    virtual void DrawCollider() override;
-
 
     // Inherited via Animated
     virtual void InitAnimations() override;

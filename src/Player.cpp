@@ -8,6 +8,7 @@
 #include "SolidTile.h"
 #include "raymath.h"
 #include <algorithm>
+#include "LevelManager.h"
 
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION            330
@@ -15,29 +16,33 @@
 #define GLSL_VERSION            100
 #endif
 
-Player::Player()
+struct FixtureUserData
 {
+	std::string name;
+};
 
-	rectangle = { 150,500,18,56 };
-	x = rectangle.x;
-	y = rectangle.y;
-	w = rectangle.width;
-	h = rectangle.height;
-	
+Player::Player()
+	:Collidable({150,250,12,20}, b2_dynamicBody)
+{
+	NewBody();
 	InitAnimations();
 	state = PlayerState::Idle;
 	m_colliderTag = PLAYER;
-	feetSensor = Rectangle{ x,y + h - 4, 18, 8 };
-	//EnitityManager::Add(this);
-	CollisionManager::Add(this);
-	std::cout << "PLAYER CREATED " << std::endl;
-	std::cout << "entity list size " + std::to_string(EnitityManager::EntityList.size()) << std::endl;
+
 
 	// Add mappings for debug purposes
 	StatesStrMap[PlayerState::Idle] = "Idle";
 	StatesStrMap[PlayerState::Running] = "Running";
 	StatesStrMap[PlayerState::Jumping] = "Jumping";
 	StatesStrMap[PlayerState::Falling] = "Falling";
+	ColStrMap[ColliderTag::DOOR] = "DOOR";
+	ColStrMap[ColliderTag::ELEVATOR] = "ELEVATOR";
+	ColStrMap[ColliderTag::ELEVATOR_CALL_SW] = "ELEVATOR_CALL_SW";
+	ColStrMap[ColliderTag::LEVEL_PORTAL] = "LEVEL_PORTAL";
+	ColStrMap[ColliderTag::M_BLOCK] = "M_BLOCK";
+	ColStrMap[ColliderTag::PLAYER] = "PLAYER";
+	ColStrMap[ColliderTag::SOLID] = "SOLID";
+	ColStrMap[ColliderTag::UNASSIGNED] = "UNASSIGNED";
 
 
 	//Shader test
@@ -55,6 +60,47 @@ Player::Player()
 
 }
 
+void Player::NewBody()
+{
+	//feet collider box
+	b2PolygonShape feet_sesnor_box;
+	feet_sesnor_box.SetAsBox(0.3f, 0.3f, b2Vec2(0, 0.80f), 0);
+	//fixture user data
+	FixtureUserData* feetFixtureName = new FixtureUserData;
+	feetFixtureName->name = "feet_sensor";
+	//fixture definition
+	b2FixtureDef feetDef;
+	feetDef.isSensor = true;
+	feetDef.shape = &feet_sesnor_box;
+	feetDef.userData.pointer = reinterpret_cast<uintptr_t>(feetFixtureName);
+	//create fixture using definition
+	m_feet_sensor = m_body->CreateFixture(&feetDef);
+
+	//left&right collider boxes
+	b2PolygonShape left_sesnor_box;
+	left_sesnor_box.SetAsBox(0.05f, 0.61f, b2Vec2(-0.4f, 0), 0);
+	b2PolygonShape right_sesnor_box;
+	right_sesnor_box.SetAsBox(0.05f, 0.61f, b2Vec2(0.4f, 0), 0);
+	//fixture user data
+	FixtureUserData* right_sesnorName = new FixtureUserData;
+	FixtureUserData* left_sesnorName = new FixtureUserData;
+	right_sesnorName->name = "right_sensor";
+	left_sesnorName->name = "left_sensor";
+	//fixture definition
+	b2FixtureDef left_sensor_def;
+	left_sensor_def.isSensor = true;
+	left_sensor_def.shape = &left_sesnor_box;
+	left_sensor_def.userData.pointer = reinterpret_cast<uintptr_t>(left_sesnorName);
+	b2FixtureDef right_sensor_def;
+	right_sensor_def.isSensor = true;
+	right_sensor_def.shape = &right_sesnor_box;
+	right_sensor_def.userData.pointer = reinterpret_cast<uintptr_t>(right_sesnorName);
+	//create fixture using definition
+	m_left_sensor = m_body->CreateFixture(&left_sensor_def);
+	m_right_sensor = m_body->CreateFixture(&right_sensor_def);
+	m_body->SetLinearDamping(linear_dumping);
+}
+
 Player::~Player()
 {
 	EnitityManager::Remove(this);
@@ -68,9 +114,33 @@ void Player::Update(float dt)
 	// Swtich animation frames for current anim
 	SwitchFrames(dt);
 
-	// Update player in one possible state
-	is_touching_floor = CollisionManager::RectSensor(feetSensor);
+	LevelPortalCheck();
 
+	CheckTouchGround();
+
+	CheckWallTouch();
+
+	if (GameScreen::debug)
+	{
+		contact_debug_str = "";
+		if (m_body->GetContactList() != nullptr)
+		{
+			auto con = m_body->GetContactList()->contact;
+			while (con != nullptr)
+			{
+				auto obj1 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
+				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
+				contact_debug_str += ColStrMap[obj1->m_colliderTag];
+				contact_debug_str += ", ";
+				contact_debug_str += ColStrMap[obj2->m_colliderTag];
+				contact_debug_str += "\n";
+				con = con->GetNext();
+			}
+		}
+	}
+
+
+	// Update player in one possible state
 	switch (state)
 	{
 	case PlayerState::Idle:
@@ -86,130 +156,179 @@ void Player::Update(float dt)
 		UpdateFallingState(dt);
 		break;
 	}
-
-	// Apply gravity, friction, acceleration
-	ApplyForces(dt);
-
-	// Check if level portal entered
-	LevelPortalCheck();
-
-	// Check moving blocks
-	MovingBlockCheck(dt);
-
-	// Resolve collisions
-	CollisionManager::ResolveCollisions(this, dt);
-
-	// Sync colliders and pos
-	SyncColliders();
 }
 
 void Player::LevelPortalCheck()
 {
-	Rectangle r = { x - 1,y,34,32 };  
-	std::vector<Collidable*> collisions = CollisionManager::GetCollisionObjects(r);
-
-	for (Collidable* c : collisions)
+	if (m_body->GetContactList() != nullptr)
 	{
-		if (c->m_colliderTag == LEVEL_PORTAL)
+		auto con = m_body->GetContactList()->contact;
+		while (con != nullptr)
 		{
-			const LevelPortal& lpptr = static_cast<LevelPortal&>(*c);
-			if (lpptr.is_active)
+			auto obj1 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
+			auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
+			if (obj1 != nullptr && obj1->m_colliderTag == LEVEL_PORTAL && con->IsTouching())
 			{
-				GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
-				const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(lpptr.m_iid_reference);
-				Vector2 newPos{ (connected_portal.getPosition().x) * settings::ScreenScale,
-								(connected_portal.getPosition().y) * settings::ScreenScale };
-				GameScreen::camera.target = newPos;
-				TransformPos(newPos);
+				std::cout << "test" << std::endl;
+				const LevelPortal& lpptr = static_cast<LevelPortal&>(*obj1);
+				auto ref = lpptr.m_iid_reference;
+				if (lpptr.is_active)
+				{
+					GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
+					const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(ref);
+					Vector2 newPos{ (connected_portal.getPosition().x ) ,
+									(connected_portal.getPosition().y ) };
+					GameScreen::camera.target = newPos;
+					m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
+					break;
+				}
 			}
+			if (obj2 != nullptr && obj2->m_colliderTag == LEVEL_PORTAL && con->IsTouching())
+			{
+				std::cout << "test" << std::endl;
+				const LevelPortal& lpptr = static_cast<LevelPortal&>(*obj2);
+				auto ref = lpptr.m_iid_reference;
+				if (lpptr.is_active)
+				{
+					GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
+					const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(ref);
+					Vector2 newPos{ (connected_portal.getPosition().x) ,
+									(connected_portal.getPosition().y) };
+					GameScreen::camera.target = newPos;
+					m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
+					break;
+				}
+			}
+			con = con->GetNext();
 		}
 	}
 }
 
-void Player::MovingBlockCheck(float dt)
+void Player::CheckTouchGround()
 {
-	if (CollisionManager::IsCollisionWith(M_BLOCK, feetSensor))
+	is_touching_floor = false;
+	if (m_body->GetContactList() != nullptr)
 	{
-		auto collisions = CollisionManager::GetCollisionObjects(feetSensor);
-		for (auto& c : collisions)
+		auto con = m_body->GetContactList()->contact;
+		while (con != nullptr)
 		{
-			if (c->m_colliderTag == M_BLOCK)
+			auto obj1 = reinterpret_cast<FixtureUserData*>(con->GetFixtureA()->GetUserData().pointer);
+			auto obj2 = reinterpret_cast<FixtureUserData*>(con->GetFixtureB()->GetUserData().pointer);
+			if (obj1 != nullptr && obj1->name == "feet_sensor" && con->IsTouching())
 			{
-				x += c->vx * dt;
-				y += c->vy * dt;
+				is_touching_floor = true;
 			}
+			if (obj2 != nullptr && obj2->name == "feet_sensor" && con->IsTouching())
+			{
+				is_touching_floor = true;
+			}
+			con = con->GetNext();
 		}
-
 	}
 }
 
-void Player::SyncColliders()
+void Player::CheckWallTouch()
 {
-	rectangle.x = x;
-	rectangle.y = y;
-	feetSensor.x = x;
-	feetSensor.y = y + h - 4;
-	pos.x = x;
-	pos.y = y;
+	//this seems hacky and tragic honestly
+	left_wall_touch = false;
+	right_wall_touch = false;
+
+	if (m_body->GetContactList() != nullptr)
+	{
+		auto con = m_body->GetContactList()->contact;
+		while (con != nullptr)
+		{
+			auto obj1 = reinterpret_cast<FixtureUserData*>(con->GetFixtureA()->GetUserData().pointer);
+			if (obj1 != nullptr && obj1->name == "left_sensor" && con->IsTouching())
+			{
+				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
+				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
+				{
+					left_wall_touch = true;
+				}	
+			}
+			if (obj1 != nullptr && obj1->name == "right_sensor" && con->IsTouching())
+			{
+				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
+				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
+				{
+					right_wall_touch = true;
+				}
+			}
+			obj1 = reinterpret_cast<FixtureUserData*>(con->GetFixtureB()->GetUserData().pointer);
+			if (obj1 != nullptr && obj1->name == "left_sensor" && con->IsTouching())
+			{
+				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
+				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
+				{
+					left_wall_touch = true;
+				}
+			}
+			if (obj1 != nullptr && obj1->name == "right_sensor" && con->IsTouching())
+			{
+				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
+				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
+				{
+					right_wall_touch = true;
+				}
+			}
+
+			con = con->GetNext();
+		}
+	}
+}
+
+void Player::set_velocity_x(float vx)
+{
+
+	if (vx > 0 && right_wall_touch)
+	{
+		vx = 0.0f;
+	}
+	if (vx < 0 && left_wall_touch)
+	{
+		vx = 0.0f;
+	}
+
+	m_body->SetLinearVelocity({
+		vx,
+		m_body->GetLinearVelocity().y,
+		});
+}
+
+void Player::set_velocity_y(float vy)
+{
+	m_body->SetLinearVelocity({
+		m_body->GetLinearVelocity().x,
+		vy,
+		});
+}
+
+void Player::set_velocity_xy(float vx, float vy)
+{
+	m_body->SetLinearVelocity({ vx, vy });
 }
 
 void Player::Draw()
 {
-
-	auto spritePosX = x - 22;
-	auto spritePosY = y - 8;
-
 
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
 																	CurrentFrame().y,
 																	CurrentFrame().width * -1,
 																	CurrentFrame().height};
 	
+	auto spritePosX = center_pos().x - 10;
+	auto spritePosY = center_pos().y - 12;
 
 	//BeginShaderMode(shdrOutline);
 	DrawTexturePro(*sprite,
 		cframe,
-		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
+		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize},
 		{ 0,0 },
 		0.0f,
 		WHITE);
 
 	//EndShaderMode();
-}
-
-void Player::DrawCollider()
-{
-	if (colliding) 
-	{
-		DrawRectangleLinesEx(rectangle, 1, RED);
-		
-	}
-	else 
-	{
-		DrawRectangleLinesEx(rectangle, 1, GREEN);
-		
-	}
-
-	if (CollisionManager::RectSensor(feetSensor))
-	{
-		DrawRectangleLinesEx(feetSensor, 1, RED);
-	}
-	else
-	{
-		DrawRectangleLinesEx(feetSensor, 1, GREEN);
-	}
-
-	//DrawText(collisionRecText.c_str(), 5, 80, 20, BLACK);
-	//DrawText(("csize: " + std::to_string(CollisionManager::colliders.size())).c_str(), 5, 100, 20, BLACK);
-
-	//DrawText(("ny: " + std::to_string(normals.y)).c_str(), 5, 160, 20, BLACK);
-	//DrawText(std::to_string(colliding).c_str(), 5, 180, 20, BLACK);
-	//DrawText(("time: " + std::to_string(contactTime)).c_str(), 5, 200, 20, BLACK);
-	//Vector2 raydir = GetScreenToWorld2D({ float(GetMousePosition().x),float(GetMousePosition().y) }, GameScreen::camera);
-	
-	//DrawCircle(contactPoint.x, contactPoint.y, 5, GREEN);
-	//DrawLine(contactPoint.x, contactPoint.y, contactPoint.x + normals.x * 10, contactPoint.y+normals.y * 10, YELLOW);
-	
 }
 
 void Player::InitAnimations()
@@ -219,71 +338,11 @@ void Player::InitAnimations()
 	SetAnimation("P_IDLE");
 }
 
-void Player::ApplyForces(float dt)
-{
-	// Apply gravity
-	if (!CollisionManager::IsCollisionWith(M_BLOCK_TOP, feetSensor))
-	{
-		vy = vy + gravity;
-	}
-	
-	//Apply friction
-	if (vx > 0.0f)
-	{
-		vx = std::max(0.0f, vx - friction * dt);
-	}
-	else if (vx < 0.0f)
-	{
-		vx = std::min(0.0f, vx + friction * dt);
-	}
-	if (vy > 0.0f)
-	{
-		vy = std::max(0.0f, vy - friction * dt);
-	}
-	else if (vy < 0.0f)
-	{
-		vy = std::min(0.0f, vy + friction * dt);
-	}
-
-	// Cap falling velocity
-	if (vy > 800.0f)
-	{
-		vy = 800.0f;
-	}
-
-	// Apply acceleration
-	if (vx == 0.0f && IsKeyDown(KEY_LEFT))
-	{
-		vx = -speed / 2;
-	}
-	if (vx == 0.0f && IsKeyDown(KEY_RIGHT))
-	{
-		vx = speed / 2;
-	}
-	if (vx > 0.0f && IsKeyDown(KEY_RIGHT))
-	{
-		vx += acceleration * dt;
-
-	}
-	if (vx < 0.0f && IsKeyDown(KEY_LEFT))
-	{
-		vx -= acceleration * dt;
-
-	}
-}
-
-void Player::TransformPos(Vector2 pos_in)
-{
-	x = pos_in.x;
-	y = pos_in.y;
-	SyncColliders();
-}
-
 void Player::UpdateIdleState(float dt)
 {
 	if (IsKeyPressed(KEY_UP) && is_touching_floor)
 	{
-		vy = -jump_force;
+		set_velocity_y(-jump_force);
 		state = PlayerState::Jumping;
 		SetAnimation("P_JUMP");
 	}
@@ -293,57 +352,60 @@ void Player::UpdateIdleState(float dt)
 		state = PlayerState::Running;
 	}
 
-	if (vy >= 0 && !is_touching_floor)
+	if (m_body->GetLinearVelocity().y >= 0 && !is_touching_floor)
 	{
 		state = PlayerState::Falling;
 		SetAnimation("P_FALL");
 	}
+
 }
 
 void Player::UpdateRunningState(float dt)
 {
 	if (IsKeyPressed(KEY_UP) && (is_touching_floor || coyote_time_counter > 0))
 	{
-		vy = -jump_force;
+		set_velocity_y(-jump_force);
 		state = PlayerState::Jumping;
 		SetAnimation("P_JUMP");
 	}
 	else if (!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT))
 	{
 		state = PlayerState::Idle;
-		vx = 0;
+		set_velocity_x(0.0f);
 		SetAnimation("P_IDLE");
 	}
 	else if (IsKeyDown(KEY_LEFT))
 	{
 		state = PlayerState::Running;
-		vx = -speed;
+		set_velocity_x(-speed);
 		looking_right = false;
 	}
 	else if (IsKeyDown(KEY_RIGHT))
 	{
 		state = PlayerState::Running;
-		vx = speed;
+		set_velocity_x(speed);
 		looking_right = true;
 	}
 
-	if (vy >= 0 && !is_touching_floor)
+
+	if (m_body->GetLinearVelocity().y >= 0 && !is_touching_floor)
 	{
 		state = PlayerState::Falling;
 		SetAnimation("P_FALL");
 	}
+
 }
 
 void Player::UpdateJumpingState(float dt)
 {
 	
 	coyote_time_counter = 0;
-	if (vy < 0.0f && IsKeyDown(KEY_UP))
+	if (m_body->GetLinearVelocity().y < 0.0f && IsKeyDown(KEY_UP))
 	{
-		vy -= acceleration * 4 * dt;
+		set_velocity_y(m_body->GetLinearVelocity().y - jump_add);
 	}
 
-	if (vy < 0.0f)
+	if (m_body->GetLinearVelocity().y < 0.0f)
 	{
 		if (AnimationEnded())
 		{
@@ -352,7 +414,7 @@ void Player::UpdateJumpingState(float dt)
 	}
 
 
-	else if (vy >= 0.0f)
+	else if (m_body->GetLinearVelocity().y >= 0.0f)
 	{
 		state = PlayerState::Falling;
 		SetAnimation("P_FALL");
@@ -361,12 +423,12 @@ void Player::UpdateJumpingState(float dt)
 	
 	if (IsKeyDown(KEY_LEFT))
 	{
-		vx = -speed;
+		set_velocity_x(-speed);
 		looking_right = false;
 	}
 	if (IsKeyDown(KEY_RIGHT))
 	{
-		vx = speed;
+		set_velocity_x(speed);
 		looking_right = true;
 	}
 }
@@ -396,12 +458,12 @@ void Player::UpdateFallingState(float dt)
 	{
 		coyote_time_counter = 0.0f;
 		jump_buffer_counter = 0.0f;
-		vy = -jump_force;
+		set_velocity_y(-jump_force);
 		state = PlayerState::Jumping;
 		PlayOnce("P_JUMP");
 	}
 
-	if (is_touching_floor && vy > 500)
+	if (is_touching_floor && m_body->GetLinearVelocity().y > m_ground_slam_vel)
 	{
 		PlayOnceUninterupt("P_GROUND");
 	}
@@ -415,12 +477,12 @@ void Player::UpdateFallingState(float dt)
 	}
 	else if (IsKeyDown(KEY_LEFT))
 	{
-		vx = -speed;
+		set_velocity_x(-speed);
 		looking_right = false;
 	}
 	else if (IsKeyDown(KEY_RIGHT))
 	{
-		vx = speed;
+		set_velocity_x(speed);
 		looking_right = true;
 	}
 

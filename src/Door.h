@@ -23,18 +23,14 @@ public:
     bool m_is_right = true;
     bool m_is_active = true;
     bool player_in_sensor = false;
-    Rectangle sensor;
+    b2Fixture* sensor;
+    void CheckPlayerInSensor();
+
     // Inherited via Entity
     virtual void Update(float dt) override;
 
-
     // Inherited via Entity
     virtual void Draw() override;
-
-
-    // Inherited via Collidable
-    virtual void DrawCollider() override;
-
 
     // Inherited via Animated
     virtual void InitAnimations() override;

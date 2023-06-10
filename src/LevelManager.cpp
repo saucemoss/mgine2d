@@ -1,4 +1,5 @@
 #include "LevelManager.h"
+#include "Collidable.h"
 #include "Door.h"
 #include <raymath.h>
 #include "SolidTile.h"
@@ -15,6 +16,9 @@
 #include <rlgl.h>
 #include "MovingBlock.h"
 
+b2World* LevelManager::world = nullptr;
+b2World* Collidable::world = nullptr;
+ContactListener listener;
 
 // Move a light and mark it as dirty so that we update it's mask next frame
 void LevelManager::MoveLight(LightInfo& light, float x, float y)
@@ -24,8 +28,8 @@ void LevelManager::MoveLight(LightInfo& light, float x, float y)
 	light.position.y = y;
 
 	// update the cached bounds
-	light.bounds.x = x - light.outerRadius;
-	light.bounds.y = y - light.outerRadius;
+	light.bounds.x = x - light.outerRadius ;
+	light.bounds.y = y - light.outerRadius ;
 
 }
 
@@ -58,16 +62,15 @@ void LevelManager::DrawLightMask(LightInfo& light)
 	BeginTextureMode(light.mask);
 
 	ClearBackground(WHITE);
-
 	// Force the blend mode to only set the alpha of the destination
 	rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
 	rlSetBlendMode(BLEND_CUSTOM);
 
 	// If we are valid, then draw the light radius to the alpha mask
-	if (light.valid) DrawCircleGradient((int)light.position.x, (int)light.position.y, light.outerRadius, ColorAlpha(WHITE, 0), WHITE);
+	if (light.valid) DrawCircleGradient((int)light.position.x, (int)light.position.y, light.outerRadius, ColorAlpha(WHITE, 0), WHITE); 
 
 	rlDrawRenderBatchActive();
-
+	
 	// Cut out the shadows from the light radius by forcing the alpha to maximum
 	rlSetBlendMode(BLEND_ALPHA);
 	rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MAX);
@@ -83,7 +86,9 @@ void LevelManager::DrawLightMask(LightInfo& light)
 
 	// Go back to normal blend mode
 	rlSetBlendMode(BLEND_ALPHA);
-
+	
+	DrawCircleGradient((int)light.position.x, (int)light.position.y, light.outerRadius, ColorAlpha(WHITE,0), WHITE);
+	
 	EndTextureMode();
 }
 
@@ -141,14 +146,13 @@ bool LevelManager::UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light
 
 	return true;
 };
-
 // Setup lights
 void LevelManager::SetupLight(float x, float y, float radius)
 {
 	m_lights.push_back(LightInfo());
 	m_lights.back().active = true;
 	m_lights.back().valid = false;  // The light must prove it is valid
-	m_lights.back().mask = LoadRenderTexture(currentLdtkLevel->size.x * 2, currentLdtkLevel->size.y * 2);
+	m_lights.back().mask = LoadRenderTexture(currentLdtkLevel->size.x, currentLdtkLevel->size.y);
 	m_lights.back().outerRadius = radius;
 
 	m_lights.back().bounds.width = radius * 2;
@@ -164,10 +168,17 @@ void LevelManager::SetupBoxes()
 {
 	for (auto& s : solid_tiles)
 	{
-		m_light_walls.push_back(&s->rectangle);
+		m_light_walls.push_back(&s->m_rectangle);
+	}
+	for (auto& e : level_entities_safe)
+	{
+		Collidable* c = dynamic_cast<Collidable*>(e.get());
+		if (c != nullptr)
+		{
+			m_light_walls.push_back(&c->m_rectangle);
+		}
 	}
 }
-
 
 LevelManager::LevelManager()
 {
@@ -179,28 +190,11 @@ LevelManager::LevelManager()
 	laboratorySolidsSpriteAtlas = LoadTexture("res\\level\\lab2.png");
 	ldtkWorld = &ldtkProject->getWorld();
 	
+	world = new b2World(gravity);
+	Collidable::world = world;
 	LoadLevel("Level_0");
-	
-	//Level Portals
-	//level portals persist in world cause they connect levels, all other entities are unloaded upon new level entry
-	for (const ldtk::Level& l : ldtkWorld->allLevels())
-	{
-		for (auto&& e : l.getLayer("Entities").getEntitiesByName("LevelPortal_in"))
-		{ 
-			auto& entity = e.get();
-			Rectangle rect = { ((float)entity.getPosition().x - (float)entity.getSize().x / 2) * settings::ScreenScale,
-							   ((float)entity.getPosition().y - (float)entity.getSize().y / 2 ) * settings::ScreenScale,
-							   (float)entity.getSize().x * settings::ScreenScale,
-							   (float)entity.getSize().y * settings::ScreenScale };
+	m_darkness_strength = 0.9f;
 
-			std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
-			ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
-			
-			level_portals.emplace_back(new LevelPortal(rect, entity, l.name, target_lvl, portal_out));
-		}
-	}
-	m_darkness_strength = 0.20f;
-	
 }
 
 LevelManager::~LevelManager()
@@ -218,8 +212,19 @@ void LevelManager::LoadLevel(std::string level_name)
 	//Set to new current level
 	currentLdtkLevel = &ldtkWorld->getLevel(level_name);
 	levelSize = currentLdtkLevel->size;
-	//playier light
-	SetupLight(0, 0, 150);
+
+	if (world == nullptr)
+	{
+		world = new b2World(gravity);
+	}
+	Collidable::world = world;
+
+	if (GameScreen::player != nullptr)
+	{
+		GameScreen::player->RecreateBody();
+		GameScreen::player->NewBody();
+	}
+	SetupLight(0, 0, 100);
 	//Textures setup:
 	// 
 	//Background Texture
@@ -278,23 +283,21 @@ void LevelManager::LoadLevel(std::string level_name)
 
 				Vector2 target_pos = {
 					(float)tile.getPosition().x,
-					(float)tile.getPosition().y,
+					(float)tile.getPosition().y
 				};
 
 				//collision rectangles
 				if (layer.getName() == "LabSolids")
 				{
-					Rectangle rec = { (float)tile.getPosition().x * settings::ScreenScale,
-									 (float)tile.getPosition().y * settings::ScreenScale,
-									 settings::drawSize, settings::drawSize };
+					Rectangle rec = { tile.getPosition().x, tile.getPosition().y, tile_size, tile_size };
 					solid_tiles.push_back(std::make_unique<SolidTile>(rec));
 					DrawTextureRec(laboratorySolidsSpriteAtlas, source_rect, target_pos, WHITE);
 				}
 				if (layer.getName() == "Platforms")
 				{
-					Rectangle rec = { (float)tile.getPosition().x * settings::ScreenScale,
-									 (float)tile.getPosition().y * settings::ScreenScale,
-									 tile_size * settings::ScreenScale, tile_size * settings::ScreenScale};
+					Rectangle rec = {(float)tile.getPosition().x ,
+									 (float)tile.getPosition().y ,
+									 tile_size , tile_size };
 					solid_tiles.push_back(std::make_unique<SolidTile>(rec));
 					DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
 				}
@@ -334,10 +337,13 @@ void LevelManager::LoadLevel(std::string level_name)
 
 				if (tileset.getTileCustomData(tile.tileId) == "Animated")
 				{
-					level_entities_safe.push_back(std::make_unique<AnimatedDecor>(tile.tileId));
-					level_entities_safe.back().get()->SetPos({ 
-						(float)tile.getPosition().x* settings::ScreenScale,
-						(float)tile.getPosition().y* settings::ScreenScale, });
+					Rectangle r = {
+						target_pos.x,
+						target_pos.y,
+						tile_size ,
+						tile_size 
+					};
+					level_entities_safe.push_back(std::make_unique<AnimatedDecor>(r,tile.tileId));
 				}
 				else
 				{
@@ -384,16 +390,14 @@ void LevelManager::LoadLevel(std::string level_name)
 	EndTextureMode();
 	paralaxedBackgroundRenderedLevelTexture = paralaxBackgroundRenderTexture.texture;
 
-
+	
 	//Load entities
 	for (auto&& entity : currentLdtkLevel->getLayer("Entities").allEntities())
 	{
-		Rectangle rect = { (float)entity.getPosition().x * settings::ScreenScale,
-				  (float)entity.getPosition().y * settings::ScreenScale,
-				  (float)entity.getSize().x * settings::ScreenScale,
-				  (float)entity.getSize().y * settings::ScreenScale };
-		
-
+		Rectangle rect = {	(float)entity.getPosition().x,
+							(float)entity.getPosition().y,
+							(float)entity.getSize().x ,
+							(float)entity.getSize().y  };
 
 		if (entity.getName() == "Door")
 		{
@@ -426,22 +430,41 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "MovingBlock")
 		{
 			level_entities_safe.push_back(std::make_unique<MovingBlock>(rect, entity.getArrayField<ldtk::IntPoint>("Path")));
-			level_entities_safe.back().get()->m_ldtkID = entity.iid;
+		}
+		if (entity.getName() == "LevelPortal_in")
+		{
+			rect = {		(float)entity.getPosition().x - rect.width / 2,
+							(float)entity.getPosition().y - rect.height / 2,
+							(float)entity.getSize().x ,
+							(float)entity.getSize().y };
+			std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
+			ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
+			level_entities_safe.push_back(std::make_unique<LevelPortal>(rect, target_lvl, portal_out));
+			
 		}
 	}
-
+	
 	//Light walls
 	SetupBoxes();
 
 	std::cout << m_lights.size() << std::endl;
 	// Create a global light mask to hold all the blended m_lights
 	lightMask = LoadRenderTexture(
-		currentLdtkLevel->size.x * 2,
-		currentLdtkLevel->size.y * 2);
+		currentLdtkLevel->size.x,
+		currentLdtkLevel->size.y);
 }
 
 void LevelManager::UnloadLevel()
 {
+
+	if (world != nullptr)
+	{
+		// if we had an old world then delete it and recreate
+		// a new one for the new level
+		delete world;
+		world = nullptr;
+	}
+
 
 	UnloadTexture(laboratorySolidsRenderedLevelTexture);
 	UnloadTexture(paralaxedBackgroundRenderedLevelTexture);
@@ -449,8 +472,6 @@ void LevelManager::UnloadLevel()
 	UnloadTexture(decorationRenderedLevelTexture);
 	UnloadTexture(decorationSpriteAtlas);
 	UnloadTexture(paralaxedBackgroundSpriteAtlas);
-
-
 	UnloadRenderTexture(laboratorySolidsRenderTexture);
 	UnloadRenderTexture(decorationRenderTexture);
 	UnloadRenderTexture(baseBackgroundRenderTexture);
@@ -465,24 +486,33 @@ void LevelManager::UnloadLevel()
 	nextLight = 0;
 	level_entities_safe.clear();
 	solid_tiles.clear();
-
-
 }
 
 void LevelManager::Update(float dt)
 {
+
+	const float timeStep = dt;
+	const int32 velocityIterations = 6;
+	const int32 positionIterations = 2;
+	world->Step(timeStep, velocityIterations, positionIterations);
+
 	// Drag light 0
 
 	Vector2 mp = GetScreenToWorld2D(GetMousePosition(), GameScreen::camera);
 	Vector2 pp = GetScreenToWorld2D(GameScreen::player_focused_cam.target, GameScreen::player_focused_cam);
 
-	MoveLight(m_lights.at(0), GameScreen::player_focused_cam.target.x + 10, GameScreen::player_focused_cam.target.y + 24);
+	MoveLight(m_lights.at(0), GameScreen::player_focused_cam.target.x, GameScreen::player_focused_cam.target.y);
+
+	for (int i = 1; i < m_lights.size(); i++)
+	{
+		MoveLight(m_lights.at(i), m_lights.at(i).position.x, m_lights.at(i).position.y);
+	}
+
 
 	// Make a new light
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 	{
-		SetupLight(mp.x, mp.y, 400);
-		
+
 	}
 	
 	// Toggle debug info
@@ -514,8 +544,8 @@ void LevelManager::Update(float dt)
 		for (int i = 0; i < m_lights.size(); i++)
 		{
 			if (m_lights[i].active) DrawTextureRec(m_lights[i].mask.texture, { 0, 0,
-				(float)GameScreen::LevelMgr->currentLdtkLevel->size.x * 2,
-				-(float)GameScreen::LevelMgr->currentLdtkLevel->size.y * 2 }, Vector2Zero(), WHITE);
+				(float)GameScreen::LevelMgr->currentLdtkLevel->size.x ,
+				-(float)GameScreen::LevelMgr->currentLdtkLevel->size.y }, Vector2Zero(), WHITE);
 		}
 
 		rlDrawRenderBatchActive();
@@ -576,26 +606,60 @@ void LevelManager::Draw()
 	{
 		DrawTexturePro(baseBackgroundRenderedLevelTexture,
 			{ 0, 0, (float)baseBackgroundRenderedLevelTexture.width, (float)-baseBackgroundRenderedLevelTexture.height },
-			{ 0, 0, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale },
+			{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 			{ 0,0 }, 0, WHITE);
 	}
 
 	//Draw paralaxed background elements
 	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
 		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
-		{ parallaxed.x ,parallaxed.y, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale }, //dest
+		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
 		{ 0,0 }, 0, WHITE);
 
 	//Draw level solids
 	DrawTexturePro(laboratorySolidsRenderedLevelTexture,
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
-		{ 0, 0, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale }, 
+		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  }, 
 		{ 0,0 }, 0, WHITE);
 
 	//Draw decorations
 	DrawTexturePro(decorationRenderedLevelTexture,
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
-		{ 0, 0, (float)levelSize.x * settings::ScreenScale,(float)levelSize.y * settings::ScreenScale },
+		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 		{ 0,0 }, 0, WHITE);
-	
+
+}
+
+void ContactListener::BeginContact(b2Contact* contact)
+{
+	//auto bodyUserData1 = contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+	//auto c1 = reinterpret_cast<Collidable*>(bodyUserData1);
+	//auto bodyUserData2 = contact->GetFixtureB()->GetBody()->GetUserData().pointer;
+	//auto c2 = reinterpret_cast<Collidable*>(bodyUserData2);
+
+	//if (c2->m_colliderTag == PLAYER)
+	//{
+	//	auto player = static_cast<Player*>(c2);
+	//	if (c1->m_colliderTag == SOLID)
+	//	{
+	//		player->is_touching_floor = true;
+	//	}
+	//}
+}
+
+void ContactListener::EndContact(b2Contact* contact)
+{
+	//auto bodyUserData1 = contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+	//auto c1 = reinterpret_cast<Collidable*>(bodyUserData1);
+	//auto bodyUserData2 = contact->GetFixtureB()->GetBody()->GetUserData().pointer;
+	//auto c2 = reinterpret_cast<Collidable*>(bodyUserData2);
+
+	//if (c2->m_colliderTag == PLAYER)
+	//{
+	//	auto player = static_cast<Player*>(c2);
+	//	if (c1->m_colliderTag == SOLID)
+	//	{
+	//		player->is_touching_floor = false;
+	//	}
+	//}
 }

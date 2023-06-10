@@ -1,38 +1,79 @@
 #include "Door.h"
-
+struct FixtureUserData
+{
+	std::string name;
+};
 Door::Door(const Rectangle& rect, bool is_right)
 	:
+	Collidable(rect, b2_staticBody),
 	m_is_right(is_right)
 {
 	InitAnimations();
-	rectangle = rect;
-	x = rectangle.x;
-	y = rectangle.y;
-	w = rectangle.width;
-	h = rectangle.height;
-
-	rectangle.x += 15;
-	rectangle.width -= 30;
-	sensor = { x - 90,y,w + 180,h };
+	//sensor collider box
+	b2PolygonShape sensor_shape;
+	sensor_shape.SetAsBox(3.0f, 1.0f, b2Vec2(0.0f, 0.0f), 0);
+	//fixture user data
+	FixtureUserData* sensorFixtureName = new FixtureUserData;
+	sensorFixtureName->name = "door_sensor";
+	//fixture definition
+	b2FixtureDef sensorFixDef;
+	sensorFixDef.isSensor = true;
+	sensorFixDef.shape = &sensor_shape;
+	sensorFixDef.userData.pointer = reinterpret_cast<uintptr_t>(sensorFixtureName);
+	//create fixture using definition
+	sensor = m_body->CreateFixture(&sensorFixDef);
+	
 	m_colliderTag = DOOR;
 	state = DoorState::Closed;
 	EnitityManager::Add(this);
-	CollisionManager::Add(this);
+
 
 }
 
 Door::~Door()
 {
 	EnitityManager::Remove(this);
-	CollisionManager::Remove(this);
 
 }
 
 
+void Door::CheckPlayerInSensor()
+{
+	player_in_sensor = false;
+	if (m_body->GetContactList() != nullptr)
+	{
+		auto con = m_body->GetContactList()->contact;
+		while (con != nullptr)
+		{
+			auto obj1 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
+			auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
+			if (obj1 != nullptr && obj1->m_colliderTag == PLAYER && con->IsTouching())
+			{
+				player_in_sensor = true;
+			}
+			if (obj2 != nullptr && obj2->m_colliderTag == PLAYER && con->IsTouching())
+			{
+				player_in_sensor = true;
+			}
+			con = con->GetNext();
+		}
+	}
+
+}
+
 void Door::Update(float dt)
 {
 	
-	player_in_sensor = CollisionManager::IsCollisionWith(PLAYER, sensor);
+	CheckPlayerInSensor();
+
+	if (player_in_sensor)
+	{
+		m_fixture->SetSensor(true);
+	}
+	else
+	{
+		m_fixture->SetSensor(false);
+	}
 
 	switch (state)
 	{
@@ -61,7 +102,6 @@ void Door::Update(float dt)
 	case DoorState::Closing:
 		if (!player_in_sensor)
 		{
-			CollisionManager::Add(this);
 			if (AnimationEnded())
 			{
 				state = DoorState::Closed;
@@ -85,7 +125,6 @@ void Door::Update(float dt)
 		}
 		else
 		{
-			CollisionManager::Remove(this);
 			if (AnimationEnded())
 			{
 				state = DoorState::Open;
@@ -100,8 +139,8 @@ void Door::Update(float dt)
 
 void Door::Draw()
 {
-	auto spritePosX = x ;
-	auto spritePosY = y ;
+	auto spritePosX = center_pos().x;
+	auto spritePosY = center_pos().y;
 
 	Rectangle cframe = m_is_right ? CurrentFrame() : Rectangle{		CurrentFrame().x,
 																	CurrentFrame().y,
@@ -109,30 +148,10 @@ void Door::Draw()
 																	CurrentFrame().height };
 	DrawTexturePro(*sprite,
 		cframe,
-		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
+		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
 		{ 0,0 },
 		0.0f,
 		WHITE);
-}
-
-void Door::DrawCollider()
-{
-
-	DrawRectangleLinesEx(rectangle, 1, BLUE);
-	DrawRectangleLinesEx(sensor, 1, YELLOW);
-
-	std::map<DoorState, std::string> StatesStrMap{ 
-		{DoorState::Open,"Open"}, 
-		{DoorState::Closed,"Closed"},
-		{DoorState::Closing,"Closing"},
-		{DoorState::Opening,"Opening"}
-	};
-	std::string stateStr = "State: " + StatesStrMap[state];
-	DrawText(stateStr.c_str(), x, y - 50, 20, BLACK);
-	std::string animStr = "Anim: " + animations->m_CurrentActiveAnimation + " :: " +
-		std::to_string(animations->GetAnimation(animations->m_CurrentActiveAnimation)->GetCurrentFrameNum());
-	DrawText(animStr.c_str(), x, y - 70, 20, BLACK);
-	
 }
 
 void Door::InitAnimations()

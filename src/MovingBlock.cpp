@@ -5,17 +5,13 @@
 
 
 MovingBlock::MovingBlock(const Rectangle& rect, const ldtk::ArrayField<ldtk::IntPoint> path_points)
-	:m_path_points(path_points)
+	:
+	Collidable(rect, b2_kinematicBody),
+	m_path_points(path_points)
 {
 	InitAnimations();
-	rectangle = rect;
-	x = rectangle.x;
-	y = rectangle.y;
-	w = rectangle.width;
-	h = rectangle.height; 
+
 	m_colliderTag = M_BLOCK;
-	m_top_part = { x+10,y,w-20,20 };
-	AddColliderElement(&m_top_part, M_BLOCK_TOP);
 	EnitityManager::Add(this);
 	m_next_point = m_path_points.at(0).value();
 
@@ -28,12 +24,12 @@ MovingBlock::~MovingBlock()
 
 void MovingBlock::Draw()
 {
-	auto spritePosX = x;
-	auto spritePosY = y;
+	auto spritePosX = center_pos().x;
+	auto spritePosY = center_pos().y;
 
 	DrawTexturePro(*sprite,
 		CurrentFrame(),
-		Rectangle{ spritePosX,spritePosY,settings::drawSize,settings::drawSize },
+		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
 		{ 0,0 },
 		0.0f,
 		WHITE);
@@ -41,26 +37,29 @@ void MovingBlock::Draw()
 
 void MovingBlock::Update(float dt)
 {
-	speed = 35;
+	float speed = 2;
 	m_next_point = m_path_points.at(m_path_step_counter).value();
-	int px = m_next_point.x * settings::drawSize;
-	int py = m_next_point.y * settings::drawSize;
+	int x = center_pos().x;
+	int y = center_pos().y;
+	int px = m_next_point.x * settings::tileSize;
+	int py = m_next_point.y * settings::tileSize;
 
 	if (px > x)
 	{
-		vx += speed;
+		m_body->SetLinearVelocity({ speed, 0 });
+
 	}
 	if (px < x)
 	{
-		vx -= speed;
+		m_body->SetLinearVelocity({ -speed, 0 });
 	}
 	if (py > y)
 	{
-		vy += speed;
+		m_body->SetLinearVelocity({ 0, speed });
 	}
 	if (py < y)
 	{
-		vy -= speed;
+		m_body->SetLinearVelocity({ 0, -speed });
 	}
 
 
@@ -75,42 +74,15 @@ void MovingBlock::Update(float dt)
 			m_path_step_counter = 0;
 		}
 	}
-	//Apply friction
-	float friction = 1800;
-	if (vx > 0.0f)
-	{
-		vx = std::max(0.0f, vx - friction * dt);
-	}
-	else if (vx < 0.0f)
-	{
-		vx = std::min(0.0f, vx + friction * dt);
-	}
-	if (vy > 0.0f)
-	{
-		vy = std::max(0.0f, vy - friction * dt);
-	}
-	else if (vy < 0.0f)
-	{
-		vy = std::min(0.0f, vy + friction * dt);
-	}
 
-
-	x += vx * dt;
-	y += vy * dt;
-	rectangle.x = x;
-	rectangle.y = y;
-	m_top_part.x = x + 10;
-	m_top_part.y = y;
-	for (auto& e : elements)
+	m_rectangle =
 	{
-		e->rectangle.x = m_top_part.x;
-		e->rectangle.y = m_top_part.y;
-	}
-}
+		pos().x - m_rectangle.width / 2,
+		pos().y - m_rectangle.height / 2,
+		m_rectangle.width,
+		m_rectangle.height
+	};
 
-void MovingBlock::DrawCollider()
-{
-	DrawRectangleLinesEx(rectangle, 1, RED);
 }
 
 void MovingBlock::InitAnimations()
