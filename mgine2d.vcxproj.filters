@@ -114,8 +114,8 @@
     <ClCompile Include="src\MovingBlock.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Collidable.cpp">
-      <Filter>Pliki źródłowe\Systems\Physics</Filter>
+    <ClCompile Include="src\WoodCrate.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +177,12 @@
       <Filter>Pliki nagłówkowe\Systems\Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\MovingBlock.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ramp.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WoodCrate.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>

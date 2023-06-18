@@ -24,6 +24,10 @@ public:
 	void FreezeFrame(int frameNumber);
 	void SetToFrame(int frameNumber);
 	int GetCurrentFrameNum();
+	const Texture2D* GetTexture()
+	{
+		return m_texture;
+	}
 
 
 private:

@@ -154,7 +154,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AnimatedDecor.cpp" />
-    <ClCompile Include="src\Collidable.cpp" />
     <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Elevator.cpp" />
     <ClCompile Include="src\ElevatorCallSwitch.cpp" />
@@ -168,8 +167,10 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\TitleScreen.cpp" />
+    <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Ramp.h" />
     <ClInclude Include="src\MovingBlock.h" />
     <ClInclude Include="src\Collidable.h" />
     <ClInclude Include="src\ElevatorCallSwitch.h" />
@@ -190,6 +191,7 @@
     <ClInclude Include="src\Settings.h" />
     <ClInclude Include="src\TitleScreen.h" />
     <ClInclude Include="src\Util.h" />
+    <ClInclude Include="src\WoodCrate.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />

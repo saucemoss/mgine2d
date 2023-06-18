@@ -19,7 +19,6 @@ public:
     ECallSwitchState state;
     // Inherited via Entity
     virtual void Update(float dt) override;
-    void CheckPlayerInSensor();
     bool ElevatorAtSwitch();
 
     void CallElevator();

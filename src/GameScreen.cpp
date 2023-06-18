@@ -132,9 +132,9 @@ void GameScreen::Draw()
 	EnitityManager::Draw(0);	// Entities/Objects behind player
 	//TODO						// Entities Shaders?
 	player->Draw();				// Player		
-	EnitityManager::Draw(1);	// Entities/Objects in front of player
-	//TODO						// Paralaxed foreground Level layer		
+	EnitityManager::Draw(1);	// Entities/Objects in front of player	
 	LevelMgr->DrawSpotLights();	// Darkness and lights
+	LevelMgr->DrawForeGround();	// Paralaxed foreground Level layer
 	
 
 	//DEBUG:
@@ -161,25 +161,45 @@ void GameScreen::Draw()
 						pos.y * settings::PPM,
 						2,
 						PURPLE);
-
 			auto fixture = currentBody->GetFixtureList();
 			while (fixture != nullptr)
 			{
 				auto shape = fixture->GetShape();
 				// Note, right now supposing all shapes are polygons, use to determine shape->GetType();
 
-				auto polygonShape = (b2PolygonShape*)shape;
-				int vertexCount = 4; // since we're assuming they're squares
-				for (int j = 0; j < vertexCount; j++)
+				if (shape->GetType() == b2Shape::e_chain)
 				{
-					b2Vec2 vertexA = polygonShape->m_vertices[j];
+					auto chainShape = (b2ChainShape*)shape;
 
-					int jj = (((j + 1) < vertexCount) ? (j + 1) : 0); // Get next vertex or first to close the shape
-					b2Vec2 vertexB = polygonShape->m_vertices[jj];
+					int vertexCount = 4; // since we're assuming they're squares
+					for (int j = 0; j < vertexCount; j++)
+					{
+						b2Vec2 vertexA = chainShape->m_vertices[j];
 
-					DrawLineV({ (pos.x + vertexA.x) * settings::PPM, (pos.y + vertexA.y) * settings::PPM },
-						{ (pos.x + vertexB.x) * settings::PPM, (pos.y + vertexB.y) * settings::PPM },
-						GREEN); // Draw a line between two vertex positions
+						int jj = (((j + 1) < vertexCount) ? (j + 1) : 0); // Get next vertex or first to close the shape
+						b2Vec2 vertexB = chainShape->m_vertices[jj];
+
+						DrawLineV({ (pos.x + vertexA.x) * settings::PPM, (pos.y + vertexA.y) * settings::PPM },
+							{ (pos.x + vertexB.x) * settings::PPM, (pos.y + vertexB.y) * settings::PPM },
+							ORANGE); // Draw a line between two vertex positions
+					}
+				}
+				else
+				{
+					auto polygonShape = (b2PolygonShape*)shape;
+
+					int vertexCount = 4; // since we're assuming they're squares
+					for (int j = 0; j < vertexCount; j++)
+					{
+						b2Vec2 vertexA = polygonShape->m_vertices[j];
+
+						int jj = (((j + 1) < vertexCount) ? (j + 1) : 0); // Get next vertex or first to close the shape
+						b2Vec2 vertexB = polygonShape->m_vertices[jj];
+
+						DrawLineV({ (pos.x + vertexA.x) * settings::PPM, (pos.y + vertexA.y) * settings::PPM },
+							{ (pos.x + vertexB.x) * settings::PPM, (pos.y + vertexB.y) * settings::PPM },
+							GREEN); // Draw a line between two vertex positions
+					}
 				}
 
 				fixture = fixture->GetNext();
@@ -191,7 +211,7 @@ void GameScreen::Draw()
 
 	}
 
-	EndMode2D();				//END CAMERA MODE. UI:
+	EndMode2D();
 
 	//DEBUG:
 	if (debug)

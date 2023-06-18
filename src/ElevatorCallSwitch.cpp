@@ -4,13 +4,12 @@
 
 ElevatorCallSwitch::ElevatorCallSwitch(const Rectangle& rect, const ldtk::IID elevator_reference)
 	:
-	Collidable(rect, b2_kinematicBody),
+	Collidable(rect, b2_staticBody, ELEVATOR_CALL_SW),
 	m_elevator_reference(elevator_reference)
 {
 	m_fixture->SetSensor(true);
 	InitAnimations();
 
-	m_colliderTag = ELEVATOR_CALL_SW;
 	state = ECallSwitchState::IDLE;
 	EnitityManager::Add(this);
 }
@@ -23,7 +22,7 @@ ElevatorCallSwitch::~ElevatorCallSwitch()
 void ElevatorCallSwitch::Update(float dt)
 {
 	SwitchFrames(dt);
-	CheckPlayerInSensor();
+	player_in_sensor = LevelManager::CheckPlayerInSensor(*m_fixture);
 
 	switch (state)
 	{
@@ -50,30 +49,6 @@ void ElevatorCallSwitch::Update(float dt)
 
 }
 
-void ElevatorCallSwitch::CheckPlayerInSensor()
-{
-
-	player_in_sensor = false;
-	if (m_body->GetContactList() != nullptr)
-	{
-		auto con = m_body->GetContactList()->contact;
-		while (con != nullptr)
-		{
-			auto obj1 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
-			auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-			if (obj1 != nullptr && obj1->m_colliderTag == PLAYER && con->IsTouching())
-			{
-				player_in_sensor = true;
-			}
-			if (obj2 != nullptr && obj2->m_colliderTag == PLAYER && con->IsTouching())
-			{
-				player_in_sensor = true;
-			}
-			con = con->GetNext();
-		}
-	}
-	
-}
 
 bool ElevatorCallSwitch::ElevatorAtSwitch()
 {

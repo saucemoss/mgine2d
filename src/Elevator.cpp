@@ -1,15 +1,60 @@
 #include "Elevator.h"
 #include "GameScreen.h"
 
+
 Elevator::Elevator(const Rectangle& rect, ldtk::ArrayField<int> levels, const ldtk::Entity& ldtk_elevator)
 	:
-	Collidable(rect, b2_kinematicBody),
+	Collidable(rect, b2_kinematicBody, ELEVATOR),
 	m_ldtk_elevator(ldtk_elevator)
 {
 	InitAnimations();
 
+	m_fixture->SetSensor(true);
+	//walls:
+	//b2Vec2 vs[4];
+	//vs[0].Set(-1.0f, -1.0f);
+	//vs[1].Set(-1.0f, 1.0f);
+	//vs[2].Set(1.0f, 1.0f);
+	//vs[3].Set(1.0f, -1.0f);
+	//b2ChainShape chain;
+	//chain.CreateLoop(vs, 4);
+	////fixture user data
+	//FixtureUserData* elevator_walls = new FixtureUserData;
+	//elevator_walls->name = "elevator_walls";
+	////fixture definition
+	//b2FixtureDef walls_fix_def;
+	//walls_fix_def.shape = &chain;
+	//walls_fix_def.userData.pointer = reinterpret_cast<uintptr_t>(elevator_walls);
+	////create fixture using definition
+	//walls_fixture = m_body->CreateFixture(&walls_fix_def);
+
+	//floor&roof
+	b2PolygonShape floor_box;
+	floor_box.SetAsBox(1, 0.1f, b2Vec2(0, 1.1f), 0);
+	b2PolygonShape roof_box;
+	roof_box.SetAsBox(1, 0.1f, b2Vec2(0, -1.1f), 0);
+	//fixture user data
+	FixtureUserData* floor_name = new FixtureUserData;
+	FixtureUserData* roof_name = new FixtureUserData;
+	floor_name->name = "floor_box";
+	roof_name->name = "roof_box";
+	//fixture definition
+	b2FixtureDef floor_f_def;
+	floor_f_def.shape = &floor_box;
+	floor_f_def.userData.pointer = reinterpret_cast<uintptr_t>(floor_name);
+	b2FixtureDef roof_f_def;
+	roof_f_def.shape = &roof_box;
+	roof_f_def.userData.pointer = reinterpret_cast<uintptr_t>(roof_name);
+	//create fixture using definition
+	m_body->CreateFixture(&floor_f_def);
+	m_body->CreateFixture(&roof_f_def);
+
 	m_levels = levels;
-	m_colliderTag = ELEVATOR;
+	for (int i = 0; i < m_levels.size(); i++)
+	{
+		m_levels.at(i) = m_levels.at(i).value() * settings::tileSize + settings::tileSize / 2;
+	}
+
 	state = ElevatorState::START_LEVEL;
 	EnitityManager::Add(this);
 
@@ -24,15 +69,16 @@ void Elevator::Update(float dt)
 {
 	SwitchFrames(dt);
 	
-	//player_in_sensor = CollisionManager::IsCollisionWith(PLAYER, sensor);
-	int lastLevel = (m_levels.back().value() - m_levels[0].value()) * settings::tileSize;
-	int level_position = m_body->GetPosition().y * settings::PPM * settings::tileSize;
+	player_in_sensor = LevelManager::CheckPlayerInSensor(*m_fixture);
+	
+
+	int lastLevel = (m_levels.back().value() - m_levels[0].value());
 	
 	switch (state)
 	{
 	case ElevatorState::START_LEVEL:
 		if (player_in_sensor && IsKeyPressed(KEY_E) && 
-			m_body->GetPosition().y * settings::PPM == m_levels[0].value() * settings::tileSize)
+			pos().y == m_levels[0].value())
 		{
 			state = ElevatorState::GOING_DOWN;
 			m_current_level = 0;
@@ -46,8 +92,8 @@ void Elevator::Update(float dt)
 	case ElevatorState::GOING_DOWN:
 		MoveDown(m_speed);
 		
-		next_level = m_levels[m_current_level + 1].value() * settings::tileSize;
-		if (m_body->GetPosition().y * settings::PPM >= next_level)
+		next_level = m_levels[m_current_level + 1].value();
+		if (pos().y >= next_level)
 		{
 			ResetY(next_level);
 			m_current_level++;
@@ -63,8 +109,8 @@ void Elevator::Update(float dt)
 	case ElevatorState::GOING_UP:
 		MoveUp(m_speed);
 
-		next_level = m_levels[m_current_level - 1].value() * settings::tileSize;
-		if (m_body->GetPosition().y * settings::PPM <= next_level)
+		next_level = m_levels[m_current_level - 1].value();
+		if (pos().y <= next_level)
 		{
 			ResetY(next_level);
 			m_current_level--;
@@ -97,7 +143,7 @@ void Elevator::Update(float dt)
 		}
 		break;
 	case ElevatorState::GOING_TO_SW:
-		if (next_level > m_body->GetPosition().y * settings::PPM)
+		if (next_level > pos().y)
 		{
 			MoveDown(m_speed);
 			m_going_up = false;
@@ -108,12 +154,13 @@ void Elevator::Update(float dt)
 			m_going_up = true;
 		}
 
-		if (next_level <= m_body->GetPosition().y * settings::PPM + 5 && next_level >= m_body->GetPosition().y * settings::PPM - 5 )
+		if (next_level <= pos().y + 5 &&
+			next_level >= pos().y - 5 )
 		{
 			ResetY(next_level);
 			for (int i = 0; i < m_levels.size(); i++)
 			{
-				if (m_levels.at(i).value() * settings::tileSize == next_level)
+				if (m_levels.at(i).value() == next_level)
 				{
 					m_current_level = i;
 					break;
@@ -141,23 +188,35 @@ void Elevator::Update(float dt)
 		}
 		break;
 	}
-	//std::cout << m_current_level << std::endl;
+	
+	//if (open)
+	//{
+	//	walls_fixture->SetSensor(true);
+	//}
+	//else
+	//{
+	//	walls_fixture->SetSensor(false);
+	//}
 }
 
 void Elevator::ResetY(int next_level)
 {
 	
-	m_body->SetTransform({ next_level + m_rectangle.height, m_body->GetPosition().x * settings::PPM }, 0);
+	m_body->SetTransform({ m_body->GetPosition().x, next_level / settings::PPM}, 0);
+	m_body->SetLinearVelocity({ 0, 0 });
+	//open = true;
 }
 
 void Elevator::MoveUp(float speed)
 {
-	m_body->SetLinearVelocity({ -speed, 0 });
+	m_body->SetLinearVelocity({ 0, -speed });
+	//open = false;
 }
 
 void Elevator::MoveDown(float speed)
 {
-	m_body->SetLinearVelocity({ speed, 0 });
+	m_body->SetLinearVelocity({ 0, speed });
+	//open = false;
 
 }
 
@@ -166,6 +225,7 @@ void Elevator::MoveToSwitch(float y_in)
 	
 	next_level = y_in;
 	state = ElevatorState::GOING_TO_SW;
+	//open = false;
 }
 
 void Elevator::Draw()

@@ -73,7 +73,11 @@ public:
     std::vector<LightInfo> m_lights;
     std::vector<Rectangle*> m_light_walls;
     float m_darkness_strength;
+
+    //physics
     b2Vec2 gravity = b2Vec2(0.0f, 80.0f);
+    static bool CheckPlayerInSensor(b2Fixture& sensor);
+    void SolidTilesToBigBoxes();
   
     //Textures definition
     //static background
@@ -92,11 +96,14 @@ public:
     Texture2D paralaxedBackgroundSpriteAtlas;
     RenderTexture2D paralaxBackgroundRenderTexture;
     Texture2D paralaxedBackgroundRenderedLevelTexture;
+
+    //Layer draw
+    void DrawForeGround();
     
 
     //Object containers
     std::vector<std::unique_ptr<Collidable>> solid_tiles;
-    std::vector<std::unique_ptr<Entity>> level_entities_safe;
+    static std::vector<std::unique_ptr<Entity>> level_entities_safe;
 
     //Box2d
     static b2World* world;

@@ -3,11 +3,10 @@
 
 
 LevelPortal::LevelPortal(const Rectangle& rect, std::string to_level, ldtk::IID iid_refernece)
-	: Collidable(rect, b2_staticBody),
+	: Collidable(rect, b2_staticBody, LEVEL_PORTAL),
 	m_to_level(to_level),
 	m_iid_reference(iid_refernece)
 {
-	m_colliderTag = LEVEL_PORTAL;
 	m_rectangle = rect;
 	m_fixture->SetSensor(true);
 	EnitityManager::Add(this);

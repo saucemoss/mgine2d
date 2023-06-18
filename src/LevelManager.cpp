@@ -15,10 +15,12 @@
 #include "ElevatorCallSwitch.h"
 #include <rlgl.h>
 #include "MovingBlock.h"
+#include "WoodCrate.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
-ContactListener listener;
+std::vector<std::unique_ptr<Entity>> LevelManager::level_entities_safe;
+
 
 // Move a light and mark it as dirty so that we update it's mask next frame
 void LevelManager::MoveLight(LightInfo& light, float x, float y)
@@ -92,7 +94,6 @@ void LevelManager::DrawLightMask(LightInfo& light)
 	EndTextureMode();
 }
 
-// See if a light needs to update it's mask
 bool LevelManager::UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light_walls)
 {
 	if (!light.active || !light.dirty) return false;
@@ -146,7 +147,7 @@ bool LevelManager::UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light
 
 	return true;
 };
-// Setup lights
+
 void LevelManager::SetupLight(float x, float y, float radius)
 {
 	m_lights.push_back(LightInfo());
@@ -163,9 +164,33 @@ void LevelManager::SetupLight(float x, float y, float radius)
 	// Force the render texture to have something in it
 	DrawLightMask(m_lights.back());
 }
-// Set up some m_light_walls
+
 void LevelManager::SetupBoxes()
 {
+
+	//auto currentBody = world->GetBodyList();
+	//while (currentBody != nullptr)
+	//{
+	//	auto pos = currentBody->GetPosition();
+	//	auto fixture = currentBody->GetFixtureList();
+	//	while (fixture != nullptr)
+	//	{
+	//		auto shape = fixture->GetShape();
+	//		// Note, right now supposing all shapes are polygons, use to determine shape->GetType();
+
+	//			auto polygonShape = (b2PolygonShape*)shape;
+	//			
+	//			Rectangle r = {
+	//				pos.x * settings::PPM, pos.y * settings::PPM ,
+	//				32,32};
+	//			m_light_walls.push_back(&r);
+
+	//		fixture = fixture->GetNext();
+	//	}
+
+	//	currentBody = currentBody->GetNext();
+	//}
+
 	for (auto& s : solid_tiles)
 	{
 		m_light_walls.push_back(&s->m_rectangle);
@@ -175,7 +200,10 @@ void LevelManager::SetupBoxes()
 		Collidable* c = dynamic_cast<Collidable*>(e.get());
 		if (c != nullptr)
 		{
-			m_light_walls.push_back(&c->m_rectangle);
+			if (c->m_colliderTag == M_BLOCK)
+			{
+				m_light_walls.push_back(&c->m_rectangle);
+			}
 		}
 	}
 }
@@ -193,7 +221,7 @@ LevelManager::LevelManager()
 	world = new b2World(gravity);
 	Collidable::world = world;
 	LoadLevel("Level_0");
-	m_darkness_strength = 0.9f;
+	m_darkness_strength = 0.99f;
 
 }
 
@@ -224,6 +252,8 @@ void LevelManager::LoadLevel(std::string level_name)
 		GameScreen::player->RecreateBody();
 		GameScreen::player->NewBody();
 	}
+
+
 	SetupLight(0, 0, 100);
 	//Textures setup:
 	// 
@@ -238,7 +268,8 @@ void LevelManager::LoadLevel(std::string level_name)
 	laboratorySolidsRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
 	//
 	//Paralax Textures
-	//renderBGTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+	paralaxBackgroundRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+	paralaxedBackgroundSpriteAtlas = LoadTexture("res//level//mothman.png");
 	//
 	//Decoration Texture
 	decorationSpriteAtlas = LoadTexture("res//level//mothman.png");
@@ -290,7 +321,7 @@ void LevelManager::LoadLevel(std::string level_name)
 				if (layer.getName() == "LabSolids")
 				{
 					Rectangle rec = { tile.getPosition().x, tile.getPosition().y, tile_size, tile_size };
-					solid_tiles.push_back(std::make_unique<SolidTile>(rec));
+					//solid_tiles.push_back(std::make_unique<SolidTile>(rec));
 					DrawTextureRec(laboratorySolidsSpriteAtlas, source_rect, target_pos, WHITE);
 				}
 				if (layer.getName() == "Platforms")
@@ -308,6 +339,7 @@ void LevelManager::LoadLevel(std::string level_name)
 	EndTextureMode();
 	laboratorySolidsRenderedLevelTexture = laboratorySolidsRenderTexture.texture;
 
+	SolidTilesToBigBoxes();
 
 	//Decoration Draw
 	BeginTextureMode(decorationRenderTexture);
@@ -430,6 +462,10 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "MovingBlock")
 		{
 			level_entities_safe.push_back(std::make_unique<MovingBlock>(rect, entity.getArrayField<ldtk::IntPoint>("Path")));
+		}
+		if (entity.getName() == "WoodCrate")
+		{
+			level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
 		}
 		if (entity.getName() == "LevelPortal_in")
 		{
@@ -554,7 +590,6 @@ void LevelManager::Update(float dt)
 		rlSetBlendMode(BLEND_ALPHA);
 		EndTextureMode();
 	}
-
 }
 
 void LevelManager::DrawSpotLights()
@@ -588,6 +623,107 @@ void LevelManager::DrawSpotLights()
 	}
 }
 
+bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)
+{
+	bool player_in_sensor = false;
+	if (sensor.GetBody()->GetContactList() != nullptr)
+	{
+		auto con = sensor.GetBody()->GetContactList()->contact;
+		while (con != nullptr)
+		{
+			Collidable* playerPtr = nullptr;
+			if (con->GetFixtureA() == &sensor)
+			{
+				playerPtr = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
+			}
+			else if (con->GetFixtureB() == &sensor)
+			{
+				playerPtr = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
+			}
+
+			if (playerPtr != nullptr && playerPtr->m_colliderTag == PLAYER && con->IsTouching())
+			{
+				return true;
+			}
+			con = con->GetNext();
+		}
+	}
+	return player_in_sensor;
+}
+
+void LevelManager::SolidTilesToBigBoxes()
+{
+	int tiles = 0;
+	std::vector<Rectangle> x_line;
+	auto& layer = currentLdtkLevel->getLayer("LabSolids");
+	int grid_x = layer.getGridSize().x;
+	int grid_y = layer.getGridSize().y;
+
+	for (int y = 0; y < grid_y; y++)
+	{
+		for (int x = 0; x < grid_x; x++)
+		{
+			int x_counter = 0;
+			if (layer.getIntGridVal(x, y).value != -1)
+			{
+				bool next = true;
+				while (next)
+				{
+					if (layer.getIntGridVal(x + x_counter, y).value == -1 || x + x_counter >= grid_x)
+					{
+						next = false;
+						x_line.push_back({	(float)x * settings::tileSize,
+											(float)y * settings::tileSize,
+											float(x_counter * settings::tileSize),
+											settings::tileSize });
+					}
+					else
+					{
+						x_counter++;
+					}
+				}
+			}
+			x += x_counter;
+		}
+	}
+
+	std::vector<Rectangle> b_boxes;
+
+	for (int i = 0; i < x_line.size(); i++)
+	{
+		auto& r1 = x_line[i];
+		for (auto& r2 : x_line)
+		{
+			if (r1.x == r2.x && r1.width == r2.width && //if horizontaly alligned
+				r1.y + r1.height == r2.y)
+			{
+				r1.height += 32;
+				r2 = { 0,0,0,0 };
+			}
+		}
+		b_boxes.push_back(r1);
+	}
+
+	for (auto r : b_boxes)
+	{
+		solid_tiles.push_back(std::make_unique<SolidTile>(r));
+		//DrawRectangleLinesEx(r, 1, BLUE);
+	}
+
+}
+
+void LevelManager::DrawForeGround()
+{
+	Camera2D c = GameScreen::camera;
+	Vector2 c_position = { (c.offset.x / c.zoom - c.target.x) , (c.offset.y / c.zoom - c.target.y) };
+	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
+	//Draw paralaxed foreground elements
+	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
+		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
+		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y }, //dest
+		{ 0,0 }, 0, WHITE);
+}
+
 void LevelManager::Draw()
 {
 
@@ -597,7 +733,7 @@ void LevelManager::Draw()
 
 	Vector2 c_position = { (c.offset.x / c.zoom - c.target.x) , (c.offset.y / c.zoom - c.target.y) };
 
-	Vector2 parallaxed = Vector2Multiply(c_position, { 0.01f,0.01f });
+	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
 	Vector2 parallaxed_far = Vector2Multiply(c_position, { 0.01f,0.01f });
 
 
@@ -611,10 +747,10 @@ void LevelManager::Draw()
 	}
 
 	//Draw paralaxed background elements
-	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
-		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
-		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
-		{ 0,0 }, 0, WHITE);
+	//DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
+	//	{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
+	//	{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
+	//	{ 0,0 }, 0, WHITE);
 
 	//Draw level solids
 	DrawTexturePro(laboratorySolidsRenderedLevelTexture,

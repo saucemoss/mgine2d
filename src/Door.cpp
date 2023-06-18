@@ -1,11 +1,7 @@
 #include "Door.h"
-struct FixtureUserData
-{
-	std::string name;
-};
 Door::Door(const Rectangle& rect, bool is_right)
 	:
-	Collidable(rect, b2_staticBody),
+	Collidable(rect, b2_staticBody, DOOR),
 	m_is_right(is_right)
 {
 	InitAnimations();
@@ -22,8 +18,7 @@ Door::Door(const Rectangle& rect, bool is_right)
 	sensorFixDef.userData.pointer = reinterpret_cast<uintptr_t>(sensorFixtureName);
 	//create fixture using definition
 	sensor = m_body->CreateFixture(&sensorFixDef);
-	
-	m_colliderTag = DOOR;
+
 	state = DoorState::Closed;
 	EnitityManager::Add(this);
 

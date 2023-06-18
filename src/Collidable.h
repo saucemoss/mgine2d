@@ -11,6 +11,8 @@
 #include <iostream>
 #include <b2_settings.h>
 
+
+
 class Collidable;
 
 enum ColliderTag {
@@ -20,45 +22,58 @@ enum ColliderTag {
 	LEVEL_PORTAL,
 	DOOR,
 	ELEVATOR, ELEVATOR_CALL_SW,
-	M_BLOCK, M_BLOCK_TOP
+	M_BLOCK, M_BLOCK_TOP, W_CRATE
 };
 
-
+struct FixtureUserData
+{
+	std::string name;
+};
 
 class Collidable
 {
 public:
-	Collidable(Rectangle rectangle, b2BodyType type)
+	Collidable(Rectangle rectangle, b2BodyType type, ColliderTag collider_tag)
 	{
-		m_box.SetAsBox(float(rectangle.width / 2.0f / settings::PPM),
-			float(rectangle.height / 2.0f / settings::PPM));
-		m_bodyDef.fixedRotation = true;
-		m_bodyDef.position.Set(	(rectangle.x + rectangle.width / 2) / settings::PPM, 
-								(rectangle.y + rectangle.height / 2) / settings::PPM);
-
-		m_bodyDef.type = type;
-
-		m_bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
-		m_body = world->CreateBody(&m_bodyDef);
-		m_fixtureDef.friction = 1.0f;
+		m_colliderTag = collider_tag;
 		switch (type)
 		{
 		case b2_dynamicBody:
-			m_fixtureDef.shape = &m_box;
-			m_fixture = m_body->CreateFixture(&m_box, 1.0f);
+			switch (collider_tag)
+			{
+			case PLAYER:
+				SetupSimpleBox(rectangle, type, true);
+				break;
+			case W_CRATE:
+				SetupSimpleBox(rectangle, type, false);
+				break;
+			}
 			break;
 		case b2_kinematicBody:
-
-			m_fixture = m_body->CreateFixture(&m_box, 1.0f);
+			SetupSimpleBox(rectangle, type, true);
 			break;
-		case b2_staticBody:
-			
-			m_fixture = m_body->CreateFixture(&m_box, 0.0f);
+		case b2_staticBody:	
+			SetupSimpleBox(rectangle, type, true, 0.0f);
 			break;
 		}
 
 		m_rectangle = rectangle;
 
+	}
+
+	void SetupSimpleBox(Rectangle& rectangle, b2BodyType type, bool fix_rotate, float density = 1.0f)
+	{
+		m_box.SetAsBox(float(rectangle.width / 2.0f / settings::PPM),
+			float(rectangle.height / 2.0f / settings::PPM));
+		m_bodyDef.fixedRotation = fix_rotate;
+		m_bodyDef.position.Set((rectangle.x + rectangle.width / 2) / settings::PPM,
+			(rectangle.y + rectangle.height / 2) / settings::PPM);
+		m_bodyDef.type = type;
+		m_bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
+		m_body = world->CreateBody(&m_bodyDef);
+		m_fixtureDef.friction = 1.0f;
+		m_fixtureDef.shape = &m_box;
+		m_fixture = m_body->CreateFixture(&m_box, density);
 	}
 
 	~Collidable()

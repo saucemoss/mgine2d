@@ -14,6 +14,7 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("DOOR", LoadTexture("res/level/door.png"));
 	m_Textures.emplace("DECOR_ANIM", LoadTexture("res/level/decor_anim.png"));
 	m_Textures.emplace("MOTHMAN", LoadTexture("res/level/mothman.png"));
+	m_Textures.emplace("P_ATT_1", LoadTexture("res/PlayerTextures/p_attack_1.png"));
 }
 
 
@@ -62,6 +63,16 @@ void Animations::InitializePlayerAnimations()
 	jump_anim->SetCustomFrameTime(3, 0.5f);
 	animations.emplace("P_JUMP", *jump_anim);
 
+	Texture2D* texture2 = TextureLoader::GetTexture("P_ATT_1");
+	Animation* att1_anim = new Animation(texture2, 0, 7, 64, 0.04f);
+	att1_anim->SetCustomFrameTime(1, 0.04f);
+	att1_anim->SetCustomFrameTime(2, 0.04f);
+	att1_anim->SetCustomFrameTime(3, 0.04f);
+	att1_anim->SetCustomFrameTime(4, 0.04f);
+	att1_anim->SetCustomFrameTime(5, 0.04f);
+	att1_anim->SetCustomFrameTime(6, 0.04f);
+	att1_anim->SetCustomFrameTime(7, 0.04f);
+	animations.emplace("P_ATT1", *att1_anim);
 
 }
 

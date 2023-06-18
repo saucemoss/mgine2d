@@ -6,12 +6,11 @@
 
 MovingBlock::MovingBlock(const Rectangle& rect, const ldtk::ArrayField<ldtk::IntPoint> path_points)
 	:
-	Collidable(rect, b2_kinematicBody),
+	Collidable(rect, b2_kinematicBody, M_BLOCK),
 	m_path_points(path_points)
 {
 	InitAnimations();
 
-	m_colliderTag = M_BLOCK;
 	EnitityManager::Add(this);
 	m_next_point = m_path_points.at(0).value();
 

@@ -9,6 +9,7 @@
 #include "raymath.h"
 #include <algorithm>
 #include "LevelManager.h"
+#include "WoodCrate.h"
 
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION            330
@@ -16,18 +17,14 @@
 #define GLSL_VERSION            100
 #endif
 
-struct FixtureUserData
-{
-	std::string name;
-};
-
 Player::Player()
-	:Collidable({150,250,12,20}, b2_dynamicBody)
+	:
+	Collidable({150,250,12,20}, b2_dynamicBody, PLAYER)
 {
 	NewBody();
 	InitAnimations();
 	state = PlayerState::Idle;
-	m_colliderTag = PLAYER;
+	
 
 
 	// Add mappings for debug purposes
@@ -139,6 +136,26 @@ void Player::Update(float dt)
 		}
 	}
 
+
+	if (IsKeyPressed(KEY_SPACE))
+	{
+		
+		Rectangle rect = looking_right ? Rectangle{ pos().x + settings::tileSize,
+													pos().y - 22,
+													settings::tileSize,
+													settings::tileSize }
+										:Rectangle{ pos().x - settings::tileSize/2,
+													pos().y - 22,
+													settings::tileSize,
+													settings::tileSize };
+
+		LevelManager::level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
+	}
+
+	if (IsKeyPressed(KEY_LEFT_CONTROL))
+	{
+		SetAnimation("P_ATT1");
+	}
 
 	// Update player in one possible state
 	switch (state)
@@ -316,14 +333,21 @@ void Player::Draw()
 																	CurrentFrame().y,
 																	CurrentFrame().width * -1,
 																	CurrentFrame().height};
-	
 	auto spritePosX = center_pos().x - 10;
 	auto spritePosY = center_pos().y - 12;
 
+	if(animations->m_CurrentActiveAnimation=="P_ATT1")
+	{
+		spritePosX = center_pos().x - 24;
+		spritePosY = center_pos().y - 28;
+	}
+	
+
+
 	//BeginShaderMode(shdrOutline);
-	DrawTexturePro(*sprite,
+	DrawTexturePro(*animation->GetTexture(),
 		cframe,
-		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize},
+		Rectangle{ spritePosX,spritePosY,CurrentFrame().width,CurrentFrame().height },
 		{ 0,0 },
 		0.0f,
 		WHITE);
@@ -333,7 +357,6 @@ void Player::Draw()
 
 void Player::InitAnimations()
 {
-	sprite = TextureLoader::GetTexture("NP1");
 	animations->InitializePlayerAnimations();
 	SetAnimation("P_IDLE");
 }

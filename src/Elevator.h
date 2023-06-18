@@ -28,8 +28,9 @@ public:
 
     ~Elevator();
     ElevatorState state;
-    Rectangle sensor;
-    Rectangle roof;
+    b2Fixture* walls_fixture;
+    //bool open = true;
+
     const ldtk::Entity& m_ldtk_elevator;
     void ResetY(int next_level);
 
@@ -54,7 +55,7 @@ private:
     bool m_going_up = false;
     int m_distance_counter = 0;
     int m_current_level;
-    int m_speed = 3;
+    int m_speed = 10;
     int next_level;
     ldtk::ArrayField<int> m_levels;
 
