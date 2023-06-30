@@ -160,6 +160,7 @@
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LevelPortal.cpp" />
     <ClCompile Include="src\MovingBlock.cpp" />
+    <ClCompile Include="src\Platform.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
     <ClCompile Include="src\Animations.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Platform.h" />
     <ClInclude Include="src\Ramp.h" />
     <ClInclude Include="src\MovingBlock.h" />
     <ClInclude Include="src\Collidable.h" />

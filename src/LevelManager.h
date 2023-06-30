@@ -78,6 +78,7 @@ public:
     b2Vec2 gravity = b2Vec2(0.0f, 80.0f);
     static bool CheckPlayerInSensor(b2Fixture& sensor);
     void SolidTilesToBigBoxes();
+    void PlatformsToBigBoxes();
   
     //Textures definition
     //static background

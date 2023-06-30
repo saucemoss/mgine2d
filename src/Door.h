@@ -24,7 +24,6 @@ public:
     bool m_is_active = true;
     bool player_in_sensor = false;
     b2Fixture* sensor;
-    void CheckPlayerInSensor();
 
     // Inherited via Entity
     virtual void Update(float dt) override;

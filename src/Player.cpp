@@ -154,7 +154,9 @@ void Player::Update(float dt)
 
 	if (IsKeyPressed(KEY_LEFT_CONTROL))
 	{
-		SetAnimation("P_ATT1");
+		//PlayOnceUninterupt("P_ATT1");
+		PlayFromFrame(5, "P_ATT1");
+		
 	}
 
 	// Update player in one possible state

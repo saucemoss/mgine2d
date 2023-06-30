@@ -65,13 +65,13 @@ void Animations::InitializePlayerAnimations()
 
 	Texture2D* texture2 = TextureLoader::GetTexture("P_ATT_1");
 	Animation* att1_anim = new Animation(texture2, 0, 7, 64, 0.04f);
-	att1_anim->SetCustomFrameTime(1, 0.04f);
-	att1_anim->SetCustomFrameTime(2, 0.04f);
-	att1_anim->SetCustomFrameTime(3, 0.04f);
-	att1_anim->SetCustomFrameTime(4, 0.04f);
-	att1_anim->SetCustomFrameTime(5, 0.04f);
-	att1_anim->SetCustomFrameTime(6, 0.04f);
-	att1_anim->SetCustomFrameTime(7, 0.04f);
+	att1_anim->SetCustomFrameTime(1, 0.06f);
+	att1_anim->SetCustomFrameTime(2, 0.06f);
+	att1_anim->SetCustomFrameTime(3, 0.03f);
+	att1_anim->SetCustomFrameTime(4, 0.02f);
+	att1_anim->SetCustomFrameTime(5, 0.02f);
+	att1_anim->SetCustomFrameTime(6, 0.03f);
+	att1_anim->SetCustomFrameTime(7, 0.06f);
 	animations.emplace("P_ATT1", *att1_anim);
 
 }

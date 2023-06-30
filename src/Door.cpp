@@ -1,4 +1,5 @@
 #include "Door.h"
+#include "LevelManager.h"
 Door::Door(const Rectangle& rect, bool is_right)
 	:
 	Collidable(rect, b2_staticBody, DOOR),
@@ -32,34 +33,11 @@ Door::~Door()
 }
 
 
-void Door::CheckPlayerInSensor()
-{
-	player_in_sensor = false;
-	if (m_body->GetContactList() != nullptr)
-	{
-		auto con = m_body->GetContactList()->contact;
-		while (con != nullptr)
-		{
-			auto obj1 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
-			auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-			if (obj1 != nullptr && obj1->m_colliderTag == PLAYER && con->IsTouching())
-			{
-				player_in_sensor = true;
-			}
-			if (obj2 != nullptr && obj2->m_colliderTag == PLAYER && con->IsTouching())
-			{
-				player_in_sensor = true;
-			}
-			con = con->GetNext();
-		}
-	}
-
-}
-
 void Door::Update(float dt)
 {
-	
-	CheckPlayerInSensor();
+
+	player_in_sensor = LevelManager::CheckPlayerInSensor(*sensor);
+
 
 	if (player_in_sensor)
 	{

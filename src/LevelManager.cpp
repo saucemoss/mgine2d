@@ -16,6 +16,7 @@
 #include <rlgl.h>
 #include "MovingBlock.h"
 #include "WoodCrate.h"
+#include "Platform.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
@@ -329,7 +330,7 @@ void LevelManager::LoadLevel(std::string level_name)
 					Rectangle rec = {(float)tile.getPosition().x ,
 									 (float)tile.getPosition().y ,
 									 tile_size , tile_size };
-					solid_tiles.push_back(std::make_unique<SolidTile>(rec));
+					//solid_tiles.push_back(std::make_unique<SolidTile>(rec));
 					DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
 				}
 			}
@@ -340,6 +341,7 @@ void LevelManager::LoadLevel(std::string level_name)
 	laboratorySolidsRenderedLevelTexture = laboratorySolidsRenderTexture.texture;
 
 	SolidTilesToBigBoxes();
+	PlatformsToBigBoxes();
 
 	//Decoration Draw
 	BeginTextureMode(decorationRenderTexture);
@@ -466,6 +468,10 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "WoodCrate")
 		{
 			level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
+		}
+		if (entity.getName() == "PlatformBox")
+		{
+			level_entities_safe.push_back(std::make_unique<Platform>(rect));
 		}
 		if (entity.getName() == "LevelPortal_in")
 		{
@@ -645,7 +651,10 @@ bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)
 			{
 				return true;
 			}
-			con = con->GetNext();
+			else
+			{
+				con = con->GetNext();
+			}	
 		}
 	}
 	return player_in_sensor;
@@ -709,6 +718,11 @@ void LevelManager::SolidTilesToBigBoxes()
 		solid_tiles.push_back(std::make_unique<SolidTile>(r));
 		//DrawRectangleLinesEx(r, 1, BLUE);
 	}
+
+}
+
+void LevelManager::PlatformsToBigBoxes()
+{
 
 }
 
