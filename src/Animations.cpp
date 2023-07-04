@@ -15,8 +15,28 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("DECOR_ANIM", LoadTexture("res/level/decor_anim.png"));
 	m_Textures.emplace("MOTHMAN", LoadTexture("res/level/mothman.png"));
 	m_Textures.emplace("P_ATT_1", LoadTexture("res/PlayerTextures/p_attack_1.png"));
+	m_Textures.emplace("INFECTED_H_1", LoadTexture("res/enemies/infected_hazmat.png"));
 }
 
+void Animations::InitializeInfectedHAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("INFECTED_H_1");
+	animations.emplace("IH_IDLE", *(new Animation(texture, 0, 3, 32, 0.16f)));
+	animations.emplace("IH_RUN", *(new Animation(texture, 1, 3, 32, 0.08f)));
+	animations.emplace("IH_ATT", *(new Animation(texture, 2, 10, 32, 0.08f)));
+	animations.emplace("IH_DMG", *(new Animation(texture, 3, 1, 32, 0.08f)));
+
+	Animation* IH_DEATH = new Animation(texture, 4, 10, 32, 0.08f);
+	IH_DEATH->SetCustomFrameTime(3, 0.05f);
+	IH_DEATH->SetCustomFrameTime(4, 0.05f);
+	IH_DEATH->SetCustomFrameTime(5, 0.05f);
+	IH_DEATH->SetCustomFrameTime(6, 0.05f);
+	IH_DEATH->SetCustomFrameTime(7, 0.08f);
+	IH_DEATH->SetCustomFrameTime(8, 0.10f);
+	IH_DEATH->SetCustomFrameTime(9, 0.12f);
+	IH_DEATH->SetCustomFrameTime(10, 3.12f);
+	animations.emplace("IH_DEATH", *IH_DEATH);
+}
 
 void Animations::InitializeDecorAnimations()
 {
@@ -121,24 +141,21 @@ void Animation::SwitchFrames(float dt)
 	m_animationTicker -= dt;
 	if (m_animationTicker <= 0)
 	{
-		m_currentFrame = m_frames[m_currentFrameNum];
-		m_animationTicker = m_framesTimes[m_currentFrameNum];
-		if (m_currentFrameNum < m_framesCount-1)
+		m_currentFrameNum += 1;
+		if (m_currentFrameNum >= m_framesCount)
 		{
-			m_currentFrameNum +=1 ;
-		}
-		else
-		{
-			if (!m_playOnce) 
+			if (!m_playOnce)
 			{
-				m_currentFrameNum = 0;
+				Reset();
 			}
 			else
 			{
-				m_currentFrameNum = m_framesCount - 1;
+				m_currentFrameNum = m_framesCount-1;
 			}
 			m_reachedEnd = true;
 		}
+		m_currentFrame = m_frames[m_currentFrameNum];
+		m_animationTicker = m_framesTimes[m_currentFrameNum];
 	}
 }
 
@@ -150,8 +167,8 @@ void Animation::PlayOnce()
 void Animation::Reset()
 {
 	m_currentFrameNum = 0;
-	m_animationTicker = m_framesTimes[m_currentFrameNum];
-	m_currentFrame = m_frames[m_currentFrameNum];
+	m_animationTicker = m_framesTimes[0];
+	m_currentFrame = m_frames[0];
 	m_reachedEnd = false;
 }
 
@@ -162,9 +179,10 @@ bool Animation::AnimationEnded()
 
 void Animation::FreezeFrame(int frameNumber)
 {
-	m_currentFrameNum = frameNumber-1;
+	m_currentFrameNum = frameNumber;
 	m_currentFrame = m_frames[m_currentFrameNum];
-	m_animationTicker = 1.0f;
+	m_animationTicker = 10000.0f;
+	m_reachedEnd = false;
 }
 
 void Animation::SetToFrame(int frameNumber)

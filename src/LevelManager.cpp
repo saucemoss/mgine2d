@@ -17,6 +17,8 @@
 #include "MovingBlock.h"
 #include "WoodCrate.h"
 #include "Platform.h"
+#include "InfectedHazmat.h"
+#include "FireAxe.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
@@ -93,6 +95,12 @@ void LevelManager::DrawLightMask(LightInfo& light)
 	DrawCircleGradient((int)light.position.x, (int)light.position.y, light.outerRadius, ColorAlpha(WHITE,0), WHITE);
 	
 	EndTextureMode();
+}
+
+void LevelManager::RemoveAxeFromLevel(FireAxe& axe)
+{
+	axe.m_destroy = true;
+	LevelManager::world->DestroyBody(axe.m_body);
 }
 
 bool LevelManager::UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light_walls)
@@ -341,7 +349,6 @@ void LevelManager::LoadLevel(std::string level_name)
 	laboratorySolidsRenderedLevelTexture = laboratorySolidsRenderTexture.texture;
 
 	SolidTilesToBigBoxes();
-	PlatformsToBigBoxes();
 
 	//Decoration Draw
 	BeginTextureMode(decorationRenderTexture);
@@ -472,6 +479,11 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "PlatformBox")
 		{
 			level_entities_safe.push_back(std::make_unique<Platform>(rect));
+		}
+		if (entity.getName() == "InfectedHazmat")
+		{
+			level_entities_safe.push_back(std::make_unique<InfectedHazmat>(rect));
+			level_entities_safe.back().get()->m_draw_layer = 1;
 		}
 		if (entity.getName() == "LevelPortal_in")
 		{
@@ -660,6 +672,37 @@ bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)
 	return player_in_sensor;
 }
 
+bool LevelManager::CheckAxeInSensor(b2Fixture& sensor)
+{
+	bool axe_in_sensor = false;
+	if (sensor.GetBody()->GetContactList() != nullptr)
+	{
+		auto con = sensor.GetBody()->GetContactList()->contact;
+		while (con != nullptr)
+		{
+			Collidable* axePtr = nullptr;
+			if (con->GetFixtureA() == &sensor)
+			{
+				axePtr = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
+			}
+			else if (con->GetFixtureB() == &sensor)
+			{
+				axePtr = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
+			}
+
+			if (axePtr != nullptr && axePtr->m_colliderTag == FIREAXE && con->IsTouching())
+			{
+				return true;
+			}
+			else
+			{
+				con = con->GetNext();
+			}
+		}
+	}
+	return axe_in_sensor;
+}
+
 void LevelManager::SolidTilesToBigBoxes()
 {
 	int tiles = 0;
@@ -721,10 +764,6 @@ void LevelManager::SolidTilesToBigBoxes()
 
 }
 
-void LevelManager::PlatformsToBigBoxes()
-{
-
-}
 
 void LevelManager::DrawForeGround()
 {

@@ -70,6 +70,18 @@
     <Filter Include="Pliki źródłowe\Systems\Level">
       <UniqueIdentifier>{575c5441-dab0-4d65-a300-af0e1a0b0a11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Entities\Enemies">
+      <UniqueIdentifier>{0f813f15-ecbe-4df8-8e2a-f81729487d59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Entities\Enemies">
+      <UniqueIdentifier>{2c6708fe-bd5b-4f0e-9a01-a88117c945db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Entities\Objects\Weapons">
+      <UniqueIdentifier>{d8278ac6-5a84-4441-ad35-c0b099093cbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Entities\Objects\Weapons">
+      <UniqueIdentifier>{3c059955-e826-4a42-837f-fb2b4a3391cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -119,6 +131,12 @@
     </ClCompile>
     <ClCompile Include="src\Platform.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InfectedHazmat.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FireAxe.cpp">
+      <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +209,12 @@
     <ClInclude Include="src\Platform.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="src\InfectedHazmat.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FireAxe.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects\Weapons</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt">
@@ -229,6 +253,9 @@
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="res\Treasure Hunters\Palm Tree Island\Sprites\Terrain\lab.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="res\enemies\infected_hazmat.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>

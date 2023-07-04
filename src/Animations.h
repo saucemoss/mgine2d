@@ -53,6 +53,7 @@ class Animations
 public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
+	void InitializeInfectedHAnimations();
 	void InitializeDecorAnimations();
 	void InitializeDoorAnimations();
 	Animation* GetAnimation(std::string name);
@@ -130,7 +131,7 @@ public:
 	void FreezeFrame(std::string name, int frameNumber)
 	{
 		animation = animations->GetAnimation(name);
-		animation->FreezeFrame(frameNumber);
+		animation->FreezeFrame(frameNumber-1);
 		animations->m_CurrentActiveAnimation = name;
 		
 	}

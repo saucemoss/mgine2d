@@ -3,19 +3,17 @@
 #include "Collidable.h"
 #include "Animations.h"
 
-
-
-class WoodCrate : public Entity, public Collidable, public Animated
+class FireAxe : public Entity, public Collidable, public Animated
 {
 public:
-	WoodCrate(const Rectangle& rect);
-	~WoodCrate();
+	FireAxe(const Rectangle& rect);
+	~FireAxe();
+	float axvel;
+
 	// Inherited via Entity
 	virtual void Draw() override;
 	virtual void Update(float dt) override;
 
-
 	// Inherited via Animated
 	virtual void InitAnimations() override;
-
 };

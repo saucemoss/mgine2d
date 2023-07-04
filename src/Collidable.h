@@ -22,7 +22,8 @@ enum ColliderTag {
 	LEVEL_PORTAL,
 	DOOR,
 	ELEVATOR, ELEVATOR_CALL_SW,
-	M_BLOCK, M_BLOCK_TOP, W_CRATE
+	M_BLOCK, M_BLOCK_TOP, W_CRATE,
+	INFECTED_H, FIREAXE
 };
 
 struct FixtureUserData
@@ -47,6 +48,11 @@ public:
 			case W_CRATE:
 				SetupSimpleBox(rectangle, type, false);
 				break;
+			case FIREAXE:
+				SetupSimpleBox(rectangle, type, false);
+				break;
+			default:
+				SetupSimpleBox(rectangle, type, true);
 			}
 			break;
 		case b2_kinematicBody:

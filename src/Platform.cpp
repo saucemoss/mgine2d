@@ -27,7 +27,7 @@ void Platform::Update(float dt)
 
 	if (LevelManager::CheckPlayerInSensor(*m_fixture))
 	{
-		if (IsKeyPressed(KEY_DOWN))
+		if (IsKeyDown(KEY_DOWN))
 		{
 			m_fixture->SetSensor(true);
 		}

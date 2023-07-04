@@ -12,6 +12,7 @@ public:
     virtual void Draw() = 0;
     virtual void Update(float dt) = 0;
 	ldtk::IID m_ldtkID;;
+	bool m_destroy = false;
 };
 
 
@@ -22,20 +23,33 @@ public:
 
 	static void Update(float dt)
 	{
+
 		for (Entity* e : EntityList)
 		{
-			e->Update(dt);
+			if (!e->m_destroy)
+			{
+				e->Update(dt);
+			}
 		}
 	}
 	static void Draw(int draw_layer)
 	{
 		for (Entity* e : EntityList)
 		{
-			if (e->m_draw_layer == draw_layer)
+			if (e->m_draw_layer == draw_layer && !e->m_destroy)
 			{
 				e->Draw();
 			}
 		}
+
+		for (int i = 0; i < EntityList.size(); i++)
+		{
+			if (EntityList[i]->m_destroy)
+			{
+				Remove(EntityList[i]);
+			}
+		}
+
 	}
 	static void Add(Entity* e)
 	{

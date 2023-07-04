@@ -37,7 +37,8 @@ void Door::Update(float dt)
 {
 
 	player_in_sensor = LevelManager::CheckPlayerInSensor(*sensor);
-
+	// Swtich animation frames for current anim
+	SwitchFrames(dt);
 
 	if (player_in_sensor)
 	{
@@ -54,22 +55,22 @@ void Door::Update(float dt)
 		if (!player_in_sensor)
 		{
 			state = DoorState::Closing;
-			SetAnimation("D_CLOSE");
+			PlayOnce("D_CLOSE");
 		}
 		else
 		{
-			FreezeFrame("D_OPEN", 17);	
+	
 		}
 		break;
 	case DoorState::Closed:
 		if (!player_in_sensor)
 		{
-			FreezeFrame("D_CLOSE", 17);
+
 		}
 		else
 		{
 			state = DoorState::Opening;
-			SetAnimation("D_OPEN");
+			PlayOnce("D_OPEN");
 		}
 		break;
 	case DoorState::Closing:
@@ -105,8 +106,7 @@ void Door::Update(float dt)
 		}
 		break;
 	}
-	// Swtich animation frames for current anim
-	SwitchFrames(dt);
+
 
 }
 
@@ -125,6 +125,7 @@ void Door::Draw()
 		{ 0,0 },
 		0.0f,
 		WHITE);
+	
 }
 
 void Door::InitAnimations()

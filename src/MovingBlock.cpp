@@ -42,23 +42,22 @@ void MovingBlock::Update(float dt)
 	int y = center_pos().y;
 	int px = m_next_point.x * settings::tileSize;
 	int py = m_next_point.y * settings::tileSize;
-
+	m_body->SetLinearVelocity({ 0, 0 });
 	if (px > x)
 	{
-		m_body->SetLinearVelocity({ speed, 0 });
-
+		m_body->SetLinearVelocity({ speed, m_body->GetLinearVelocity().y});
 	}
 	if (px < x)
 	{
-		m_body->SetLinearVelocity({ -speed, 0 });
+		m_body->SetLinearVelocity({ -speed, m_body->GetLinearVelocity().y });
 	}
 	if (py > y)
 	{
-		m_body->SetLinearVelocity({ 0, speed });
+		m_body->SetLinearVelocity({ m_body->GetLinearVelocity().x, speed });
 	}
 	if (py < y)
 	{
-		m_body->SetLinearVelocity({ 0, -speed });
+		m_body->SetLinearVelocity({ m_body->GetLinearVelocity().x, -speed });
 	}
 
 

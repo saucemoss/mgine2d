@@ -157,6 +157,8 @@
     <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Elevator.cpp" />
     <ClCompile Include="src\ElevatorCallSwitch.cpp" />
+    <ClCompile Include="src\FireAxe.cpp" />
+    <ClCompile Include="src\InfectedHazmat.cpp" />
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LevelPortal.cpp" />
     <ClCompile Include="src\MovingBlock.cpp" />
@@ -171,6 +173,8 @@
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\FireAxe.h" />
+    <ClInclude Include="src\InfectedHazmat.h" />
     <ClInclude Include="src\Platform.h" />
     <ClInclude Include="src\Ramp.h" />
     <ClInclude Include="src\MovingBlock.h" />
@@ -203,6 +207,7 @@
     <Image Include="..\GameProject\Content\Sprites\zSpawner.png" />
     <Image Include="resources\zombie_sheet.png" />
     <Image Include="res\bigzombie.png" />
+    <Image Include="res\enemies\infected_hazmat.png" />
     <Image Include="res\PlayerTextures\new_player1.png" />
     <Image Include="res\PlayerTextures\player.png" />
     <Image Include="res\PlayerTextures\player32.png" />

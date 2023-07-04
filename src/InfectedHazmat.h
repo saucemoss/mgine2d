@@ -5,74 +5,68 @@
 #include "Collidable.h"
 #include <map>
 #include <box2d.h>
-#include "FireAxe.h"
 
 
-enum class PlayerState
+enum class InfectedHazmatState
 {
     Idle,
     Running,
-    Jumping,
-    Falling
+    Attacking,
+    Hurting,
+    Dying
 };
 
 
-class Player : public Entity, public Animated, public Collidable
+class InfectedHazmat : public Entity, public Animated, public Collidable
 {
 public:
-    Player();
-    void NewBody();
-    ~Player();
-    
+    InfectedHazmat(const Rectangle& rectangle);
+    ~InfectedHazmat();
+
     void Update(float dt) override;
+    void Die();
+    void CheckAgroSensor();
     void CheckTouchGround();
-    void CheckWallTouch();
-    void CheckAxeTouch();
-    void CheckThrowAxe();
+    void CheckPlayerTouch();
+    void CheckIfAxed();
     void set_velocity_x(float vx);
     void set_velocity_y(float vy);
     void set_velocity_xy(float vx, float vy);
-    void LevelPortalCheck();
 
     void Draw() override;
     void InitAnimations() override;
 
     //Movement Control
+    bool player_in_agro = false;
     bool is_touching_floor = false;
-    bool left_wall_touch = false;
-    bool right_wall_touch = false;
+    bool left_player_touch = false;
+    bool right_player_touch = false;
     bool looking_right = true;
-    float speed = 7.0f;
-    float jump_force = 21.0f;
+    float speed = 5.0f;
     float linear_dumping = 2.0f;
-    float jump_add = 1.0f;
-    float coyote_time = 0.15f;
-    float coyote_time_counter = coyote_time;
-    float jump_buffer_time = 0.10f;
-    float jump_buffer_counter = jump_buffer_time;
-    float m_ground_slam_vel = 10.0f;
     b2Fixture* m_feet_sensor;
     b2Fixture* m_left_sensor;
     b2Fixture* m_right_sensor;
+    b2Fixture* m_agro_sensor;
+    b2Fixture* m_attack_sensor;
 
     //States
-    PlayerState state;
+    InfectedHazmatState state;
 
-    //Weapons
-    bool m_has_axe = true;
-    static FireAxe* axe;
-    
 
     //Debug
-    std::map<PlayerState, std::string> StatesStrMap{};
+    std::map<InfectedHazmatState, std::string> StatesStrMap{};
     std::map<ColliderTag, std::string> ColStrMap{};
     std::string contact_debug_str;
+    std::string axe_vel_str;
+    float axe_vel;
 
 
     void UpdateIdleState(float dt);
     void UpdateRunningState(float dt);
-    void UpdateJumpingState(float dt);
-    void UpdateFallingState(float dt);
+    void UpdateAttackingState(float dt);
+    void UpdateHurtingState(float dt);
+    void UpdateDyingState(float dt);
 
     Shader shdrOutline;
 

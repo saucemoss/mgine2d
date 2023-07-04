@@ -18,7 +18,7 @@ bool GameScreen::debug = false;
 GameScreen::GameScreen()
 
 {
-	//HideCursor();
+	HideCursor();
 	
 	LevelMgr = new LevelManager();
 

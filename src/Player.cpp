@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "LevelManager.h"
 #include "WoodCrate.h"
+#include "FireAxe.h"
 
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION            330
@@ -17,9 +18,11 @@
 #define GLSL_VERSION            100
 #endif
 
+FireAxe* Player::axe = nullptr;
+
 Player::Player()
 	:
-	Collidable({150,250,12,20}, b2_dynamicBody, PLAYER)
+	Collidable({50,250,12,20}, b2_dynamicBody, PLAYER)
 {
 	NewBody();
 	InitAnimations();
@@ -96,13 +99,15 @@ void Player::NewBody()
 	m_left_sensor = m_body->CreateFixture(&left_sensor_def);
 	m_right_sensor = m_body->CreateFixture(&right_sensor_def);
 	m_body->SetLinearDamping(linear_dumping);
+
+	//generously give axe
+	m_has_axe = true;
 }
 
 Player::~Player()
 {
 	EnitityManager::Remove(this);
 }
-
 
 void Player::Update(float dt)
 {
@@ -116,6 +121,10 @@ void Player::Update(float dt)
 	CheckTouchGround();
 
 	CheckWallTouch();
+
+	CheckAxeTouch();
+
+	CheckThrowAxe();
 
 	if (GameScreen::debug)
 	{
@@ -136,28 +145,6 @@ void Player::Update(float dt)
 		}
 	}
 
-
-	if (IsKeyPressed(KEY_SPACE))
-	{
-		
-		Rectangle rect = looking_right ? Rectangle{ pos().x + settings::tileSize,
-													pos().y - 22,
-													settings::tileSize,
-													settings::tileSize }
-										:Rectangle{ pos().x - settings::tileSize/2,
-													pos().y - 22,
-													settings::tileSize,
-													settings::tileSize };
-
-		LevelManager::level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
-	}
-
-	if (IsKeyPressed(KEY_LEFT_CONTROL))
-	{
-		//PlayOnceUninterupt("P_ATT1");
-		PlayFromFrame(5, "P_ATT1");
-		
-	}
 
 	// Update player in one possible state
 	switch (state)
@@ -186,33 +173,26 @@ void Player::LevelPortalCheck()
 		{
 			auto obj1 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
 			auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-			if (obj1 != nullptr && obj1->m_colliderTag == LEVEL_PORTAL && con->IsTouching())
+			if ((obj1 != nullptr && obj2 != nullptr && obj1->m_colliderTag == LEVEL_PORTAL && obj2->m_colliderTag == PLAYER && con->IsTouching()) ||
+				(obj2 != nullptr && obj1 != nullptr && obj2->m_colliderTag == LEVEL_PORTAL && obj1->m_colliderTag == PLAYER && con->IsTouching()))
 			{
-				std::cout << "test" << std::endl;
-				const LevelPortal& lpptr = static_cast<LevelPortal&>(*obj1);
-				auto ref = lpptr.m_iid_reference;
-				if (lpptr.is_active)
+				LevelPortal* lpptr = nullptr;
+				if (obj1->m_colliderTag == LEVEL_PORTAL)
 				{
-					GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
+					lpptr = static_cast<LevelPortal*>(obj1);
+				}
+				else
+				{
+					lpptr = static_cast<LevelPortal*>(obj2);
+				}
+				auto ref = lpptr->m_iid_reference;
+				if (lpptr->is_active)
+				{
+					
+					GameScreen::LevelMgr->LoadLevel(lpptr->m_to_level);
 					const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(ref);
 					Vector2 newPos{ (connected_portal.getPosition().x ) ,
 									(connected_portal.getPosition().y ) };
-					GameScreen::camera.target = newPos;
-					m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
-					break;
-				}
-			}
-			if (obj2 != nullptr && obj2->m_colliderTag == LEVEL_PORTAL && con->IsTouching())
-			{
-				std::cout << "test" << std::endl;
-				const LevelPortal& lpptr = static_cast<LevelPortal&>(*obj2);
-				auto ref = lpptr.m_iid_reference;
-				if (lpptr.is_active)
-				{
-					GameScreen::LevelMgr->LoadLevel(lpptr.m_to_level);
-					const ldtk::Entity& connected_portal = GameScreen::LevelMgr->currentLdtkLevel->getLayer("Entities").getEntity(ref);
-					Vector2 newPos{ (connected_portal.getPosition().x) ,
-									(connected_portal.getPosition().y) };
 					GameScreen::camera.target = newPos;
 					m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
 					break;
@@ -294,6 +274,47 @@ void Player::CheckWallTouch()
 
 			con = con->GetNext();
 		}
+	}
+}
+
+void Player::CheckAxeTouch()
+{
+	if (!m_has_axe)
+	{
+		m_has_axe = LevelManager::CheckAxeInSensor(*m_fixture);
+		if (m_has_axe)
+		{
+			LevelManager::RemoveAxeFromLevel(*axe);
+		}
+	}
+}
+
+void Player::CheckThrowAxe()
+{
+	if (IsKeyPressed(KEY_SPACE) && m_has_axe)
+	{
+
+		Rectangle rect = looking_right ? Rectangle{ pos().x + 16,
+													pos().y - 16,
+													6,
+													6 }
+										: Rectangle{pos().x - 16,
+													pos().y - 16,
+													6,
+													6 };
+
+		LevelManager::level_entities_safe.push_back(std::make_unique<FireAxe>(rect));
+		axe = reinterpret_cast<FireAxe*>(LevelManager::level_entities_safe.back().get());
+		axe->m_body->ApplyAngularImpulse(3.5f, true);
+		if (looking_right)
+		{
+			axe->m_body->ApplyLinearImpulseToCenter({ 140,-22 }, true);
+		}
+		else
+		{
+			axe->m_body->ApplyLinearImpulseToCenter({ -140,-22 }, true);
+		}
+		m_has_axe = false;
 	}
 }
 
@@ -490,7 +511,7 @@ void Player::UpdateFallingState(float dt)
 
 	if (is_touching_floor && m_body->GetLinearVelocity().y > m_ground_slam_vel)
 	{
-		PlayOnceUninterupt("P_GROUND");
+		PlayOnce("P_GROUND");
 	}
 	else if (is_touching_floor)
 	{
