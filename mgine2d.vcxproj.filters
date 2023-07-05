@@ -135,8 +135,11 @@
     <ClCompile Include="src\InfectedHazmat.cpp">
       <Filter>Pliki źródłowe\Entities\Enemies</Filter>
     </ClCompile>
+    <ClCompile Include="src\ContactListener.cpp">
+      <Filter>Pliki źródłowe\Systems\Physics</Filter>
+    </ClCompile>
     <ClCompile Include="src\FireAxe.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\Entities\Objects\Weapons</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -200,9 +203,6 @@
     <ClInclude Include="src\MovingBlock.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="src\Ramp.h">
-      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="src\WoodCrate.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
@@ -214,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="src\FireAxe.h">
       <Filter>Pliki nagłówkowe\Entities\Objects\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ContactListener.h">
+      <Filter>Pliki nagłówkowe\Systems\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -19,6 +19,7 @@
 #include "Platform.h"
 #include "InfectedHazmat.h"
 #include "FireAxe.h"
+#include "ContactListener.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
@@ -226,11 +227,12 @@ LevelManager::LevelManager()
 
 	laboratorySolidsSpriteAtlas = LoadTexture("res\\level\\lab2.png");
 	ldtkWorld = &ldtkProject->getWorld();
-	
+	contacts = new ContactListener();
 	world = new b2World(gravity);
+	world->SetContactListener(contacts);
 	Collidable::world = world;
 	LoadLevel("Level_0");
-	m_darkness_strength = 0.99f;
+	m_darkness_strength = 0.95f;
 
 }
 
@@ -252,7 +254,9 @@ void LevelManager::LoadLevel(std::string level_name)
 
 	if (world == nullptr)
 	{
+		contacts = new ContactListener();
 		world = new b2World(gravity);
+		world->SetContactListener(contacts);
 	}
 	Collidable::world = world;
 
@@ -515,6 +519,8 @@ void LevelManager::UnloadLevel()
 	{
 		// if we had an old world then delete it and recreate
 		// a new one for the new level
+		delete contacts;
+		contacts = nullptr;
 		delete world;
 		world = nullptr;
 	}
@@ -764,7 +770,6 @@ void LevelManager::SolidTilesToBigBoxes()
 
 }
 
-
 void LevelManager::DrawForeGround()
 {
 	Camera2D c = GameScreen::camera;
@@ -819,36 +824,4 @@ void LevelManager::Draw()
 
 }
 
-void ContactListener::BeginContact(b2Contact* contact)
-{
-	//auto bodyUserData1 = contact->GetFixtureA()->GetBody()->GetUserData().pointer;
-	//auto c1 = reinterpret_cast<Collidable*>(bodyUserData1);
-	//auto bodyUserData2 = contact->GetFixtureB()->GetBody()->GetUserData().pointer;
-	//auto c2 = reinterpret_cast<Collidable*>(bodyUserData2);
 
-	//if (c2->m_colliderTag == PLAYER)
-	//{
-	//	auto player = static_cast<Player*>(c2);
-	//	if (c1->m_colliderTag == SOLID)
-	//	{
-	//		player->is_touching_floor = true;
-	//	}
-	//}
-}
-
-void ContactListener::EndContact(b2Contact* contact)
-{
-	//auto bodyUserData1 = contact->GetFixtureA()->GetBody()->GetUserData().pointer;
-	//auto c1 = reinterpret_cast<Collidable*>(bodyUserData1);
-	//auto bodyUserData2 = contact->GetFixtureB()->GetBody()->GetUserData().pointer;
-	//auto c2 = reinterpret_cast<Collidable*>(bodyUserData2);
-
-	//if (c2->m_colliderTag == PLAYER)
-	//{
-	//	auto player = static_cast<Player*>(c2);
-	//	if (c1->m_colliderTag == SOLID)
-	//	{
-	//		player->is_touching_floor = false;
-	//	}
-	//}
-}

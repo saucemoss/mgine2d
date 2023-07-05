@@ -27,7 +27,6 @@ Player::Player()
 	NewBody();
 	InitAnimations();
 	state = PlayerState::Idle;
-	
 
 
 	// Add mappings for debug purposes
@@ -206,75 +205,29 @@ void Player::LevelPortalCheck()
 void Player::CheckTouchGround()
 {
 	is_touching_floor = false;
-	if (m_body->GetContactList() != nullptr)
+	if (GameScreen::LevelMgr->contacts->player_floor_contacts > 0)
 	{
-		auto con = m_body->GetContactList()->contact;
-		while (con != nullptr)
-		{
-			auto obj1 = reinterpret_cast<FixtureUserData*>(con->GetFixtureA()->GetUserData().pointer);
-			auto obj2 = reinterpret_cast<FixtureUserData*>(con->GetFixtureB()->GetUserData().pointer);
-			if (obj1 != nullptr && obj1->name == "feet_sensor" && con->IsTouching())
-			{
-				is_touching_floor = true;
-			}
-			if (obj2 != nullptr && obj2->name == "feet_sensor" && con->IsTouching())
-			{
-				is_touching_floor = true;
-			}
-			con = con->GetNext();
-		}
+		is_touching_floor = true;
 	}
+
 }
 
 void Player::CheckWallTouch()
 {
-	//this seems hacky and tragic honestly
 	left_wall_touch = false;
-	right_wall_touch = false;
-
-	if (m_body->GetContactList() != nullptr)
+	if (GameScreen::LevelMgr->contacts->player_left_wall_contacts > 0)
 	{
-		auto con = m_body->GetContactList()->contact;
-		while (con != nullptr)
-		{
-			auto obj1 = reinterpret_cast<FixtureUserData*>(con->GetFixtureA()->GetUserData().pointer);
-			if (obj1 != nullptr && obj1->name == "left_sensor" && con->IsTouching())
-			{
-				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
-				{
-					left_wall_touch = true;
-				}	
-			}
-			if (obj1 != nullptr && obj1->name == "right_sensor" && con->IsTouching())
-			{
-				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
-				{
-					right_wall_touch = true;
-				}
-			}
-			obj1 = reinterpret_cast<FixtureUserData*>(con->GetFixtureB()->GetUserData().pointer);
-			if (obj1 != nullptr && obj1->name == "left_sensor" && con->IsTouching())
-			{
-				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
-				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
-				{
-					left_wall_touch = true;
-				}
-			}
-			if (obj1 != nullptr && obj1->name == "right_sensor" && con->IsTouching())
-			{
-				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
-				if (obj2 != nullptr && (obj2->m_colliderTag == SOLID || obj2->m_colliderTag == M_BLOCK))
-				{
-					right_wall_touch = true;
-				}
-			}
-
-			con = con->GetNext();
-		}
+		left_wall_touch = true;
 	}
+
+	right_wall_touch = false;
+	if (GameScreen::LevelMgr->contacts->player_right_wall_contacts > 0)
+	{
+		right_wall_touch = true;
+	}
+
+
+
 }
 
 void Player::CheckAxeTouch()
@@ -376,6 +329,10 @@ void Player::Draw()
 		WHITE);
 
 	//EndShaderMode();
+
+	int t = GameScreen::LevelMgr->contacts->player_right_wall_contacts;
+
+	DrawText(std::to_string(t).c_str(), center_pos().x - 50, center_pos().y - 40, 40, RED);
 }
 
 void Player::InitAnimations()

@@ -4326,6 +4326,34 @@
 							"defUid": 227,
 							"px": [448,256],
 							"fieldInstances": []
+						},
+						{
+							"__identifier": "WoodCrate",
+							"__grid": [16,7],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": { "tilesetUid": 190, "x": 608, "y": 0, "w": 32, "h": 32 },
+							"__smartColor": "#FEAE34",
+							"iid": "192d4310-1460-11ee-bab3-073f5b63d8d1",
+							"width": 32,
+							"height": 32,
+							"defUid": 215,
+							"px": [512,224],
+							"fieldInstances": []
+						},
+						{
+							"__identifier": "WoodCrate",
+							"__grid": [16,6],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": { "tilesetUid": 190, "x": 608, "y": 0, "w": 32, "h": 32 },
+							"__smartColor": "#FEAE34",
+							"iid": "1ad48a70-1460-11ee-bab3-8d676d5d7266",
+							"width": 32,
+							"height": 32,
+							"defUid": 215,
+							"px": [512,192],
+							"fieldInstances": []
 						}
 					]
 				},

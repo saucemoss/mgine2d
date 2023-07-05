@@ -9,6 +9,7 @@
 #include "Entity.h"
 #include "Door.h"
 #include "FireAxe.h"
+#include "ContactListener.h"
 
 // Custom Blend Modes
 #define RLGL_SRC_ALPHA 0x0302
@@ -80,6 +81,7 @@ public:
     static bool CheckPlayerInSensor(b2Fixture& sensor);
     static bool CheckAxeInSensor(b2Fixture& sensor);
     void SolidTilesToBigBoxes();
+    ContactListener* contacts;
   
     //Textures definition
     //static background
@@ -112,10 +114,3 @@ public:
 
 };
 
-class ContactListener : public b2ContactListener
-{
-private:
-    void BeginContact(b2Contact* contact);
-    void EndContact(b2Contact* contact);
-    
-};

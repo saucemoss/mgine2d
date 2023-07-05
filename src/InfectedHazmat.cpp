@@ -186,6 +186,7 @@ void InfectedHazmat::CheckIfAxed()
 	{
 		Die();
 	}
+
 }
 
 void InfectedHazmat::set_velocity_x(float vx)
@@ -230,8 +231,11 @@ void InfectedHazmat::Draw()
 	{
 		DrawText("DEAD!", center_pos().x-50, center_pos().y-40, 40, RED);
 	}
-	//axe_vel_str = std::to_string(axe_vel);
-	//DrawText(axe_vel_str.c_str(), 200, 100, 20, BLACK);
+	if (LevelManager::CheckAxeInSensor(*m_fixture) &&
+		GameScreen::player->axe != nullptr)
+	{
+		DrawText("Contact!", center_pos().x - 50, center_pos().y - 40, 40, RED);
+	}
 
 }
 

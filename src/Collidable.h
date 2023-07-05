@@ -11,8 +11,6 @@
 #include <iostream>
 #include <b2_settings.h>
 
-
-
 class Collidable;
 
 enum ColliderTag {
