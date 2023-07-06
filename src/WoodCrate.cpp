@@ -4,7 +4,8 @@ WoodCrate::WoodCrate(const Rectangle& rect)
 	:
 	Collidable(rect, b2_dynamicBody, W_CRATE)
 {
-	
+	m_fixture->SetDensity(8.0f);
+	m_body->ResetMassData();
 	InitAnimations();
 	EnitityManager::Add(this);
 }

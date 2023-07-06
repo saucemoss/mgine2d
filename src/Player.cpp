@@ -99,6 +99,10 @@ void Player::NewBody()
 	m_right_sensor = m_body->CreateFixture(&right_sensor_def);
 	m_body->SetLinearDamping(linear_dumping);
 
+	//add some mass
+	m_fixture->SetDensity(8.0f);
+	m_body->ResetMassData();
+
 	//generously give axe
 	m_has_axe = true;
 }
@@ -120,8 +124,6 @@ void Player::Update(float dt)
 	CheckTouchGround();
 
 	CheckWallTouch();
-
-	CheckAxeTouch();
 
 	CheckThrowAxe();
 
@@ -159,6 +161,9 @@ void Player::Update(float dt)
 		break;
 	case PlayerState::Falling:
 		UpdateFallingState(dt);
+		break;
+	case PlayerState::Dying:
+		UpdateDyingState(dt);
 		break;
 	}
 }
@@ -202,6 +207,17 @@ void Player::LevelPortalCheck()
 	}
 }
 
+void Player::Die()
+{
+	if (!is_dying)
+	{
+		is_dying = true;
+		SetAnimation("P_MELT");
+		state = PlayerState::Dying;
+	}
+
+}
+
 void Player::CheckTouchGround()
 {
 	is_touching_floor = false;
@@ -230,28 +246,16 @@ void Player::CheckWallTouch()
 
 }
 
-void Player::CheckAxeTouch()
-{
-	if (!m_has_axe)
-	{
-		m_has_axe = LevelManager::CheckAxeInSensor(*m_fixture);
-		if (m_has_axe)
-		{
-			LevelManager::RemoveAxeFromLevel(*axe);
-		}
-	}
-}
-
 void Player::CheckThrowAxe()
 {
 	if (IsKeyPressed(KEY_SPACE) && m_has_axe)
 	{
 
-		Rectangle rect = looking_right ? Rectangle{ pos().x + 16,
+		Rectangle rect = looking_right ? Rectangle{ pos().x + 8,
 													pos().y - 16,
 													6,
 													6 }
-										: Rectangle{pos().x - 16,
+										: Rectangle{pos().x - 14,
 													pos().y - 16,
 													6,
 													6 };
@@ -312,12 +316,26 @@ void Player::Draw()
 	auto spritePosX = center_pos().x - 10;
 	auto spritePosY = center_pos().y - 12;
 
+	auto axe_spritePosX = center_pos().x +8;
+	auto axe_spritePosY = center_pos().y +6;
+
 	if(animations->m_CurrentActiveAnimation=="P_ATT1")
 	{
 		spritePosX = center_pos().x - 24;
 		spritePosY = center_pos().y - 28;
 	}
 	
+	if (m_has_axe)
+	{
+		DrawTexturePro(*axe_sprite,
+			{
+				10 * 32, 7 * 32,settings::tileSize,settings::tileSize
+			},
+			Rectangle{ axe_spritePosX,axe_spritePosY,settings::tileSize,settings::tileSize },
+			{ settings::tileSize / 2,settings::tileSize / 2 },
+			0,
+			WHITE);
+	}
 
 
 	//BeginShaderMode(shdrOutline);
@@ -331,12 +349,11 @@ void Player::Draw()
 	//EndShaderMode();
 
 	int t = GameScreen::LevelMgr->contacts->player_right_wall_contacts;
-
-	DrawText(std::to_string(t).c_str(), center_pos().x - 50, center_pos().y - 40, 40, RED);
 }
 
 void Player::InitAnimations()
 {
+	axe_sprite = TextureLoader::GetTexture("MOTHMAN");
 	animations->InitializePlayerAnimations();
 	SetAnimation("P_IDLE");
 }
@@ -487,6 +504,21 @@ void Player::UpdateFallingState(float dt)
 	{
 		set_velocity_x(speed);
 		looking_right = true;
+	}
+
+}
+
+void Player::UpdateDyingState(float dt)
+{
+	if (AnimationEnded())
+	{
+		is_dying = false;
+		state = PlayerState::Idle;
+		Vector2 newPos{ 50 ,
+						250 };
+		GameScreen::camera.target = newPos;
+		m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
+		GameScreen::LevelMgr->LoadLevel("Level_0");
 	}
 
 }

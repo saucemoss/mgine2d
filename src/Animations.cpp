@@ -72,6 +72,7 @@ void Animations::InitializePlayerAnimations()
 	jump_anim1->SetCustomFrameTime(2, 0.14f);
 	jump_anim1->SetCustomFrameTime(3, 0.5f);
 	animations.emplace("P_JUMP1", *jump_anim1);
+	animations.emplace("P_MELT", *(new Animation(texture, 10, 16, 32, 0.06f)));
 
 	animations.emplace("P_RUN", *(new Animation(texture, 5, 6, 32, 0.08f)));
 	animations.emplace("P_GROUND", *(new Animation(texture, 7, 1, 32, 0.08f)));

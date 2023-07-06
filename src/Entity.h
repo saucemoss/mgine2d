@@ -23,12 +23,15 @@ public:
 
 	static void Update(float dt)
 	{
-
 		for (Entity* e : EntityList)
 		{
-			if (!e->m_destroy)
+			e->Update(dt);
+		}
+		for (int i = 0; i < EntityList.size(); i++)
+		{
+			if (EntityList[i]->m_destroy)
 			{
-				e->Update(dt);
+				Remove(EntityList[i]);
 			}
 		}
 	}
@@ -39,14 +42,6 @@ public:
 			if (e->m_draw_layer == draw_layer && !e->m_destroy)
 			{
 				e->Draw();
-			}
-		}
-
-		for (int i = 0; i < EntityList.size(); i++)
-		{
-			if (EntityList[i]->m_destroy)
-			{
-				Remove(EntityList[i]);
 			}
 		}
 

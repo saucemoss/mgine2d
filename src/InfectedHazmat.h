@@ -28,7 +28,6 @@ public:
     void CheckAgroSensor();
     void CheckTouchGround();
     void CheckPlayerTouch();
-    void CheckIfAxed();
     void set_velocity_x(float vx);
     void set_velocity_y(float vy);
     void set_velocity_xy(float vx, float vy);

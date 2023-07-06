@@ -1,4 +1,5 @@
 #include "FireAxe.h"
+#include "LevelManager.h"
 
 FireAxe::FireAxe(const Rectangle& rect) :
 	Collidable(rect, b2_dynamicBody, FIREAXE)
@@ -47,13 +48,10 @@ void FireAxe::Draw()
 
 void FireAxe::Update(float dt)
 {
-	m_rectangle =
+	if (m_destroy)
 	{
-		pos().x - m_rectangle.width / 2,
-		pos().y - m_rectangle.height / 2,
-		m_rectangle.width,
-		m_rectangle.height
-	};
+		LevelManager::world->DestroyBody(m_body);
+	}
 }
 
 void FireAxe::InitAnimations()

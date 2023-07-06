@@ -19,6 +19,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	//add more mass 
 	m_fixture->SetDensity(20.0f);
 	m_body->ResetMassData();
+
 	//feet collider box
 	b2PolygonShape feet_sesnor_box;
 	feet_sesnor_box.SetAsBox(0.3f, 0.3f, b2Vec2(0, 0.80f), 0);
@@ -98,9 +99,6 @@ void InfectedHazmat::Update(float dt)
 	CheckPlayerTouch();
 	CheckTouchGround();
 	CheckAgroSensor();
-	CheckIfAxed();
-
-
 
 	switch (state)
 	{
@@ -172,23 +170,6 @@ void InfectedHazmat::CheckPlayerTouch()
 	right_player_touch = LevelManager::CheckPlayerInSensor(*m_right_sensor);
 }
 
-void InfectedHazmat::CheckIfAxed()
-{
-	if (LevelManager::CheckAxeInSensor(*m_fixture) &&
-		GameScreen::player->axe != nullptr)
-	{
-		axe_vel = fabs(GameScreen::player->axe->m_body->GetLinearVelocity().x);
-	}
-	if (LevelManager::CheckAxeInSensor(*m_fixture) &&
-		GameScreen::player->axe != nullptr &&
-		(fabs(GameScreen::player->axe->m_body->GetLinearVelocity().x) > 5.0f ||
-		 fabs(GameScreen::player->axe->m_body->GetLinearVelocity().y) > 5.0f))
-	{
-		Die();
-	}
-
-}
-
 void InfectedHazmat::set_velocity_x(float vx)
 {
 	m_body->SetLinearVelocity({
@@ -230,11 +211,7 @@ void InfectedHazmat::Draw()
 		state == InfectedHazmatState::Attacking)
 	{
 		DrawText("DEAD!", center_pos().x-50, center_pos().y-40, 40, RED);
-	}
-	if (LevelManager::CheckAxeInSensor(*m_fixture) &&
-		GameScreen::player->axe != nullptr)
-	{
-		DrawText("Contact!", center_pos().x - 50, center_pos().y - 40, 40, RED);
+		GameScreen::player->Die();
 	}
 
 }

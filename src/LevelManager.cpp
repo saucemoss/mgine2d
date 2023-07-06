@@ -98,10 +98,9 @@ void LevelManager::DrawLightMask(LightInfo& light)
 	EndTextureMode();
 }
 
-void LevelManager::RemoveAxeFromLevel(FireAxe& axe)
+void LevelManager::RemoveEntityFromLevel(Entity& e)
 {
-	axe.m_destroy = true;
-	LevelManager::world->DestroyBody(axe.m_body);
+	e.m_destroy = true;
 }
 
 bool LevelManager::UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light_walls)
@@ -676,37 +675,6 @@ bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)
 		}
 	}
 	return player_in_sensor;
-}
-
-bool LevelManager::CheckAxeInSensor(b2Fixture& sensor)
-{
-	bool axe_in_sensor = false;
-	if (sensor.GetBody()->GetContactList() != nullptr)
-	{
-		auto con = sensor.GetBody()->GetContactList()->contact;
-		while (con != nullptr)
-		{
-			Collidable* axePtr = nullptr;
-			if (con->GetFixtureA() == &sensor)
-			{
-				axePtr = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-			}
-			else if (con->GetFixtureB() == &sensor)
-			{
-				axePtr = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
-			}
-
-			if (axePtr != nullptr && axePtr->m_colliderTag == FIREAXE && con->IsTouching())
-			{
-				return true;
-			}
-			else
-			{
-				con = con->GetNext();
-			}
-		}
-	}
-	return axe_in_sensor;
 }
 
 void LevelManager::SolidTilesToBigBoxes()

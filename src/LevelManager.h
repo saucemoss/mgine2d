@@ -64,7 +64,7 @@ public:
     void MoveLight(LightInfo& light, float x, float y);
     void ComputeShadowVolumeForEdge(LightInfo& light, Vector2 sp, Vector2 ep);
     void DrawLightMask(LightInfo& light);
-    static void RemoveAxeFromLevel(FireAxe& axe);
+    static void RemoveEntityFromLevel(Entity& e);
     bool UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light_walls);
     void SetupBoxes();
     //m_lights
@@ -79,7 +79,6 @@ public:
     //physics
     b2Vec2 gravity = b2Vec2(0.0f, 80.0f);
     static bool CheckPlayerInSensor(b2Fixture& sensor);
-    static bool CheckAxeInSensor(b2Fixture& sensor);
     void SolidTilesToBigBoxes();
     ContactListener* contacts;
   
