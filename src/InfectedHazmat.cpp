@@ -36,7 +36,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 
 	//player agro sensor
 	b2PolygonShape agro_sesnor_box;
-	agro_sesnor_box.SetAsBox(5.0f, 2.0f, b2Vec2(0.0, -1), 0);
+	agro_sesnor_box.SetAsBox(2.0f, 2.0f, b2Vec2(-3.0, 0.0), 0);
 	//fixture user data
 	FixtureUserData* agroSensorName = new FixtureUserData;
 	agroSensorName->name = "agro_sensor";
@@ -47,6 +47,47 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	agroDef.userData.pointer = reinterpret_cast<uintptr_t>(agroSensorName);
 	//create fixture using definition
 	m_agro_sensor = m_body->CreateFixture(&agroDef);
+
+	
+	b2PolygonShape agro_sesnor_box2;
+	agro_sesnor_box2.SetAsBox(-2.0f, 2.0f, b2Vec2(3.0, 0.0), 0);
+	//fixture user data
+	FixtureUserData* agroSensorName2 = new FixtureUserData;
+	agroSensorName2->name = "agro_sensor";
+	//fixture definition
+	b2FixtureDef agroDef2;
+	agroDef2.isSensor = true;
+	agroDef2.shape = &agro_sesnor_box2;
+	agroDef2.userData.pointer = reinterpret_cast<uintptr_t>(agroSensorName2);
+	//create fixture using definition
+	m_body->CreateFixture(&agroDef2);
+
+
+	//proximity sensor (used for animation purposes)
+	b2PolygonShape proximity_sesnor_box1;
+	proximity_sesnor_box1.SetAsBox(0.2f, 0.2f, b2Vec2(2.0, 1.1), 0);
+	//fixture user data
+	FixtureUserData* proximitySensorName1 = new FixtureUserData;
+	proximitySensorName1->name = "proximity_sensor";
+	//fixture definition
+	b2FixtureDef proximityDef1;
+	proximityDef1.isSensor = true;
+	proximityDef1.shape = &proximity_sesnor_box1;
+	proximityDef1.userData.pointer = reinterpret_cast<uintptr_t>(proximitySensorName1);
+	//create fixture using definition
+	m_body->CreateFixture(&proximityDef1);
+	b2PolygonShape proximity_sesnor_box2;
+	proximity_sesnor_box2.SetAsBox(0.2f, 0.2f, b2Vec2(-2.0, 1.1), 0);
+	//fixture user data
+	FixtureUserData* proximitySensorName2 = new FixtureUserData;
+	proximitySensorName2->name = "proximity_sensor";
+	//fixture definition
+	b2FixtureDef proximityDef2;
+	proximityDef2.isSensor = true;
+	proximityDef2.shape = &proximity_sesnor_box2;
+	proximityDef2.userData.pointer = reinterpret_cast<uintptr_t>(proximitySensorName2);
+	//create fixture using definition
+	m_body->CreateFixture(&proximityDef2);
 
 	//attack sensor
 	b2PolygonShape attack_sesnor_box;
@@ -121,16 +162,25 @@ void InfectedHazmat::Update(float dt)
 
 }
 
-void InfectedHazmat::Die()
+void InfectedHazmat::Die(int death_option)
 {
 	m_body->SetEnabled(false);
-	SetAnimation("IH_DEATH");
+
+	switch (death_option)
+	{
+	case 1:
+		SetAnimation("IH_DEATH");
+		break;
+	case 2:
+		solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
+		break;
+	}
+	
 	state = InfectedHazmatState::Dying;
 }
 
 void InfectedHazmat::CheckAgroSensor()
 {
-	player_in_agro = LevelManager::CheckPlayerInSensor(*m_agro_sensor);
 	if (player_in_agro && GameScreen::player->center_pos().x > center_pos().x)
 	{
 		looking_right = true;
@@ -193,12 +243,20 @@ void InfectedHazmat::set_velocity_xy(float vx, float vy)
 
 void InfectedHazmat::Draw()
 {
-	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{ CurrentFrame().x,
-																CurrentFrame().y,
-																CurrentFrame().width * -1,
-																CurrentFrame().height };
+	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
+																	CurrentFrame().y,
+																	CurrentFrame().width * -1,
+																	CurrentFrame().height };
 	auto spritePosX = center_pos().x - 10;
-	auto spritePosY = center_pos().y - 2 ;
+	auto spritePosY = center_pos().y - 1 ;
+
+
+	if (CurrentFrame().width==96)
+	{
+		spritePosX = center_pos().x-42;
+		spritePosY = center_pos().y-33;
+	}
+
 	DrawTexturePro(*animation->GetTexture(),
 		cframe,
 		Rectangle{ spritePosX,spritePosY,CurrentFrame().width,CurrentFrame().height },
@@ -207,13 +265,13 @@ void InfectedHazmat::Draw()
 		WHITE);
 
 	if (animation->GetCurrentFrameNum() >= 6 && 
-		LevelManager::CheckPlayerInSensor(*m_attack_sensor) &&
+		player_in_dmg_zone &&
 		state == InfectedHazmatState::Attacking)
 	{
 		DrawText("DEAD!", center_pos().x-50, center_pos().y-40, 40, RED);
 		GameScreen::player->Die();
 	}
-
+	//DrawText(std::to_string(solid_contacts).c_str(), center_pos().x - 50, center_pos().y - 40, 40, RED);
 }
 
 void InfectedHazmat::InitAnimations()
@@ -272,15 +330,15 @@ void InfectedHazmat::UpdateAttackingState(float dt)
 		SetAnimation("IH_IDLE");
 		state = InfectedHazmatState::Idle;
 	}
-	if (IsKeyPressed(KEY_E))
-	{
-		SetAnimation("IH_DMG");
-		state = InfectedHazmatState::Hurting;
-	}
-	if (IsKeyPressed(KEY_F))
-	{
-		Die();
-	}
+	//if (IsKeyPressed(KEY_E))
+	//{
+	//	SetAnimation("IH_DMG");
+	//	state = InfectedHazmatState::Hurting;
+	//}
+	//if (IsKeyPressed(KEY_F))
+	//{
+	//	Die(1);
+	//}
 }
 
 void InfectedHazmat::UpdateHurtingState(float dt)

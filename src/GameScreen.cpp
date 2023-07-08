@@ -55,12 +55,12 @@ void GameScreen::UpdateCamera(float dt)
 	if (camera.zoom > 3.0f) camera.zoom = 3.0f;
 	else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
 
-	// Camera reset (zoom and rotation)
-	if (IsKeyPressed(KEY_R))
-	{
-		camera.zoom = 1.0f;
-		camera.rotation = 0.0f;
-	}
+	//// Camera reset (zoom and rotation)
+	//if (IsKeyPressed(KEY_R))
+	//{
+	//	camera.zoom = 1.0f;
+	//	camera.rotation = 0.0f;
+	//}
 
 	static float minSpeed = 1.0f;
 	static float minEffectLength = 5.0f;
@@ -107,12 +107,12 @@ void GameScreen::UpdateCamera(float dt)
 Screens GameScreen::Update(float dt)
 {
 	//full screen at current screensize
-	if (IsKeyPressed(KEY_F11))
+	if (IsKeyPressed(KEY_F11) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_LEFT))
 	{
 		ToggleFullscreen();
 	}
 
-	if (IsKeyPressed(KEY_ONE))
+	if (IsKeyPressed(KEY_ONE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_RIGHT))
 	{
 		debug = !debug;
 	}
@@ -142,7 +142,10 @@ void GameScreen::Draw()
 	{
 		////player states
 		//std::string stateStr = "State: " + player->StatesStrMap[player->state];
-		//DrawText(stateStr.c_str(), player->x, player->y-50, 20, BLACK);
+		//DrawText(stateStr.c_str(), player->center_pos().x, player->center_pos().y -50, 20, BLACK);
+
+		
+		DrawText(std::to_string(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)).c_str(), player->center_pos().x, player->center_pos().y - 50, 20, BLACK);
 		////player animations
 		//std::string animStr = "Anim: " + player->animations->m_CurrentActiveAnimation + " :: " +
 		//	std::to_string(player->animations->GetAnimation(player->animations->m_CurrentActiveAnimation)->GetCurrentFrameNum());

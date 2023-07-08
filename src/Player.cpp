@@ -125,8 +125,6 @@ void Player::Update(float dt)
 
 	CheckWallTouch();
 
-	CheckThrowAxe();
-
 	if (GameScreen::debug)
 	{
 		contact_debug_str = "";
@@ -164,6 +162,12 @@ void Player::Update(float dt)
 		break;
 	case PlayerState::Dying:
 		UpdateDyingState(dt);
+		break;
+	case PlayerState::Throwing:
+		UpdateThrowingState(dt);
+		break;
+	case PlayerState::Attacking:
+		UpdateAttackingState(dt);
 		break;
 	}
 }
@@ -246,35 +250,6 @@ void Player::CheckWallTouch()
 
 }
 
-void Player::CheckThrowAxe()
-{
-	if (IsKeyPressed(KEY_SPACE) && m_has_axe)
-	{
-
-		Rectangle rect = looking_right ? Rectangle{ pos().x + 8,
-													pos().y - 16,
-													6,
-													6 }
-										: Rectangle{pos().x - 14,
-													pos().y - 16,
-													6,
-													6 };
-
-		LevelManager::level_entities_safe.push_back(std::make_unique<FireAxe>(rect));
-		axe = reinterpret_cast<FireAxe*>(LevelManager::level_entities_safe.back().get());
-		axe->m_body->ApplyAngularImpulse(3.5f, true);
-		if (looking_right)
-		{
-			axe->m_body->ApplyLinearImpulseToCenter({ 140,-22 }, true);
-		}
-		else
-		{
-			axe->m_body->ApplyLinearImpulseToCenter({ -140,-22 }, true);
-		}
-		m_has_axe = false;
-	}
-}
-
 void Player::set_velocity_x(float vx)
 {
 
@@ -325,7 +300,7 @@ void Player::Draw()
 		spritePosY = center_pos().y - 28;
 	}
 	
-	if (m_has_axe)
+	if (m_has_axe && !is_dying)
 	{
 		DrawTexturePro(*axe_sprite,
 			{
@@ -347,8 +322,6 @@ void Player::Draw()
 		WHITE);
 
 	//EndShaderMode();
-
-	int t = GameScreen::LevelMgr->contacts->player_right_wall_contacts;
 }
 
 void Player::InitAnimations()
@@ -360,13 +333,14 @@ void Player::InitAnimations()
 
 void Player::UpdateIdleState(float dt)
 {
-	if (IsKeyPressed(KEY_UP) && is_touching_floor)
+	if ((IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
+		&& is_touching_floor)
 	{
 		set_velocity_y(-jump_force);
 		state = PlayerState::Jumping;
 		SetAnimation("P_JUMP");
 	}
-	else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT))
+	else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) != 0.0f)
 	{
 		SetAnimation("P_RUN");
 		state = PlayerState::Running;
@@ -378,34 +352,55 @@ void Player::UpdateIdleState(float dt)
 		SetAnimation("P_FALL");
 	}
 
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	{
+		SetAnimation("P_AXE_THROW1");
+		state = PlayerState::Throwing;
+	}
+
 }
 
 void Player::UpdateRunningState(float dt)
 {
-	if (IsKeyPressed(KEY_UP) && (is_touching_floor || coyote_time_counter > 0))
+	if ((IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
+		&& (is_touching_floor || coyote_time_counter > 0))
 	{
 		set_velocity_y(-jump_force);
 		state = PlayerState::Jumping;
 		SetAnimation("P_JUMP");
 	}
-	else if (!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT))
+	else if ((!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT) && !IsGamepadAvailable(0)) ||
+		fabs(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)) == 0.0f)
 	{
 		state = PlayerState::Idle;
 		set_velocity_x(0.0f);
 		SetAnimation("P_IDLE");
 	}
-	else if (IsKeyDown(KEY_LEFT))
+	else if (IsKeyDown(KEY_LEFT) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) < 0.0f)
 	{
-		state = PlayerState::Running;
 		set_velocity_x(-speed);
-		looking_right = false;
+
+		if (face_turning_counter <= 0.0f)
+		{
+			looking_right = false;
+			face_turning_counter = 0.1f;
+		}
+		face_turning_counter -= dt;
 	}
-	else if (IsKeyDown(KEY_RIGHT))
+	else if (IsKeyDown(KEY_RIGHT) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) > 0.0f)
 	{
-		state = PlayerState::Running;
 		set_velocity_x(speed);
-		looking_right = true;
+
+		if (face_turning_counter <= 0.0f)
+		{
+			looking_right = true;
+			face_turning_counter = 0.1f;
+		}
+		face_turning_counter -= dt;
 	}
+
+
+
 
 
 	if (m_body->GetLinearVelocity().y >= 0 && !is_touching_floor)
@@ -414,13 +409,20 @@ void Player::UpdateRunningState(float dt)
 		SetAnimation("P_FALL");
 	}
 
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	{
+		SetAnimation("P_AXE_THROW1");
+		state = PlayerState::Throwing;
+	}
+
 }
 
 void Player::UpdateJumpingState(float dt)
 {
 	
 	coyote_time_counter = 0;
-	if (m_body->GetLinearVelocity().y < 0.0f && IsKeyDown(KEY_UP))
+	if (m_body->GetLinearVelocity().y < 0.0f && 
+		(IsKeyPressed(KEY_UP) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)))
 	{
 		set_velocity_y(m_body->GetLinearVelocity().y - jump_add);
 	}
@@ -441,15 +443,31 @@ void Player::UpdateJumpingState(float dt)
 	}
 
 	
-	if (IsKeyDown(KEY_LEFT))
+	if (IsKeyDown(KEY_LEFT) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) < 0.0f)
 	{
 		set_velocity_x(-speed);
-		looking_right = false;
+		if (face_turning_counter <= 0.0f)
+		{
+			looking_right = false;
+			face_turning_counter = 0.1f;
+		}
+		face_turning_counter -= dt;
 	}
-	if (IsKeyDown(KEY_RIGHT))
+	if (IsKeyDown(KEY_LEFT) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) > 0.0)
 	{
 		set_velocity_x(speed);
-		looking_right = true;
+		if (face_turning_counter <= 0.0f)
+		{
+			looking_right = true;
+			face_turning_counter = 0.1f;
+		}
+		face_turning_counter -= dt;
+	}
+
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	{
+		SetAnimation("P_AXE_THROW1");
+		state = PlayerState::Throwing;
 	}
 }
 
@@ -465,7 +483,7 @@ void Player::UpdateFallingState(float dt)
 		coyote_time_counter -= dt;
 	}
 
-	if (IsKeyPressed(KEY_UP))
+	if ((IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)))
 	{
 		jump_buffer_counter = jump_buffer_time;
 	}
@@ -495,15 +513,31 @@ void Player::UpdateFallingState(float dt)
 			state = PlayerState::Idle;
 		}
 	}
-	else if (IsKeyDown(KEY_LEFT))
+	else if (IsKeyDown(KEY_LEFT) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) < -0.0f)
 	{
 		set_velocity_x(-speed);
-		looking_right = false;
+		if (face_turning_counter <= 0.0f)
+		{
+			looking_right = false;
+			face_turning_counter = 0.1f;
+		}
+		face_turning_counter -= dt;
 	}
-	else if (IsKeyDown(KEY_RIGHT))
+	else if (IsKeyDown(KEY_LEFT) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) > 0.0)
 	{
 		set_velocity_x(speed);
-		looking_right = true;
+		if (face_turning_counter <= 0.0f)
+		{
+			looking_right = true;
+			face_turning_counter = 0.1f;
+		}
+		face_turning_counter -= dt;
+	}
+
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	{
+		SetAnimation("P_AXE_THROW1");
+		state = PlayerState::Throwing;
 	}
 
 }
@@ -520,6 +554,65 @@ void Player::UpdateDyingState(float dt)
 		m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
 		GameScreen::LevelMgr->LoadLevel("Level_0");
 	}
+
+}
+
+void Player::UpdateThrowingState(float dt)
+{
+	
+	if(AnimationEnded() || !IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2) || (IsKeyUp(KEY_SPACE) && !IsGamepadAvailable(0)))
+	{
+		if (!axe_anim_thrown)
+		{
+			SetAnimation("P_AXE_THROW2");
+			axe_anim_thrown = true;
+			Rectangle rect = looking_right ? Rectangle{ pos().x + 8,
+											pos().y - 16,
+											6,
+											6 }
+											: Rectangle{ pos().x - 14,
+														pos().y - 16,
+														6,
+														6 };
+
+			LevelManager::level_entities_safe.push_back(std::make_unique<FireAxe>(rect));
+			axe = reinterpret_cast<FireAxe*>(LevelManager::level_entities_safe.back().get());
+			axe->m_body->ApplyAngularImpulse(3.5f, true);
+			if (looking_right)
+			{
+				axe->m_body->ApplyLinearImpulseToCenter({ 140 + axe_throw_pwr_counter * 200,-22 }, true);
+			}
+			else
+			{
+				axe->m_body->ApplyLinearImpulseToCenter({ -140 - axe_throw_pwr_counter * 200,-22 }, true);
+			}
+		}
+		if (AnimationEnded())
+		{
+			SetAnimation("P_IDLE");
+			state = PlayerState::Idle;
+			axe_anim_thrown = false;
+			axe_throw_pwr_counter = 0;
+		}
+	}
+	else
+	{
+		m_has_axe = false;
+		axe_throw_pwr_counter += dt;
+		if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT))
+		{
+			SetAnimation("P_IDLE");
+			state = PlayerState::Idle;
+			axe_anim_thrown = false;
+			axe_throw_pwr_counter = 0;
+			m_has_axe = true;
+		}
+
+	}
+}
+
+void Player::UpdateAttackingState(float dt)
+{
 
 }
 

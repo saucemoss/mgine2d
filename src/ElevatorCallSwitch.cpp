@@ -28,7 +28,7 @@ void ElevatorCallSwitch::Update(float dt)
 	{
 	case ECallSwitchState::IDLE:
 
-		if (player_in_sensor && IsKeyPressed(KEY_E) )
+		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)))
 		{
 			SetAnimation("ELEV_SW_PRESSED");
 			CallElevator();

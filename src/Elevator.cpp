@@ -77,13 +77,13 @@ void Elevator::Update(float dt)
 	switch (state)
 	{
 	case ElevatorState::START_LEVEL:
-		if (player_in_sensor && IsKeyPressed(KEY_E) && 
+		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) &&
 			pos().y == m_levels[0].value())
 		{
 			state = ElevatorState::GOING_DOWN;
 			m_current_level = 0;
 		}
-		else if (player_in_sensor && IsKeyPressed(KEY_E))
+		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)))
 		{
 			state = ElevatorState::GOING_UP;
 			m_current_level = m_levels.size();
@@ -100,7 +100,7 @@ void Elevator::Update(float dt)
 			state = ElevatorState::NEXT_LEVEL;
 		}
 
-		if (player_in_sensor && IsKeyPressed(KEY_E) && m_current_level != 0) //change of dir
+		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level != 0) //change of dir
 		{
 			state = ElevatorState::GOING_UP;
 		}
@@ -117,27 +117,27 @@ void Elevator::Update(float dt)
 			state = ElevatorState::PREVIOUS_LEVEL;
 		}
 
-		if (player_in_sensor && IsKeyPressed(KEY_E) && m_current_level != m_levels.size() - 1) //change of dir
+		if (player_in_sensor && (IsKeyPressed(KEY_E)|| IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level != m_levels.size() - 1) //change of dir
 		{
 			state = ElevatorState::GOING_DOWN;
 		}
 		break;
 	case ElevatorState::NEXT_LEVEL:
-		if (player_in_sensor && IsKeyPressed(KEY_E) && m_current_level == m_levels.size()-1)
+		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == m_levels.size()-1)
 		{
 			state = ElevatorState::GOING_UP; // last level
 		}
-		else if (player_in_sensor && IsKeyPressed(KEY_E))
+		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)))
 		{
 			state = ElevatorState::GOING_DOWN;
 		} 
 		break;
 	case ElevatorState::PREVIOUS_LEVEL:
-		if (player_in_sensor && IsKeyPressed(KEY_E) && m_current_level == 0)
+		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == 0)
 		{
 			state = ElevatorState::GOING_DOWN; // first level
 		}
-		else if (player_in_sensor && IsKeyPressed(KEY_E))
+		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)))
 		{
 			state = ElevatorState::GOING_UP;
 		}
@@ -170,19 +170,19 @@ void Elevator::Update(float dt)
 		}
 		break;
 	case ElevatorState::AT_SW:
-		if (player_in_sensor && IsKeyPressed(KEY_E) && m_current_level == 0)
+		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == 0)
 		{
 			state = ElevatorState::GOING_DOWN; // first level
 		}
-		else if (player_in_sensor && IsKeyPressed(KEY_E) && m_current_level == m_levels.size() - 1)
+		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == m_levels.size() - 1)
 		{
 			state = ElevatorState::GOING_UP;
 		}
-		else if (player_in_sensor && IsKeyPressed(KEY_E) && !m_going_up)
+		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !m_going_up)
 		{
 			state = ElevatorState::GOING_DOWN;
 		}
-		else if (player_in_sensor && IsKeyPressed(KEY_E) && m_going_up)
+		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_going_up)
 		{
 			state = ElevatorState::GOING_UP;
 		}

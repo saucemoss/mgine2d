@@ -89,8 +89,10 @@ void ContactListener::BeginContact(b2Contact* contact)
 
 		if (other == "FIREAXE" && (nameA == "PLAYER" || nameB == "PLAYER"))
 		{
+
 			GameScreen::player->axe->m_destroy = true;	
 			GameScreen::player->m_has_axe = true;
+			
 		}
 	}
 	
@@ -107,6 +109,19 @@ void ContactListener::BeginContact(b2Contact* contact)
 		{
 			e = static_cast<InfectedHazmat*>(c2);
 			other = nameA;
+		}
+		if ((other == "SOLID") && (nameA == "proximity_sensor" || nameB == "proximity_sensor") && contact->IsTouching())
+		{
+			e->solid_contacts++;
+		}
+
+		if ((other == "PLAYER") && (nameA == "agro_sensor" || nameB == "agro_sensor"))
+		{
+			e->player_in_agro = true;
+		}
+		if ((other == "PLAYER") && (nameA == "attack_sensor" || nameB == "attack_sensor"))
+		{
+			e->player_in_dmg_zone = true;
 		}
 	}
 }
@@ -173,7 +188,34 @@ void ContactListener::EndContact(b2Contact* contact)
 
 	}
 	
+	//Enemy contacts
+	{
+		std::string other = "";
+		InfectedHazmat* e = nullptr;
+		if (c1->m_colliderTag == INFECTED_H)
+		{
+			e = static_cast<InfectedHazmat*>(c1);
+			other = nameB;
+		}
+		else if (c2->m_colliderTag == INFECTED_H)
+		{
+			e = static_cast<InfectedHazmat*>(c2);
+			other = nameA;
+		}
+		if ((other == "SOLID") && (nameA == "proximity_sensor" || nameB == "proximity_sensor") && !contact->IsTouching())
+		{
+			e->solid_contacts--;
+		}
 
+		if ((other == "PLAYER") && (nameA == "agro_sensor" || nameB == "agro_sensor"))
+		{
+			e->player_in_agro = false;
+		}
+		if ((other == "PLAYER") && (nameA == "attack_sensor" || nameB == "attack_sensor"))
+		{
+			e->player_in_dmg_zone = false;
+		}
+	}
 	
 }
 
@@ -228,12 +270,21 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 		if (other == "FIREAXE" && contact->IsTouching() &&
 			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
 		{
-			//std::cout << impulse->normalImpulses[0] << std::endl;
-			//std::cout << impulse->normalImpulses[1] << std::endl;
-			if (impulse->normalImpulses[0] > 40.0f || impulse->normalImpulses[1] > 40.0f)
+
+			if (impulse->normalImpulses[0] > 190.0f || impulse->normalImpulses[1] > 190.0f)
 			{
-				e->Die();
+				e->Die(2);
 			}
+			else if (impulse->normalImpulses[0] >35.0f || impulse->normalImpulses[1] > 35.0f)
+			{
+				e->Die(1);
+			}
+			else
+			{
+				//std::cout << impulse->normalImpulses[0] << std::endl;
+				//std::cout << impulse->normalImpulses[1] << std::endl;
+			}
+
 		}
 	}
 }

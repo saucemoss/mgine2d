@@ -36,6 +36,31 @@ void Animations::InitializeInfectedHAnimations()
 	IH_DEATH->SetCustomFrameTime(9, 0.12f);
 	IH_DEATH->SetCustomFrameTime(10, 3.12f);
 	animations.emplace("IH_DEATH", *IH_DEATH);
+
+	Animation* IH_DEATH2 = new Animation(texture, 2, 16, 96, 0.04f);
+	IH_DEATH2->SetCustomFrameTime(7, 0.05f);
+	IH_DEATH2->SetCustomFrameTime(8, 0.05f);
+	IH_DEATH2->SetCustomFrameTime(9, 0.05f);
+	IH_DEATH2->SetCustomFrameTime(10, 0.06f);
+	IH_DEATH2->SetCustomFrameTime(11, 0.08f);
+	IH_DEATH2->SetCustomFrameTime(12, 0.10f);
+	IH_DEATH2->SetCustomFrameTime(13, 0.12f);
+	IH_DEATH2->SetCustomFrameTime(14, 0.22f);
+	IH_DEATH2->SetCustomFrameTime(15, 0.52f);
+	IH_DEATH2->SetCustomFrameTime(16, 1.12f);
+	animations.emplace("IH_DEATH2", *IH_DEATH2);
+
+	Animation* IH_DEATH3 = new Animation(texture, 3, 16, 96, 0.04f);
+	IH_DEATH3->SetCustomFrameTime(7, 0.05f);
+	IH_DEATH3->SetCustomFrameTime(8, 0.05f);
+	IH_DEATH3->SetCustomFrameTime(9, 0.05f);
+	IH_DEATH3->SetCustomFrameTime(10, 0.06f);
+	IH_DEATH3->SetCustomFrameTime(11, 0.08f);
+	IH_DEATH3->SetCustomFrameTime(12, 0.08f);
+	IH_DEATH3->SetCustomFrameTime(13, 0.08f);
+	IH_DEATH3->SetCustomFrameTime(14, 0.08f);
+	animations.emplace("IH_DEATH3", *IH_DEATH3);
+
 }
 
 void Animations::InitializeDecorAnimations()
@@ -73,6 +98,29 @@ void Animations::InitializePlayerAnimations()
 	jump_anim1->SetCustomFrameTime(3, 0.5f);
 	animations.emplace("P_JUMP1", *jump_anim1);
 	animations.emplace("P_MELT", *(new Animation(texture, 10, 16, 32, 0.06f)));
+	animations.emplace("P_SHOOT", *(new Animation(texture, 11, 1, 32, 0.16f)));
+	animations.emplace("P_AXE_PICK", *(new Animation(texture, 13, 1, 32, 0.16f)));
+	
+	Animation* P_AXE_THROW1 = new Animation(texture, 14, 16, 32, 0.09f);
+	P_AXE_THROW1->SetCustomFrameTime(1, 0.04f);
+	P_AXE_THROW1->SetCustomFrameTime(2, 0.04f);
+	P_AXE_THROW1->SetCustomFrameTime(3, 0.06f);
+	P_AXE_THROW1->SetCustomFrameTime(4, 0.06f);
+	P_AXE_THROW1->SetCustomFrameTime(5, 0.08f);
+	P_AXE_THROW1->SetCustomFrameTime(6, 0.10f);
+	P_AXE_THROW1->SetCustomFrameTime(7, 0.12f);
+	P_AXE_THROW1->SetCustomFrameTime(8, 0.16f);
+	P_AXE_THROW1->SetCustomFrameTime(9, 0.18f);
+	P_AXE_THROW1->SetCustomFrameTime(10, 0.20f);
+	P_AXE_THROW1->SetCustomFrameTime(11, 0.26f);
+	P_AXE_THROW1->SetCustomFrameTime(12, 0.09f);
+	P_AXE_THROW1->SetCustomFrameTime(13, 0.08f);
+	P_AXE_THROW1->SetCustomFrameTime(14, 0.09f);
+	P_AXE_THROW1->SetCustomFrameTime(15, 0.08f);
+	P_AXE_THROW1->SetCustomFrameTime(16, 0.09f);
+	animations.emplace("P_AXE_THROW1", *P_AXE_THROW1);
+
+	animations.emplace("P_AXE_THROW2", *(new Animation(texture, 15, 2, 32, 0.06f)));
 
 	animations.emplace("P_RUN", *(new Animation(texture, 5, 6, 32, 0.08f)));
 	animations.emplace("P_GROUND", *(new Animation(texture, 7, 1, 32, 0.08f)));
@@ -83,6 +131,8 @@ void Animations::InitializePlayerAnimations()
 	jump_anim->SetCustomFrameTime(2, 0.14f);
 	jump_anim->SetCustomFrameTime(3, 0.5f);
 	animations.emplace("P_JUMP", *jump_anim);
+
+
 
 	Texture2D* texture2 = TextureLoader::GetTexture("P_ATT_1");
 	Animation* att1_anim = new Animation(texture2, 0, 7, 64, 0.04f);
@@ -182,7 +232,7 @@ void Animation::FreezeFrame(int frameNumber)
 {
 	m_currentFrameNum = frameNumber;
 	m_currentFrame = m_frames[m_currentFrameNum];
-	m_animationTicker = 10000.0f;
+	m_animationTicker = 100000.0f;
 	m_reachedEnd = false;
 }
 

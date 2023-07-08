@@ -27,7 +27,7 @@ void Platform::Update(float dt)
 
 	if (LevelManager::CheckPlayerInSensor(*m_fixture))
 	{
-		if (IsKeyDown(KEY_DOWN))
+		if (IsKeyDown(KEY_DOWN) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) > 0.5f)
 		{
 			m_fixture->SetSensor(true);
 		}

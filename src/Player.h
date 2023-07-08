@@ -14,7 +14,9 @@ enum class PlayerState
     Running,
     Jumping,
     Falling,
-    Dying
+    Dying,
+    Attacking,
+    Throwing
 };
 
 
@@ -28,7 +30,6 @@ public:
     void Update(float dt) override;
     void CheckTouchGround();
     void CheckWallTouch();
-    void CheckThrowAxe();
     void set_velocity_x(float vx);
     void set_velocity_y(float vy);
     void set_velocity_xy(float vx, float vy);
@@ -53,6 +54,7 @@ public:
     float jump_buffer_time = 0.10f;
     float jump_buffer_counter = jump_buffer_time;
     float m_ground_slam_vel = 10.0f;
+    float face_turning_counter = 0.1f;
     b2Fixture* m_feet_sensor;
     b2Fixture* m_left_sensor;
     b2Fixture* m_right_sensor;
@@ -62,6 +64,8 @@ public:
 
     //Weapons
     bool m_has_axe = true;
+    bool axe_anim_thrown = false;
+    float axe_throw_pwr_counter = 0.0f;
     static FireAxe* axe;
     Texture2D* axe_sprite;
     
@@ -77,6 +81,8 @@ public:
     void UpdateJumpingState(float dt);
     void UpdateFallingState(float dt);
     void UpdateDyingState(float dt);
+    void UpdateThrowingState(float dt);
+    void UpdateAttackingState(float dt);
 
     Shader shdrOutline;
 

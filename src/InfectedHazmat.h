@@ -24,7 +24,7 @@ public:
     ~InfectedHazmat();
 
     void Update(float dt) override;
-    void Die();
+    void Die(int death_option);
     void CheckAgroSensor();
     void CheckTouchGround();
     void CheckPlayerTouch();
@@ -41,13 +41,16 @@ public:
     bool left_player_touch = false;
     bool right_player_touch = false;
     bool looking_right = true;
+    bool player_in_dmg_zone = false;
     float speed = 5.0f;
     float linear_dumping = 2.0f;
+    int solid_contacts = 0;
     b2Fixture* m_feet_sensor;
     b2Fixture* m_left_sensor;
     b2Fixture* m_right_sensor;
     b2Fixture* m_agro_sensor;
     b2Fixture* m_attack_sensor;
+    b2Fixture* m_proximity_sensor;
 
     //States
     InfectedHazmatState state;

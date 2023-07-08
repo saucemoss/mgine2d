@@ -574,11 +574,11 @@ void LevelManager::Update(float dt)
 
 	}
 	
-	// Toggle debug info
-	if (IsKeyPressed(KEY_TWO))
-	{
-		showLines = !showLines;
-	}
+	//// Toggle debug info
+	//if (IsKeyPressed(KEY_TWO))
+	//{
+	//	showLines = !showLines;
+	//}
 
 	// Update the m_lights and keep track if any were dirty so we know if we need to update the master light mask
 	bool dirtyLights = false;

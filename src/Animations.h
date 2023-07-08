@@ -13,7 +13,7 @@ public:
 	~Animation()
 	{
 		//std::cout << "Deleted animation" << std::endl;
-	}
+ 	}
 
 	void SetCustomFrameTime(int frameNumber, float duration);
 	const Rectangle GetCurrentFrame();
