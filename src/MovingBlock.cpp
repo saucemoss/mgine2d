@@ -21,7 +21,7 @@ MovingBlock::~MovingBlock()
 	EnitityManager::Remove(this);
 }
 
-void MovingBlock::Draw()
+void MovingBlock::Draw(int l)
 {
 	auto spritePosX = center_pos().x;
 	auto spritePosY = center_pos().y;

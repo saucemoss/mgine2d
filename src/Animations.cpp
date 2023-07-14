@@ -16,6 +16,17 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("MOTHMAN", LoadTexture("res/level/mothman.png"));
 	m_Textures.emplace("P_ATT_1", LoadTexture("res/PlayerTextures/p_attack_1.png"));
 	m_Textures.emplace("INFECTED_H_1", LoadTexture("res/enemies/infected_hazmat.png"));
+	m_Textures.emplace("FLY_INF_1", LoadTexture("res/enemies/flying_infected.png"));
+}
+
+void Animations::InitializeFlyingInfectedAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("FLY_INF_1");
+	animations.emplace("FLY_I_IDLE", *(new Animation(texture, 0, 5, 96, 0.06f)));
+	animations.emplace("FLY_I_FLY", *(new Animation(texture, 0, 5, 96, 0.06f)));
+	animations.emplace("FLY_I_ATT", *(new Animation(texture, 1, 6, 96, 0.06f)));
+	animations.emplace("FLY_I_DMG", *(new Animation(texture, 2, 1, 96, 0.16f)));
+	animations.emplace("FLY_I_DEAD", *(new Animation(texture, 2, 6, 96, 0.16f)));
 }
 
 void Animations::InitializeInfectedHAnimations()
@@ -24,7 +35,7 @@ void Animations::InitializeInfectedHAnimations()
 	animations.emplace("IH_IDLE", *(new Animation(texture, 0, 3, 32, 0.16f)));
 	animations.emplace("IH_RUN", *(new Animation(texture, 1, 3, 32, 0.08f)));
 	animations.emplace("IH_ATT", *(new Animation(texture, 2, 10, 32, 0.08f)));
-	animations.emplace("IH_DMG", *(new Animation(texture, 3, 1, 32, 0.08f)));
+	animations.emplace("IH_DMG", *(new Animation(texture, 3, 1, 32, 0.16f)));
 
 	Animation* IH_DEATH = new Animation(texture, 4, 10, 32, 0.08f);
 	IH_DEATH->SetCustomFrameTime(3, 0.05f);
@@ -125,6 +136,7 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_RUN", *(new Animation(texture, 5, 6, 32, 0.08f)));
 	animations.emplace("P_GROUND", *(new Animation(texture, 7, 1, 32, 0.08f)));
 	animations.emplace("P_FALL", *(new Animation(texture, 8, 1, 32, 0.08f)));
+	animations.emplace("P_HURT", *(new Animation(texture, 8, 1, 32, 0.33f)));
 	animations.emplace("P_IDLE", *(new Animation(texture, 6, 5, 32, 0.20f)));
 	Animation* jump_anim = new Animation(texture, 9, 3, 32, 0.08f);
 	jump_anim->SetCustomFrameTime(1, 0.10f);
@@ -133,17 +145,25 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_JUMP", *jump_anim);
 
 
+	Animation* P_ATT1 = new Animation(texture, 6, 5, 96, 0.02f);
+	P_ATT1->SetCustomFrameTime(1, 0.05f);
+	P_ATT1->SetCustomFrameTime(2, 0.05f);
+	P_ATT1->SetCustomFrameTime(3, 0.07f);
+	P_ATT1->SetCustomFrameTime(4, 0.08f);
+	P_ATT1->SetCustomFrameTime(5, 0.09f);
+	animations.emplace("P_ATT1", *P_ATT1);
 
-	Texture2D* texture2 = TextureLoader::GetTexture("P_ATT_1");
-	Animation* att1_anim = new Animation(texture2, 0, 7, 64, 0.04f);
-	att1_anim->SetCustomFrameTime(1, 0.06f);
-	att1_anim->SetCustomFrameTime(2, 0.06f);
-	att1_anim->SetCustomFrameTime(3, 0.03f);
-	att1_anim->SetCustomFrameTime(4, 0.02f);
-	att1_anim->SetCustomFrameTime(5, 0.02f);
-	att1_anim->SetCustomFrameTime(6, 0.03f);
-	att1_anim->SetCustomFrameTime(7, 0.06f);
-	animations.emplace("P_ATT1", *att1_anim);
+	Animation* P_ATT2 = new Animation(texture, 7, 5, 96, 0.02f);
+	P_ATT2->SetCustomFrameTime(1, 0.05f);
+	P_ATT2->SetCustomFrameTime(2, 0.05f);
+	P_ATT2->SetCustomFrameTime(3, 0.07f);
+	P_ATT2->SetCustomFrameTime(4, 0.08f);
+	P_ATT2->SetCustomFrameTime(5, 0.09f);
+	animations.emplace("P_ATT2", *P_ATT2);
+
+
+
+
 
 }
 

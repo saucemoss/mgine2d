@@ -20,6 +20,7 @@
 #include "InfectedHazmat.h"
 #include "FireAxe.h"
 #include "ContactListener.h"
+#include "FlyingInfected.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
@@ -224,11 +225,13 @@ LevelManager::LevelManager()
 	p->loadFromFile("res\\level\\TestLevel.ldtk");
 	ldtkProject = p;
 
-	laboratorySolidsSpriteAtlas = LoadTexture("res\\level\\lab2.png");
+	laboratorySolidsSpriteAtlas = LoadTexture("res\\level\\lab4.png");
 	ldtkWorld = &ldtkProject->getWorld();
 	contacts = new ContactListener();
+	destruction_listener = new DestructionListener();
 	world = new b2World(gravity);
 	world->SetContactListener(contacts);
+	world->SetDestructionListener(destruction_listener);
 	Collidable::world = world;
 	LoadLevel("Level_0");
 	m_darkness_strength = 0.95f;
@@ -254,8 +257,10 @@ void LevelManager::LoadLevel(std::string level_name)
 	if (world == nullptr)
 	{
 		contacts = new ContactListener();
+		destruction_listener = new DestructionListener();
 		world = new b2World(gravity);
 		world->SetContactListener(contacts);
+		world->SetDestructionListener(destruction_listener);
 	}
 	Collidable::world = world;
 
@@ -263,6 +268,10 @@ void LevelManager::LoadLevel(std::string level_name)
 	{
 		GameScreen::player->RecreateBody();
 		GameScreen::player->NewBody();
+
+		GameScreen::camera.target = new_player_pos;
+		GameScreen::player->m_body->SetTransform({ new_player_pos.x / settings::PPM, new_player_pos.y / settings::PPM }, 0);
+
 	}
 
 
@@ -447,12 +456,12 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			bool is_right = entity.getField<bool>("Right").value();
 			level_entities_safe.push_back(std::make_unique<Door>(rect, is_right));
-			level_entities_safe.back().get()->m_draw_layer = 1;
+			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
 		if (entity.getName() == "Elevator")
 		{
 			level_entities_safe.push_back(std::make_unique<Elevator>(rect, entity.getArrayField<int>("Levels"), entity));
-			level_entities_safe.back().get()->m_draw_layer = 1;
+			level_entities_safe.back().get()->m_draw_layers = 1;
 			level_entities_safe.back().get()->m_ldtkID = entity.iid;;
 		}
 		if (entity.getName() == "ElevatorCallSwitch")
@@ -479,6 +488,10 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
 		}
+		if (entity.getName() == "FireAxe")
+		{
+			level_entities_safe.push_back(std::make_unique<FireAxe>(rect));
+		}
 		if (entity.getName() == "PlatformBox")
 		{
 			level_entities_safe.push_back(std::make_unique<Platform>(rect));
@@ -486,7 +499,12 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "InfectedHazmat")
 		{
 			level_entities_safe.push_back(std::make_unique<InfectedHazmat>(rect));
-			level_entities_safe.back().get()->m_draw_layer = 1;
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
+		if (entity.getName() == "FlyingInfected")
+		{
+			level_entities_safe.push_back(std::make_unique<FlyingInfected>(rect));
+			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
 		if (entity.getName() == "LevelPortal_in")
 		{
@@ -520,6 +538,8 @@ void LevelManager::UnloadLevel()
 		// a new one for the new level
 		delete contacts;
 		contacts = nullptr;
+		delete destruction_listener;
+		destruction_listener = nullptr;
 		delete world;
 		world = nullptr;
 	}
@@ -555,8 +575,14 @@ void LevelManager::Update(float dt)
 	const int32 positionIterations = 2;
 	world->Step(timeStep, velocityIterations, positionIterations);
 
-	// Drag light 0
 
+	if (next_level != "")
+	{
+		LoadLevel(next_level);
+		next_level = "";
+	}
+
+	// Drag light 0
 	Vector2 mp = GetScreenToWorld2D(GetMousePosition(), GameScreen::camera);
 	Vector2 pp = GetScreenToWorld2D(GameScreen::player_focused_cam.target, GameScreen::player_focused_cam);
 
@@ -644,6 +670,7 @@ void LevelManager::DrawSpotLights()
 			DrawRectangleLines((int)m_light_walls[b]->x, (int)m_light_walls[b]->y, (int)m_light_walls[b]->width, (int)m_light_walls[b]->height, DARKBLUE);
 		}
 	}
+	
 }
 
 bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)
@@ -762,7 +789,7 @@ void LevelManager::Draw()
 	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
 	Vector2 parallaxed_far = Vector2Multiply(c_position, { 0.01f,0.01f });
 
-
+	ClearBackground(BLACK);
 	////Draw static background
 	if (currentLdtkLevel->hasBgImage())
 	{
@@ -771,7 +798,7 @@ void LevelManager::Draw()
 			{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 			{ 0,0 }, 0, WHITE);
 	}
-
+	ClearBackground(BLACK);
 	//Draw paralaxed background elements
 	//DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
 	//	{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
@@ -783,12 +810,14 @@ void LevelManager::Draw()
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  }, 
 		{ 0,0 }, 0, WHITE);
-
+	ClearBackground(BLACK);
 	//Draw decorations
 	DrawTexturePro(decorationRenderedLevelTexture,
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 		{ 0,0 }, 0, WHITE);
+	ClearBackground(BLACK);
+	
 
 }
 

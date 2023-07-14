@@ -24,16 +24,16 @@ public:
     void CallElevator();
 
     // Inherited via Entity
-    virtual void Draw() override;
+    virtual void Draw(int l) override;
 
     // Inherited via Animated
     virtual void InitAnimations() override;
 
-
+    bool player_in_sensor = false;
 
 private:
 
-    bool player_in_sensor = false;
+   
     const ldtk::IID m_elevator_reference;
     float press_delay;
     float press_delay_counter;

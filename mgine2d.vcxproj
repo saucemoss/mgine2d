@@ -159,6 +159,7 @@
     <ClCompile Include="src\Elevator.cpp" />
     <ClCompile Include="src\ElevatorCallSwitch.cpp" />
     <ClCompile Include="src\FireAxe.cpp" />
+    <ClCompile Include="src\FlyingInfected.cpp" />
     <ClCompile Include="src\InfectedHazmat.cpp" />
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LevelPortal.cpp" />
@@ -176,6 +177,7 @@
   <ItemGroup>
     <ClInclude Include="src\ContactListener.h" />
     <ClInclude Include="src\FireAxe.h" />
+    <ClInclude Include="src\FlyingInfected.h" />
     <ClInclude Include="src\InfectedHazmat.h" />
     <ClInclude Include="src\Platform.h" />
     <ClInclude Include="src\MovingBlock.h" />

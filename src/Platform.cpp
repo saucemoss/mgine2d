@@ -12,7 +12,7 @@ Platform::~Platform()
 	EnitityManager::Remove(this);
 }
 
-void Platform::Draw()
+void Platform::Draw(int l)
 {
 }
 

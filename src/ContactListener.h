@@ -18,3 +18,9 @@ private:
     void PreSolve(b2Contact* contact, const b2Manifold* oldManifold);
     void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse);
 };
+
+class DestructionListener : public b2DestructionListener
+{
+    void SayGoodbye(b2Joint* joint);
+    void SayGoodbye(b2Fixture* fixture);
+};

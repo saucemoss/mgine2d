@@ -69,9 +69,6 @@ void Elevator::Update(float dt)
 {
 	SwitchFrames(dt);
 	
-	player_in_sensor = LevelManager::CheckPlayerInSensor(*m_fixture);
-	
-
 	int lastLevel = (m_levels.back().value() - m_levels[0].value());
 	
 	switch (state)
@@ -228,18 +225,35 @@ void Elevator::MoveToSwitch(float y_in)
 	//open = false;
 }
 
-void Elevator::Draw()
+void Elevator::Draw(int l)
 {
+
 	auto spritePosX = center_pos().x;
 	auto spritePosY = center_pos().y;
 
-	DrawTexturePro(*sprite,
-		CurrentFrame(),
-		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
-		{ 0,0 },
-		0.0f,
-		WHITE);
+	if (l == 0) 
+	{
+		DrawTexturePro(*bgsprite,
+			{
+				15 * 32, 11 * 32,settings::tileSize,settings::tileSize * 2
+			},
+			Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize * 2 },
+			{ 0 ,settings::tileSize },
+			0,
+			WHITE);
+	}
+	if (l == 1)
+	{
+		DrawTexturePro(*sprite,
+			CurrentFrame(),
+			Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
+			{ 0,0 },
+			0.0f,
+			WHITE);
+	} 
 }
+
+
 
 //void Elevator::DrawCollider()
 //{
@@ -261,6 +275,7 @@ void Elevator::Draw()
 void Elevator::InitAnimations()
 {
 	sprite = TextureLoader::GetTexture("DECOR_ANIM");
+	bgsprite = TextureLoader::GetTexture("MOTHMAN");
 	animations->InitializeElevatorAnimations();
 	SetAnimation("ELEV_IDLE");
 	

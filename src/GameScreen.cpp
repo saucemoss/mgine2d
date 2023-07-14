@@ -52,7 +52,7 @@ void GameScreen::UpdateCamera(float dt)
 	player_focused_cam.target = player->pos();
 	camera.zoom += ((float)GetMouseWheelMove() * 0.05f);
 
-	if (camera.zoom > 3.0f) camera.zoom = 3.0f;
+	if (camera.zoom > 30.0f) camera.zoom = 30.0f;
 	else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
 
 	//// Camera reset (zoom and rotation)
@@ -116,11 +116,12 @@ Screens GameScreen::Update(float dt)
 	{
 		debug = !debug;
 	}
-
+	
 	UpdateCamera(dt);
 	player->Update(dt);
 	LevelMgr->Update(dt);
 	EnitityManager::Update(dt);
+
 	
 	return Screens::NONE;
 }
@@ -131,9 +132,10 @@ void GameScreen::Draw()
 	LevelMgr->Draw();			// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
 	EnitityManager::Draw(0);	// Entities/Objects behind player
 	//TODO						// Entities Shaders?
-	player->Draw();				// Player		
+	player->Draw(0);			// Player		
 	EnitityManager::Draw(1);	// Entities/Objects in front of player	
 	LevelMgr->DrawSpotLights();	// Darkness and lights
+	player->DrawUI();
 	LevelMgr->DrawForeGround();	// Paralaxed foreground Level layer
 	
 
@@ -141,11 +143,11 @@ void GameScreen::Draw()
 	if (debug)
 	{
 		////player states
-		//std::string stateStr = "State: " + player->StatesStrMap[player->state];
+		//std::string stateStr = "" + player->StatesStrMap[player->state];
 		//DrawText(stateStr.c_str(), player->center_pos().x, player->center_pos().y -50, 20, BLACK);
 
 		
-		DrawText(std::to_string(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)).c_str(), player->center_pos().x, player->center_pos().y - 50, 20, BLACK);
+		//DrawText(std::to_string(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)).c_str(), player->center_pos().x, player->center_pos().y - 50, 20, BLACK);
 		////player animations
 		//std::string animStr = "Anim: " + player->animations->m_CurrentActiveAnimation + " :: " +
 		//	std::to_string(player->animations->GetAnimation(player->animations->m_CurrentActiveAnimation)->GetCurrentFrameNum());
@@ -187,6 +189,19 @@ void GameScreen::Draw()
 							ORANGE); // Draw a line between two vertex positions
 					}
 				}
+				if (shape->GetType() == b2Shape::e_circle)
+				{
+					auto circleShape = (b2CircleShape*)shape;
+
+					auto pos = currentBody->GetPosition();
+
+					DrawCircleLines(pos.x * settings::PPM,
+									pos.y * settings::PPM,
+									circleShape->m_radius * settings::PPM,
+									GREEN);
+
+					
+				}
 				else
 				{
 					auto polygonShape = (b2PolygonShape*)shape;
@@ -216,6 +231,8 @@ void GameScreen::Draw()
 
 	EndMode2D();
 
+	DrawText(std::to_string(player->current_hp).c_str(), 40, 40, 40, GREEN);
+
 	//DEBUG:
 	if (debug)
 	{
@@ -224,7 +241,7 @@ void GameScreen::Draw()
 		DrawText(txt.c_str(), 5, 20, 20, GREEN);
 		if (player != nullptr)
 		{
-			std::string txt2 = "Player POS: " + VecToString(player->pos());
+			std::string txt2 = "Player POS: " + util::VecToString(player->pos());
 			DrawText(txt2.c_str(), 5, 40, 20, GREEN);
 			std::string txt3 = "Is touching floor: " + std::to_string(player->is_touching_floor);
 			DrawText(txt3.c_str(), 5, 60, 20, GREEN);

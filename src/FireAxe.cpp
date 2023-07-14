@@ -22,7 +22,7 @@ FireAxe::~FireAxe()
 }
 
 
-void FireAxe::Draw()
+void FireAxe::Draw(int l)
 {
 	auto spritePosX = pos().x-3;
 	auto spritePosY = pos().y+3;

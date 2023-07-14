@@ -15,7 +15,7 @@ WoodCrate::~WoodCrate()
 	EnitityManager::Remove(this);
 }
 
-void WoodCrate::Draw()
+void WoodCrate::Draw(int l)
 {
 	auto spritePosX = pos().x;
 	auto spritePosY = pos().y;

@@ -141,6 +141,9 @@
     <ClCompile Include="src\FireAxe.cpp">
       <Filter>Pliki źródłowe\Entities\Objects\Weapons</Filter>
     </ClCompile>
+    <ClCompile Include="src\FlyingInfected.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -217,6 +220,9 @@
     </ClInclude>
     <ClInclude Include="src\ContactListener.h">
       <Filter>Pliki nagłówkowe\Systems\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlyingInfected.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

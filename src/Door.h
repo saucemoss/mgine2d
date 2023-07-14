@@ -29,7 +29,7 @@ public:
     virtual void Update(float dt) override;
 
     // Inherited via Entity
-    virtual void Draw() override;
+    virtual void Draw(int l) override;
 
     // Inherited via Animated
     virtual void InitAnimations() override;

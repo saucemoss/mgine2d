@@ -8,9 +8,9 @@ class Entity
 {
 public:
     virtual ~Entity() = default;
-	int m_draw_layer = 0;
-    virtual void Draw() = 0;
-    virtual void Update(float dt) = 0;
+	int m_draw_layers = 0;
+    virtual void Draw(int layer) = 0;
+	virtual void Update(float dt) = 0;
 	ldtk::IID m_ldtkID;;
 	bool m_destroy = false;
 };
@@ -39,9 +39,9 @@ public:
 	{
 		for (Entity* e : EntityList)
 		{
-			if (e->m_draw_layer == draw_layer && !e->m_destroy)
+			if (e->m_draw_layers >= draw_layer && !e->m_destroy)
 			{
-				e->Draw();
+				e->Draw(draw_layer);
 			}
 		}
 

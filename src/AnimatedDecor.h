@@ -11,7 +11,7 @@ public:
 	virtual void InitAnimations() override;
 
 	// Inherited via Entity
-	virtual void Draw() override;
+	virtual void Draw(int l) override;
 	virtual void Update(float dt) override;
 private:
 	std::string m_texture_name;

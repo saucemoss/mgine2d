@@ -22,7 +22,6 @@ ElevatorCallSwitch::~ElevatorCallSwitch()
 void ElevatorCallSwitch::Update(float dt)
 {
 	SwitchFrames(dt);
-	player_in_sensor = LevelManager::CheckPlayerInSensor(*m_fixture);
 
 	switch (state)
 	{
@@ -81,7 +80,7 @@ void ElevatorCallSwitch::CallElevator()
 	}
 }
 
-void ElevatorCallSwitch::Draw()
+void ElevatorCallSwitch::Draw(int l)
 {
 	auto spritePosX = center_pos().x;
 	auto spritePosY = center_pos().y;

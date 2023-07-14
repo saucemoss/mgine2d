@@ -53,6 +53,7 @@ class Animations
 public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
+	void InitializeFlyingInfectedAnimations();
 	void InitializeInfectedHAnimations();
 	void InitializeDecorAnimations();
 	void InitializeDoorAnimations();

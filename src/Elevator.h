@@ -29,7 +29,8 @@ public:
     ~Elevator();
     ElevatorState state;
     b2Fixture* walls_fixture;
-    //bool open = true;
+    Texture2D* bgsprite;
+    bool player_in_sensor = false;
 
     const ldtk::Entity& m_ldtk_elevator;
     void ResetY(int next_level);
@@ -44,13 +45,12 @@ public:
     virtual void Update(float dt) override;
 
     // Inherited via Entity
-    virtual void Draw() override;
+    virtual void Draw(int l) override;
 
     // Inherited via Animated
     virtual void InitAnimations() override;
 private:
     bool m_is_active = true;
-    bool player_in_sensor = false;
     bool is_reset;
     bool m_going_up = false;
     int m_distance_counter = 0;

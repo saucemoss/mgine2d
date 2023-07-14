@@ -10,6 +10,7 @@
 #include "Settings.h"
 #include <iostream>
 #include <b2_settings.h>
+#include "Util.h"
 
 class Collidable;
 
@@ -21,7 +22,7 @@ enum ColliderTag {
 	DOOR,
 	ELEVATOR, ELEVATOR_CALL_SW,
 	M_BLOCK, M_BLOCK_TOP, W_CRATE,
-	INFECTED_H, FIREAXE
+	INFECTED_H, FLYING_INF, FIREAXE
 };
 
 struct FixtureUserData
@@ -32,6 +33,15 @@ struct FixtureUserData
 class Collidable
 {
 public:
+	b2Body* m_body = nullptr;
+	b2Fixture* m_fixture = nullptr;
+	ColliderTag m_colliderTag = UNASSIGNED;
+	b2FixtureDef m_fixtureDef;
+	b2BodyDef m_bodyDef;
+	b2PolygonShape m_box;
+	b2CircleShape m_circle;
+	static b2World* world;
+
 	Collidable(Rectangle rectangle, b2BodyType type, ColliderTag collider_tag)
 	{
 		m_colliderTag = collider_tag;
@@ -49,8 +59,12 @@ public:
 			case FIREAXE:
 				SetupSimpleBox(rectangle, type, false);
 				break;
+			case FLYING_INF:
+				SetupSimpleCircle(rectangle, type, false);
+				break;
 			default:
 				SetupSimpleBox(rectangle, type, true);
+				break;
 			}
 			break;
 		case b2_kinematicBody:
@@ -67,11 +81,11 @@ public:
 
 	void SetupSimpleBox(Rectangle& rectangle, b2BodyType type, bool fix_rotate, float density = 1.0f)
 	{
-		m_box.SetAsBox(float(rectangle.width / 2.0f / settings::PPM),
-			float(rectangle.height / 2.0f / settings::PPM));
+		m_box.SetAsBox(	float(rectangle.width / 2.0f / settings::PPM),
+						float(rectangle.height / 2.0f / settings::PPM));
+		m_bodyDef.position.Set(	(rectangle.x + rectangle.width / 2) / settings::PPM,
+								(rectangle.y + rectangle.height / 2) / settings::PPM);
 		m_bodyDef.fixedRotation = fix_rotate;
-		m_bodyDef.position.Set((rectangle.x + rectangle.width / 2) / settings::PPM,
-			(rectangle.y + rectangle.height / 2) / settings::PPM);
 		m_bodyDef.type = type;
 		m_bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
 		m_body = world->CreateBody(&m_bodyDef);
@@ -80,27 +94,42 @@ public:
 		m_fixture = m_body->CreateFixture(&m_box, density);
 	}
 
+	void SetupSimpleCircle(Rectangle& rectangle, b2BodyType type, bool fix_rotate, float density = 1.0f)
+	{
+
+		m_circle.m_radius = float(rectangle.width / 2.0f / settings::PPM);
+		m_circle.m_p.Set(0,0);
+		m_bodyDef.position.Set((rectangle.x + rectangle.width / 2) / settings::PPM,
+			(rectangle.y + rectangle.height / 2) / settings::PPM);
+		m_bodyDef.fixedRotation = true;
+	
+		m_bodyDef.type = type;
+		m_bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
+		m_body = world->CreateBody(&m_bodyDef);
+		m_fixtureDef.friction = 1.0f;
+		m_fixtureDef.shape = &m_circle;
+		m_fixture = m_body->CreateFixture(&m_circle, density);
+	}
+
 	~Collidable()
 	{
 
 	}
 
-	b2Body* m_body = nullptr;
-	b2Fixture* m_fixture = nullptr;
-	ColliderTag m_colliderTag = UNASSIGNED;
-	b2FixtureDef m_fixtureDef;
-	b2BodyDef m_bodyDef;
-	b2PolygonShape m_box;
-	static b2World* world;
-	
-
 	void RecreateBody()
 	{
-		if (m_body != nullptr)
+		m_body = world->CreateBody(&m_bodyDef);
+
+		if (m_fixtureDef.shape->m_type==b2Shape::e_polygon)
 		{
-			m_body = world->CreateBody(&m_bodyDef);
 			m_fixture = m_body->CreateFixture(&m_box, 1.0f);
 		}
+		else
+		{
+			m_fixture = m_body->CreateFixture(&m_circle, 1.0f);
+		}
+			
+		
 	}
 
 	void DrawCollider()

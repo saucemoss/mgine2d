@@ -19,7 +19,7 @@ LevelPortal::~LevelPortal()
 }
 
 
-void LevelPortal::Draw()
+void LevelPortal::Draw(int l)
 {
 }
 

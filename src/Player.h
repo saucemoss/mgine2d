@@ -16,7 +16,8 @@ enum class PlayerState
     Falling,
     Dying,
     Attacking,
-    Throwing
+    Throwing,
+    Hurting
 };
 
 
@@ -33,10 +34,12 @@ public:
     void set_velocity_x(float vx);
     void set_velocity_y(float vy);
     void set_velocity_xy(float vx, float vy);
-    void LevelPortalCheck();
+    void take_dmg(int dmg);
     void Die();
+    void SetRandomAttAnim();
 
-    void Draw() override;
+    void Draw(int l) override;
+    void DrawUI();
     void InitAnimations() override;
 
     //Movement Control
@@ -45,6 +48,8 @@ public:
     bool right_wall_touch = false;
     bool looking_right = true;
     bool is_dying = false;
+    bool taking_dmg = false;
+    bool is_aiming = false;
     float speed = 7.0f;
     float jump_force = 21.0f;
     float linear_dumping = 2.0f;
@@ -55,19 +60,30 @@ public:
     float jump_buffer_counter = jump_buffer_time;
     float m_ground_slam_vel = 10.0f;
     float face_turning_counter = 0.1f;
+    float pad_sensitivity_threshold = 0.5f;
     b2Fixture* m_feet_sensor;
     b2Fixture* m_left_sensor;
     b2Fixture* m_right_sensor;
+    b2Fixture* m_attack_sensor;
+    b2Fixture* m_left_att_sensor;
+    b2Fixture* m_right_att_sensor;
 
     //States
     PlayerState state;
 
     //Weapons
-    bool m_has_axe = true;
+    b2Vec2 start_aim_pos;
+    b2Vec2 axe_velocity;
+    bool m_has_axe = false;
     bool axe_anim_thrown = false;
     float axe_throw_pwr_counter = 0.0f;
+    int axe_dmg = 35;
     static FireAxe* axe;
     Texture2D* axe_sprite;
+
+    //HP
+    int m_max_hp = 100;
+    int current_hp = m_max_hp;
     
 
     //Debug
@@ -81,14 +97,16 @@ public:
     void UpdateJumpingState(float dt);
     void UpdateFallingState(float dt);
     void UpdateDyingState(float dt);
+    b2Vec2 GetTrajectoryPoint(b2Vec2& startingPosition, b2Vec2& startingVelocity, float n);
     void UpdateThrowingState(float dt);
     void UpdateAttackingState(float dt);
+    void UpdateHurtingingState(float dt);
 
     Shader shdrOutline;
 
     float outlineSize = 1.0f;
     float outlineColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };      // Normalized RED color 
-    float textureSize[2] = { 192.0f,160.0f };
+    float textureSize[2] = { 2.0f,2.0f };
 
     int outlineSizeLoc;
     int outlineColorLoc;

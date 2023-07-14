@@ -25,7 +25,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	feet_sesnor_box.SetAsBox(0.3f, 0.3f, b2Vec2(0, 0.80f), 0);
 	//fixture user data
 	FixtureUserData* feetFixtureName = new FixtureUserData;
-	feetFixtureName->name = "enemy_feet_sensor";
+	feetFixtureName->name = "ih_feet";
 	//fixture definition
 	b2FixtureDef feetDef;
 	feetDef.isSensor = true;
@@ -39,7 +39,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	agro_sesnor_box.SetAsBox(2.0f, 2.0f, b2Vec2(-3.0, 0.0), 0);
 	//fixture user data
 	FixtureUserData* agroSensorName = new FixtureUserData;
-	agroSensorName->name = "agro_sensor";
+	agroSensorName->name = "ih_agro";
 	//fixture definition
 	b2FixtureDef agroDef;
 	agroDef.isSensor = true;
@@ -53,7 +53,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	agro_sesnor_box2.SetAsBox(-2.0f, 2.0f, b2Vec2(3.0, 0.0), 0);
 	//fixture user data
 	FixtureUserData* agroSensorName2 = new FixtureUserData;
-	agroSensorName2->name = "agro_sensor";
+	agroSensorName2->name = "ih_agro";
 	//fixture definition
 	b2FixtureDef agroDef2;
 	agroDef2.isSensor = true;
@@ -68,7 +68,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	proximity_sesnor_box1.SetAsBox(0.2f, 0.2f, b2Vec2(2.0, 1.1), 0);
 	//fixture user data
 	FixtureUserData* proximitySensorName1 = new FixtureUserData;
-	proximitySensorName1->name = "proximity_sensor";
+	proximitySensorName1->name = "proxi";
 	//fixture definition
 	b2FixtureDef proximityDef1;
 	proximityDef1.isSensor = true;
@@ -80,7 +80,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	proximity_sesnor_box2.SetAsBox(0.2f, 0.2f, b2Vec2(-2.0, 1.1), 0);
 	//fixture user data
 	FixtureUserData* proximitySensorName2 = new FixtureUserData;
-	proximitySensorName2->name = "proximity_sensor";
+	proximitySensorName2->name = "proxi";
 	//fixture definition
 	b2FixtureDef proximityDef2;
 	proximityDef2.isSensor = true;
@@ -94,7 +94,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	attack_sesnor_box.SetAsBox(1.0f, 0.8f, b2Vec2(0.0, 0.0), 0);
 	//fixture user data
 	FixtureUserData* attackSensorName = new FixtureUserData;
-	attackSensorName->name = "attack_sensor";
+	attackSensorName->name = "ih_att";
 	//fixture definition
 	b2FixtureDef attackDef;
 	attackDef.isSensor = true;
@@ -111,8 +111,8 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	//fixture user data
 	FixtureUserData* right_sesnorName = new FixtureUserData;
 	FixtureUserData* left_sesnorName = new FixtureUserData;
-	right_sesnorName->name = "enemy_right_sensor";
-	left_sesnorName->name = "enemy_left_sensor";
+	right_sesnorName->name = "ih_r_s";
+	left_sesnorName->name = "ih_l_s";
 	//fixture definition
 	b2FixtureDef left_sensor_def;
 	left_sensor_def.isSensor = true;
@@ -137,9 +137,10 @@ InfectedHazmat::~InfectedHazmat()
 void InfectedHazmat::Update(float dt)
 {
 	SwitchFrames(dt);
-	CheckPlayerTouch();
 	CheckTouchGround();
 	CheckAgroSensor();
+
+	//std::cout << m_rectangle.x << std::endl;
 
 	switch (state)
 	{
@@ -164,7 +165,6 @@ void InfectedHazmat::Update(float dt)
 
 void InfectedHazmat::Die(int death_option)
 {
-	m_body->SetEnabled(false);
 
 	switch (death_option)
 	{
@@ -172,10 +172,9 @@ void InfectedHazmat::Die(int death_option)
 		SetAnimation("IH_DEATH");
 		break;
 	case 2:
-		solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
+	solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
 		break;
 	}
-	
 	state = InfectedHazmatState::Dying;
 }
 
@@ -194,30 +193,19 @@ void InfectedHazmat::CheckAgroSensor()
 void InfectedHazmat::CheckTouchGround()
 {
 	is_touching_floor = false;
-	if (m_body->GetContactList() != nullptr)
+	if (ground_contacts > 0)
 	{
-		auto con = m_body->GetContactList()->contact;
-		while (con != nullptr)
-		{
-			auto obj1 = reinterpret_cast<FixtureUserData*>(con->GetFixtureA()->GetUserData().pointer);
-			auto obj2 = reinterpret_cast<FixtureUserData*>(con->GetFixtureB()->GetUserData().pointer);
-			if (obj1 != nullptr && obj1->name == "enemy_feet_sensor" && con->IsTouching())
-			{
-				is_touching_floor = true;
-			}
-			if (obj2 != nullptr && obj2->name == "enemy_feet_sensor" && con->IsTouching())
-			{
-				is_touching_floor = true; 
-			}
-			con = con->GetNext();
-		}
+		is_touching_floor = true;
 	}
 }
 
-void InfectedHazmat::CheckPlayerTouch()
+
+void InfectedHazmat::TakeDmg(int dmg)
 {
-	left_player_touch = LevelManager::CheckPlayerInSensor(*m_left_sensor);
-	right_player_touch = LevelManager::CheckPlayerInSensor(*m_right_sensor);
+	m_current_hp -= dmg;
+	state = InfectedHazmatState::Hurting;
+	SetAnimation("IH_DMG");
+	
 }
 
 void InfectedHazmat::set_velocity_x(float vx)
@@ -241,7 +229,7 @@ void InfectedHazmat::set_velocity_xy(float vx, float vy)
 	m_body->SetLinearVelocity({ vx, vy });
 }
 
-void InfectedHazmat::Draw()
+void InfectedHazmat::Draw(int l)
 {
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
 																	CurrentFrame().y,
@@ -257,21 +245,20 @@ void InfectedHazmat::Draw()
 		spritePosY = center_pos().y-33;
 	}
 
+	Color c = WHITE;
+	if (state == InfectedHazmatState::Hurting)
+	{
+		c = RED;
+	}
+
 	DrawTexturePro(*animation->GetTexture(),
 		cframe,
 		Rectangle{ spritePosX,spritePosY,CurrentFrame().width,CurrentFrame().height },
 		{ 0,0 },
 		0.0f,
-		WHITE);
+		c);
 
-	if (animation->GetCurrentFrameNum() >= 6 && 
-		player_in_dmg_zone &&
-		state == InfectedHazmatState::Attacking)
-	{
-		DrawText("DEAD!", center_pos().x-50, center_pos().y-40, 40, RED);
-		GameScreen::player->Die();
-	}
-	//DrawText(std::to_string(solid_contacts).c_str(), center_pos().x - 50, center_pos().y - 40, 40, RED);
+	DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
 }
 
 void InfectedHazmat::InitAnimations()
@@ -308,53 +295,75 @@ void InfectedHazmat::UpdateRunningState(float dt)
 		}	
 	}
 
-	if (left_player_touch)
+	if (left_player_touch && player_in_dmg_zone)
 	{
-		looking_right = false;
 		SetAnimation("IH_ATT");
 		state = InfectedHazmatState::Attacking;
 	}
-	else 
-	if (right_player_touch)
+	else if (left_player_touch)
+	{
+		looking_right = false;
+	}
+	
+	if (right_player_touch && player_in_dmg_zone)
+	{
+		SetAnimation("IH_ATT");
+		state = InfectedHazmatState::Attacking;		
+	}
+	else if (right_player_touch)
 	{
 		looking_right = true;
-		SetAnimation("IH_ATT");
-		state = InfectedHazmatState::Attacking;
 	}
 }
 
 void InfectedHazmat::UpdateAttackingState(float dt)
 {
+
 	if (!left_player_touch && !right_player_touch)
 	{
 		SetAnimation("IH_IDLE");
 		state = InfectedHazmatState::Idle;
 	}
-	//if (IsKeyPressed(KEY_E))
-	//{
-	//	SetAnimation("IH_DMG");
-	//	state = InfectedHazmatState::Hurting;
-	//}
-	//if (IsKeyPressed(KEY_F))
-	//{
-	//	Die(1);
-	//}
+	if (animation->GetCurrentFrameNum() >= 6 &&
+		player_in_dmg_zone)
+	{
+		GameScreen::player->take_dmg(10);
+	}
 }
 
 void InfectedHazmat::UpdateHurtingState(float dt)
 {
 	if (AnimationEnded())
 	{
-		PlayOnceUninterupt("IH_IDLE");
-		state = InfectedHazmatState::Idle;
+		if (m_current_hp < -100)
+		{
+			Die(2);
+		}
+		else if (m_current_hp <= 0)
+		{
+			Die(1);
+		}
+		else
+		{
+			SetAnimation("IH_IDLE");
+			state = InfectedHazmatState::Idle;
+		}
+
 	}
 }
 
 void InfectedHazmat::UpdateDyingState(float dt)
 {
+	if (is_touching_floor)
+	{
+		m_body->SetEnabled(false);
+
+	}
 	if (AnimationEnded())
 	{
 		m_destroy = true;
-		LevelManager::world->DestroyBody(m_body);
+		if (!LevelManager::world->IsLocked())
+			LevelManager::world->DestroyBody(m_body);
 	}
+
 }

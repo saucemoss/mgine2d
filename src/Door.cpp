@@ -8,7 +8,7 @@ Door::Door(const Rectangle& rect, bool is_right)
 	InitAnimations();
 	//sensor collider box
 	b2PolygonShape sensor_shape;
-	sensor_shape.SetAsBox(3.0f, 1.0f, b2Vec2(0.0f, 0.0f), 0);
+	sensor_shape.SetAsBox(2.8f, 1.0f, b2Vec2(0.0f, 0.0f), 0);
 	//fixture user data
 	FixtureUserData* sensorFixtureName = new FixtureUserData;
 	sensorFixtureName->name = "door_sensor";
@@ -110,7 +110,7 @@ void Door::Update(float dt)
 
 }
 
-void Door::Draw()
+void Door::Draw(int l)
 {
 	auto spritePosX = center_pos().x;
 	auto spritePosY = center_pos().y;

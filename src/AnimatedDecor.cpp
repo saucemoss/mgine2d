@@ -39,7 +39,7 @@ void AnimatedDecor::InitAnimations()
 	
 }
 
-void AnimatedDecor::Draw()
+void AnimatedDecor::Draw(int l)
 {
 	auto spritePosX = m_rectangle.x;
 	auto spritePosY = m_rectangle.y;

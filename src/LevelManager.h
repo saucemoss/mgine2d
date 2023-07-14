@@ -58,6 +58,8 @@ public:
     const ldtk::Level* currentLdtkLevel{};
     const ldtk::Layer* bgLayer;
     ldtk::IntPoint levelSize;
+    std::string next_level;
+    Vector2 new_player_pos;
 
     //light methods
     void SetupLight(float x, float y, float radius);
@@ -81,6 +83,7 @@ public:
     static bool CheckPlayerInSensor(b2Fixture& sensor);
     void SolidTilesToBigBoxes();
     ContactListener* contacts;
+    DestructionListener* destruction_listener;
   
     //Textures definition
     //static background

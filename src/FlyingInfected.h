@@ -7,26 +7,27 @@
 #include <box2d.h>
 
 
-enum class InfectedHazmatState
+enum class FlyingInfectedStates
 {
     Idle,
-    Running,
+    Flying,
     Attacking,
     Hurting,
     Dying
 };
 
 
-class InfectedHazmat : public Entity, public Animated, public Collidable
+class FlyingInfected : public Entity, public Animated, public Collidable
 {
 public:
-    InfectedHazmat(const Rectangle& rectangle);
-    ~InfectedHazmat();
+    FlyingInfected(const Rectangle& rectangle);
+    ~FlyingInfected();
 
     void Update(float dt) override;
     void Die(int death_option);
     void CheckAgroSensor();
     void CheckTouchGround();
+    void CheckPlayerTouch();
     void TakeDmg(int dmg);
     void set_velocity_x(float vx);
     void set_velocity_y(float vy);
@@ -42,32 +43,31 @@ public:
     bool right_player_touch = false;
     bool looking_right = true;
     bool player_in_dmg_zone = false;
-    float speed = 5.0f;
+    float speed = 4.0f;
     float linear_dumping = 2.0f;
     int solid_contacts = 0;
     int ground_contacts = 0;
-    b2Fixture* m_feet_sensor;
     b2Fixture* m_left_sensor;
     b2Fixture* m_right_sensor;
     b2Fixture* m_agro_sensor;
     b2Fixture* m_attack_sensor;
-    b2Fixture* m_proximity_sensor;
+
 
     //HP
-    int m_max_hp = 100;
+    int m_max_hp = 150;
     int m_current_hp = m_max_hp;
-    
-    
+
+
     //States
-    InfectedHazmatState state;
+    FlyingInfectedStates state;
     void UpdateIdleState(float dt);
-    void UpdateRunningState(float dt);
+    void UpdateFlyingState(float dt);
     void UpdateAttackingState(float dt);
     void UpdateHurtingState(float dt);
     void UpdateDyingState(float dt);
 
     //Debug
-    std::map<InfectedHazmatState, std::string> StatesStrMap{};
+    std::map<FlyingInfectedStates, std::string> StatesStrMap{};
     std::map<ColliderTag, std::string> ColStrMap{};
     std::string contact_debug_str;
     std::string axe_vel_str;
