@@ -11,6 +11,7 @@ std::vector<Entity*> EnitityManager::EntityList;
 Camera2D GameScreen::camera;
 Camera2D GameScreen::player_focused_cam;
 LevelManager* GameScreen::LevelMgr;
+SoundManager* GameScreen::SoundMgr;
 Player* GameScreen::player;
 bool GameScreen::debug = false;
 
@@ -21,7 +22,7 @@ GameScreen::GameScreen()
 	HideCursor();
 	
 	LevelMgr = new LevelManager();
-
+	SoundMgr = new SoundManager();
 	player = new Player();
 	
 	//Camera init
@@ -128,15 +129,16 @@ Screens GameScreen::Update(float dt)
 
 void GameScreen::Draw()
 {
-	BeginMode2D(camera);		// DRAW ORDER:
-	LevelMgr->Draw();			// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
-	EnitityManager::Draw(0);	// Entities/Objects behind player
-	//TODO						// Entities Shaders?
-	player->Draw(0);			// Player		
-	EnitityManager::Draw(1);	// Entities/Objects in front of player	
-	LevelMgr->DrawSpotLights();	// Darkness and lights
-	player->DrawUI();
-	LevelMgr->DrawForeGround();	// Paralaxed foreground Level layer
+	BeginMode2D(camera);				// DRAW ORDER:
+	
+	LevelMgr->Draw();					// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
+	EnitityManager::Draw(0);			// Entities/Objects behind player
+	//TODO								// Entities Shaders?
+	player->Draw(0);					// Player		
+	EnitityManager::Draw(1);			// Entities/Objects in front of player	
+	LevelMgr->lights->DrawLightMask();	// Darkness and lights
+	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
+	player->DrawUI();					// Player UI
 	
 
 	//DEBUG:
@@ -157,76 +159,7 @@ void GameScreen::Draw()
 
 
 
-		auto world = LevelMgr->world;
-		auto currentBody = world->GetBodyList();
-		while (currentBody != nullptr)
-		{
-			auto pos = currentBody->GetPosition();
-			DrawCircle(	pos.x * settings::PPM,
-						pos.y * settings::PPM,
-						2,
-						PURPLE);
-			auto fixture = currentBody->GetFixtureList();
-			while (fixture != nullptr)
-			{
-				auto shape = fixture->GetShape();
-				// Note, right now supposing all shapes are polygons, use to determine shape->GetType();
-
-				if (shape->GetType() == b2Shape::e_chain)
-				{
-					auto chainShape = (b2ChainShape*)shape;
-
-					int vertexCount = 4; // since we're assuming they're squares
-					for (int j = 0; j < vertexCount; j++)
-					{
-						b2Vec2 vertexA = chainShape->m_vertices[j];
-
-						int jj = (((j + 1) < vertexCount) ? (j + 1) : 0); // Get next vertex or first to close the shape
-						b2Vec2 vertexB = chainShape->m_vertices[jj];
-
-						DrawLineV({ (pos.x + vertexA.x) * settings::PPM, (pos.y + vertexA.y) * settings::PPM },
-							{ (pos.x + vertexB.x) * settings::PPM, (pos.y + vertexB.y) * settings::PPM },
-							ORANGE); // Draw a line between two vertex positions
-					}
-				}
-				if (shape->GetType() == b2Shape::e_circle)
-				{
-					auto circleShape = (b2CircleShape*)shape;
-
-					auto pos = currentBody->GetPosition();
-
-					DrawCircleLines(pos.x * settings::PPM,
-									pos.y * settings::PPM,
-									circleShape->m_radius * settings::PPM,
-									GREEN);
-
-					
-				}
-				else
-				{
-					auto polygonShape = (b2PolygonShape*)shape;
-
-					int vertexCount = 4; // since we're assuming they're squares
-					for (int j = 0; j < vertexCount; j++)
-					{
-						b2Vec2 vertexA = polygonShape->m_vertices[j];
-
-						int jj = (((j + 1) < vertexCount) ? (j + 1) : 0); // Get next vertex or first to close the shape
-						b2Vec2 vertexB = polygonShape->m_vertices[jj];
-
-						DrawLineV({ (pos.x + vertexA.x) * settings::PPM, (pos.y + vertexA.y) * settings::PPM },
-							{ (pos.x + vertexB.x) * settings::PPM, (pos.y + vertexB.y) * settings::PPM },
-							GREEN); // Draw a line between two vertex positions
-					}
-				}
-
-				fixture = fixture->GetNext();
-			}
-
-			currentBody = currentBody->GetNext();
-		}
-
-
+		DebugShapes();
 	}
 
 	EndMode2D();
@@ -248,6 +181,78 @@ void GameScreen::Draw()
 		}
 	}
 	
+}
+
+void GameScreen::DebugShapes()
+{
+	auto world = LevelMgr->world;
+	auto currentBody = world->GetBodyList();
+	while (currentBody != nullptr)
+	{
+		auto pos = currentBody->GetPosition();
+		DrawCircle(pos.x * settings::PPM,
+			pos.y * settings::PPM,
+			2,
+			PURPLE);
+		auto fixture = currentBody->GetFixtureList();
+		while (fixture != nullptr)
+		{
+			auto shape = fixture->GetShape();
+
+			if (shape->GetType() == b2Shape::e_chain)
+			{
+				auto chainShape = (b2ChainShape*)shape;
+
+				int vertexCount = 4; // since we're assuming they're squares
+				for (int j = 0; j < vertexCount; j++)
+				{
+					b2Vec2 vertexA = chainShape->m_vertices[j];
+
+					int jj = (((j + 1) < vertexCount) ? (j + 1) : 0); // Get next vertex or first to close the shape
+					b2Vec2 vertexB = chainShape->m_vertices[jj];
+
+					DrawLineV({ (pos.x + vertexA.x) * settings::PPM, (pos.y + vertexA.y) * settings::PPM },
+						{ (pos.x + vertexB.x) * settings::PPM, (pos.y + vertexB.y) * settings::PPM },
+						ORANGE); // Draw a line between two vertex positions
+				}
+			}
+			if (shape->GetType() == b2Shape::e_circle)
+			{
+				auto circleShape = (b2CircleShape*)shape;
+
+				auto pos = currentBody->GetPosition();
+
+				DrawCircleLines(pos.x * settings::PPM,
+					pos.y * settings::PPM,
+					circleShape->m_radius * settings::PPM,
+					GREEN);
+
+
+			}
+			else
+			{
+				auto polygonShape = (b2PolygonShape*)shape;
+				int v_count = polygonShape->m_count;
+
+				int vertexCount = polygonShape->m_count;
+				for (int j = 0; j < vertexCount; j++)
+				{
+					b2Vec2 vertexA = polygonShape->m_vertices[j];
+
+					int jj = (((j + 1) < vertexCount) ? (j + 1) : 0); // Get next vertex or first to close the shape
+					b2Vec2 vertexB = polygonShape->m_vertices[jj];
+
+					DrawLineV({ (pos.x + vertexA.x) * settings::PPM, (pos.y + vertexA.y) * settings::PPM },
+						{ (pos.x + vertexB.x) * settings::PPM, (pos.y + vertexB.y) * settings::PPM },
+						GREEN); // Draw a line between two vertex positions
+				}
+			}
+
+			fixture = fixture->GetNext();
+		}
+
+		currentBody = currentBody->GetNext();
+	}
 }
 
 

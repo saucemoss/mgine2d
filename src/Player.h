@@ -36,7 +36,7 @@ public:
     void set_velocity_xy(float vx, float vy);
     void take_dmg(int dmg);
     void Die();
-    void SetRandomAttAnim();
+    void SetRandomAxeAttack();
 
     void Draw(int l) override;
     void DrawUI();
@@ -67,6 +67,7 @@ public:
     b2Fixture* m_attack_sensor;
     b2Fixture* m_left_att_sensor;
     b2Fixture* m_right_att_sensor;
+    b2Fixture* m_knockback_circle;
 
     //States
     PlayerState state;
@@ -75,7 +76,7 @@ public:
     b2Vec2 start_aim_pos;
     b2Vec2 axe_velocity;
     bool m_has_axe = false;
-    bool axe_anim_thrown = false;
+    bool axe_just_thrown = false;
     float axe_throw_pwr_counter = 0.0f;
     int axe_dmg = 35;
     static FireAxe* axe;
@@ -93,6 +94,7 @@ public:
 
 
     void UpdateIdleState(float dt);
+    void Jump();
     void UpdateRunningState(float dt);
     void UpdateJumpingState(float dt);
     void UpdateFallingState(float dt);

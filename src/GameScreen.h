@@ -3,6 +3,7 @@
 #include "BaseScreen.h"
 #include "LevelManager.h"
 #include "Player.h"
+#include "SoundManager.h"
 
 
 class GameScreen : public BaseScreen
@@ -19,7 +20,10 @@ public:
    
     static Player* player;
     static LevelManager* LevelMgr;
+    static SoundManager* SoundMgr;
     static bool debug;
     void Draw() override;
+
+    void DebugShapes();
 
 };

@@ -62,15 +62,27 @@ void ContactListener::BeginContact(b2Contact* contact)
 	{
 		std::string other = "";
 		std::string subject = "";
+		Collidable* other_c = nullptr;
 		if (c1->m_colliderTag == PLAYER)
 		{
 			other = nameB;
 			subject = nameA;
+			other_c = c2;
 		}
 		else if (c2->m_colliderTag == PLAYER)
 		{
 			other = nameA;
 			subject = nameB;
+			other_c = c1;
+		}
+
+		if (subject == "p_axe_att" )
+		{
+			other_c->m_body->ApplyLinearImpulseToCenter((GameScreen::player->looking_right ? b2Vec2{ 100.f, 0.0f } : b2Vec2{ -100.0f, 0.0f }), true);
+			if (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR")
+			{
+				PlaySound(SoundManager::sounds["axe_solid_hit"]);
+			}
 		}
 
 
@@ -94,7 +106,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			}
 		}
 
-		if (other == "FIREAXE" && subject == "PLAYER" && !GameScreen::player->m_has_axe)
+		if (other == "FIREAXE" && subject == "PLAYER" && !GameScreen::player->m_has_axe && !GameScreen::player->axe_just_thrown)
 		{
 			if (GameScreen::player->axe != nullptr)
 			{
@@ -102,15 +114,11 @@ void ContactListener::BeginContact(b2Contact* contact)
 				GameScreen::player->axe = nullptr;
 			}
 			GameScreen::player->m_has_axe = true;
+			PlaySound(SoundManager::sounds["axe_pickup"]);
 			FireAxe* axe;
-			if (c1->m_colliderTag == FIREAXE)
+			if (other_c->m_colliderTag == FIREAXE)
 			{
-				axe = static_cast<FireAxe*>(c1);
-				axe->m_destroy = true;
-			}
-			else if (c2->m_colliderTag == FIREAXE)
-			{
-				axe = static_cast<FireAxe*>(c2);
+				axe = static_cast<FireAxe*>(other_c);
 				axe->m_destroy = true;
 			}
 		}
@@ -156,6 +164,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			{
 				if (subject == "ih_agro")
 				{
+					PlaySound(SoundManager::sounds["agro1"]);
 					e->player_in_agro = true;
 				}
 				if (subject == "ih_att")
@@ -201,6 +210,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 				if (subject == "fi_agro")
 				{
 					e->player_in_agro = true;
+					PlaySound(SoundManager::sounds["agro2"]);
 				}
 				if (subject == "fi_att")
 				{
@@ -218,6 +228,10 @@ void ContactListener::BeginContact(b2Contact* contact)
 			if (subject == "FLYING_INF" && other == "p_axe_att" && !(e->state == FlyingInfectedStates::Hurting))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
+			}
+			if (subject == "wingflap" && other == "PLAYER")
+			{
+				e->player_in_wingflap = true;
 			}
 		}
 	}
@@ -290,6 +304,33 @@ void ContactListener::BeginContact(b2Contact* contact)
 			e->player_in_sensor = true;
 		}
 	}
+
+	//Fireaxe
+	{
+		std::string other = "";
+		std::string subject = "";
+		Collidable* other_c = nullptr;
+		FireAxe* axe = nullptr;
+		if (c1->m_colliderTag == FIREAXE)
+		{
+			axe = static_cast<FireAxe*>(c1);
+			other = nameB;
+			subject = nameA;
+			other_c = c2;
+		}
+		else if (c2->m_colliderTag == FIREAXE)
+		{
+			axe = static_cast<FireAxe*>(c2);
+			other = nameA;
+			subject = nameB;
+			other_c = c1;
+		}
+
+		if(subject=="FIREAXE" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+		{
+			PlaySound(SoundManager::sounds["axe_solid_hit"]);
+		}
+	}
 }
 
 void ContactListener::EndContact(b2Contact* contact)
@@ -322,19 +363,22 @@ void ContactListener::EndContact(b2Contact* contact)
 
 	//Player
 	{
+		std::string subject = "";
 		std::string other = "";
 		if (c1->m_colliderTag == PLAYER)
 		{
 			other = nameB;
+			subject = nameA;
 		}
 		else if (c2->m_colliderTag == PLAYER)
 		{
 			other = nameA;
+			subject = nameB;
 		}
 
 		if (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR" || other == "INFECTED_H")
 		{
-			if (nameA == "p_feet" || nameB == "p_feet")
+			if (subject == "p_feet")
 			{
 				player_floor_contacts--;
 			}
@@ -342,11 +386,11 @@ void ContactListener::EndContact(b2Contact* contact)
 
 		if (other == "SOLID" || other == "M_BLOCK")
 		{
-			if (nameA == "p_l_s" || nameB == "p_l_s")
+			if (subject == "p_l_s")
 			{
 				player_left_wall_contacts--;
 			}
-			if (nameA == "p_r_s" || nameB == "p_r_s")
+			if (subject == "p_r_s")
 			{
 				player_right_wall_contacts--;
 			}
@@ -445,6 +489,11 @@ void ContactListener::EndContact(b2Contact* contact)
 				{
 					e->ground_contacts--;
 				}
+			}
+
+			if (subject == "wingflap" && other == "PLAYER")
+			{
+				e->player_in_wingflap = false;
 			}
 		}
 	}

@@ -64,6 +64,27 @@ Player::Player()
 
 void Player::NewBody()
 {
+	//m_knockback_circle
+	//b2CircleShape knock_back_shape;
+	//knock_back_shape.m_radius = float(0.4f);
+	//knock_back_shape.m_p.Set(0, -10.5f);
+	////fixture user data
+	//FixtureUserData* knock_back_name = new FixtureUserData;
+	//knock_back_name->name = "p_kback";
+	////fixture definition
+	//b2FixtureDef knock_back_def;
+	//knock_back_def.isSensor = false;
+	//knock_back_def.shape = &knock_back_shape;
+	//knock_back_def.userData.pointer = reinterpret_cast<uintptr_t>(knock_back_name);
+	////create fixture using definition
+	//m_knockback_circle = m_body->CreateFixture(&knock_back_def);
+
+	//b2PrismaticJointDef prismaticJointDef;
+	//prismaticJointDef.bodyA = bodyA;
+	//prismaticJointDef.bodyB = bodyB;
+	//prismaticJointDef.collideConnected = false;;
+
+
 	//feet collider box
 	b2PolygonShape feet_sesnor_box;
 	feet_sesnor_box.SetAsBox(0.3f, 0.3f, b2Vec2(0, 0.80f), 0);
@@ -80,9 +101,9 @@ void Player::NewBody()
 
 	//left&right collider boxes
 	b2PolygonShape left_sesnor_box;
-	left_sesnor_box.SetAsBox(0.05f, 0.61f, b2Vec2(-0.4f, 0), 0);
+	left_sesnor_box.SetAsBox(0.05f, 0.75f, b2Vec2(-0.4f, -0.2f), 0);
 	b2PolygonShape right_sesnor_box;
-	right_sesnor_box.SetAsBox(0.05f, 0.61f, b2Vec2(0.4f, 0), 0);
+	right_sesnor_box.SetAsBox(0.05f, 0.75f, b2Vec2(0.4f, -0.2f), 0);
 	//fixture user data
 	FixtureUserData* right_sesnorName = new FixtureUserData;
 	FixtureUserData* left_sesnorName = new FixtureUserData;
@@ -182,6 +203,7 @@ void Player::Die()
 {
 	if (!is_dying)
 	{
+		PlaySound(SoundManager::sounds["dead"]);
 		is_dying = true;
 		SetAnimation("P_MELT");
 		state = PlayerState::Dying;
@@ -189,15 +211,19 @@ void Player::Die()
 
 }
 
-void Player::SetRandomAttAnim()
+void Player::SetRandomAxeAttack()
 {
 
 	int anim_num =  GetRandomValue(0, 1);
 	switch (anim_num)
 	{
-	case 0: SetAnimation("P_ATT1");
+	case 0: 
+		SetAnimation("P_ATT1");
+		PlaySound(SoundManager::sounds["swish1"]);
 		break;
-	case 1: SetAnimation("P_ATT2");
+	case 1: 
+		SetAnimation("P_ATT2");
+		PlaySound(SoundManager::sounds["swish2"]);
 		break;
 	}
 }
@@ -265,6 +291,7 @@ void Player::take_dmg(int dmg)
 {
 	if (!taking_dmg)
 	{
+		PlaySound(SoundManager::sounds["grunt"]);
 		current_hp -= dmg;
 		taking_dmg = true;
 	}
@@ -326,17 +353,29 @@ void Player::DrawUI()
 		(looking_right ? (x_axis < 0.0f ? -y_axis*300.0f : y_axis * 300.0f) : (x_axis > 0.0f ? -y_axis * 300.0f : y_axis * 300.0f)) };
 		
 		//maxpwr
-		//for (int i = 0; i < 50; i++) { // three seconds at 60fps
-		//	b2Vec2 trajectoryPosition = GetTrajectoryPoint(start_aim_pos, axe_max, i);
-		//	DrawRectangleLines(trajectoryPosition.x-1, trajectoryPosition.y-1, 3 + (float(i)* 0.03f), 3 + (float(i) * 0.03f), BLACK);
-		//}
+		for (int i = 0; i < 50; i++) { // three seconds at 60fps
+			b2Vec2 trajectoryPosition = GetTrajectoryPoint(start_aim_pos, axe_max, i);
+			DrawRectangleLines(trajectoryPosition.x-1, trajectoryPosition.y-1, 3 + (float(i)* 0.04f), 3 + (float(i) * 0.04f), BLACK);
+		}
 
-		BeginShaderMode(shdrOutline);
+		//BeginShaderMode(shdrOutline);
 		for (int i = 0; i < 50; i++) { // three seconds at 60fps
 			b2Vec2 trajectoryPosition = GetTrajectoryPoint(start_aim_pos, axe_velocity, i);
-			DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1 + (float(i) * 0.03f), 1 + (float(i) * 0.03f), GREEN);
+			
+			if (i > 46 && (fabs(axe_velocity.x) + fabs(axe_velocity.y)) >= 300.0f)
+			{
+				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1 + (float(i) * 0.04f), 1 + (float(i) * 0.04f), RED);
+			}	
+			else if (i > 35 && (fabs(axe_velocity.x) + fabs(axe_velocity.y)) >= 250.0f)
+			{
+				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1 + (float(i) * 0.04f), 1 + (float(i) * 0.04f), YELLOW);
+			}
+			else
+			{
+				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1 + (float(i) * 0.04f), 1 + (float(i) * 0.04f), GREEN);
+			}
 		}
-		EndShaderMode();
+		//EndShaderMode();
 	}
 }
 
@@ -352,9 +391,7 @@ void Player::UpdateIdleState(float dt)
 	if ((IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
 		&& is_touching_floor)
 	{
-		set_velocity_y(-jump_force);
-		state = PlayerState::Jumping;
-		SetAnimation("P_JUMP");
+		Jump();
 	}
 	else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || std::fabs(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)) > pad_sensitivity_threshold)
 	{
@@ -374,7 +411,7 @@ void Player::UpdateIdleState(float dt)
 		state = PlayerState::Hurting;
 	}
 
-	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
 		SetAnimation("P_AXE_THROW1");
 		state = PlayerState::Throwing;
@@ -382,19 +419,36 @@ void Player::UpdateIdleState(float dt)
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAttAnim();
+		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
 	}
 }
 
+void Player::Jump()
+{
+	PlaySound(SoundManager::sounds["jump"]);
+	set_velocity_y(-jump_force);
+	state = PlayerState::Jumping;
+	SetAnimation("P_JUMP");
+}
+
 void Player::UpdateRunningState(float dt)
 {
+	if (!IsSoundPlaying(SoundManager::sounds["step1"]) &&
+		!IsSoundPlaying(SoundManager::sounds["step2"]) &&
+		!IsSoundPlaying(SoundManager::sounds["step3"]) &&
+		!IsSoundPlaying(SoundManager::sounds["step4"]) &&
+		!IsSoundPlaying(SoundManager::sounds["step5"]))
+	{
+		std::string steps[] = { "step1","step2","step3","step4","step5" };
+		SoundManager::PlayRandSounds(steps, 5);
+	}
+
+
 	if ((IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
 		&& (is_touching_floor || coyote_time_counter > 0))
 	{
-		set_velocity_y(-jump_force);
-		state = PlayerState::Jumping;
-		SetAnimation("P_JUMP");
+		Jump();
 	}
 	else if ((!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT) && !IsGamepadAvailable(0)) ||
 		fabs(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)) == 0.0f)
@@ -426,7 +480,7 @@ void Player::UpdateRunningState(float dt)
 		state = PlayerState::Hurting;
 	}
 
-	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
 		SetAnimation("P_AXE_THROW1");
 		state = PlayerState::Throwing;
@@ -434,7 +488,7 @@ void Player::UpdateRunningState(float dt)
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAttAnim();
+		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
 	}
 
@@ -486,7 +540,7 @@ void Player::UpdateJumpingState(float dt)
 		state = PlayerState::Hurting;
 	}
 
-	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
 		SetAnimation("P_AXE_THROW1");
 		state = PlayerState::Throwing;
@@ -494,7 +548,7 @@ void Player::UpdateJumpingState(float dt)
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAttAnim();
+		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
 	}
 
@@ -529,11 +583,13 @@ void Player::UpdateFallingState(float dt)
 		set_velocity_y(-jump_force);
 		state = PlayerState::Jumping;
 		PlayOnce("P_JUMP");
+		PlaySound(SoundManager::sounds["jump"]);
 	}
 
 	if (is_touching_floor && m_body->GetLinearVelocity().y > m_ground_slam_vel)
 	{
 		PlayOnce("P_GROUND");
+		PlaySound(SoundManager::sounds["land"]);
 	}
 	else if (is_touching_floor)
 	{
@@ -562,7 +618,7 @@ void Player::UpdateFallingState(float dt)
 		state = PlayerState::Hurting;
 	}
 
-	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) && m_has_axe)
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
 		SetAnimation("P_AXE_THROW1");
 		state = PlayerState::Throwing;
@@ -570,7 +626,7 @@ void Player::UpdateFallingState(float dt)
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAttAnim();
+		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
 	}
 
@@ -609,92 +665,83 @@ b2Vec2 Player::GetTrajectoryPoint(b2Vec2& startingPosition, b2Vec2& startingVelo
 
 void Player::UpdateThrowingState(float dt)
 {
-	if (!axe_anim_thrown)
-	{
 
-		is_aiming = true;
+	is_aiming = (IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1) && !axe_just_thrown) ? true : false;
+
+	if (is_aiming)
+	{
+		m_has_axe = false; // pick up axe from back
+
+		//build up power as aiming continues
+		if (axe_throw_pwr_counter <= 3.0f)
+		{
+			axe_throw_pwr_counter += dt * 2.0f;
+		}
+
+		//setup throwing vectors
 		float y_axis = GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_Y);
 		float x_axis = GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_X);
 		float pwr = axe_throw_pwr_counter * 100;
-
 		float x = x_axis * pwr;
 		float y = y_axis * pwr;
-
-		start_aim_pos = { center_pos().x + (looking_right ? 18 : m_rectangle.width -20 ), center_pos().y-10};
-		axe_velocity = { (looking_right ? fabs(x):-fabs(x)) , (looking_right ? (x_axis<0.0f ? -y : y) : (x_axis > 0.0f ? -y : y)) };
-		
-	}
-
-	if (animation->GetCurrentFrameNum() == 15 && IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2))
-	{
-		PlayFromFrame(12, "P_AXE_THROW1");
-	}
-	else if(AnimationEnded() || !IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2) || (IsKeyUp(KEY_SPACE) && !IsGamepadAvailable(0)))
-	{
-		if (!axe_anim_thrown)
+		if (x_axis > pad_sensitivity_threshold && !looking_right)
 		{
-			is_aiming = false;
-			SetAnimation("P_AXE_THROW2");
-			axe_anim_thrown = true;
-			Rectangle rect = Rectangle{ start_aim_pos.x, start_aim_pos.y , 6, 6 };
+			looking_right = true;
+		}
+		else if (x_axis < -pad_sensitivity_threshold && looking_right)
+		{
+			looking_right = false;
+		}
+		start_aim_pos = { center_pos().x + (looking_right ? 12 : m_rectangle.width - 12), center_pos().y - 6 };
+		axe_velocity = { (looking_right ? fabs(x) : -fabs(x)) , (looking_right ? (x_axis < 0.0f ? -y : y) : (x_axis > 0.0f ? -y : y)) };
 
+		//loop animation on aiming
+		if (animation->GetCurrentFrameNum() == 15)
+		{
+			PlayFromFrame(12, "P_AXE_THROW1");
+		}
+
+		//if RT pressed - throw!
+		if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1) || (IsKeyUp(KEY_SPACE) && !IsGamepadAvailable(0)))
+		{
+			PlaySound(SoundManager::sounds["axe_throw"]);
+			axe_just_thrown = true;
+			is_aiming = false; // no longer aiming
+			SetAnimation("P_AXE_THROW2");
+			Rectangle rect = Rectangle{ start_aim_pos.x + (looking_right ? 6 : -8), start_aim_pos.y , 6, 6 };
 			LevelManager::level_entities_safe.push_back(std::make_unique<FireAxe>(rect));
 			axe = reinterpret_cast<FireAxe*>(LevelManager::level_entities_safe.back().get());
-			axe->m_body->ApplyAngularImpulse(3.5f, true);
+			axe->m_body->ApplyAngularImpulse((looking_right ? 3.5f : -3.5f), true);
 			axe->m_body->ApplyLinearImpulseToCenter(axe_velocity, true);
-			
-			
+		}
 
-			if (taking_dmg)
-			{
-				SetAnimation("P_HURT");
-				state = PlayerState::Hurting;
-			}
-		}
-		if (AnimationEnded())
-		{
-			is_aiming = false;
-			SetAnimation("P_IDLE");
-			state = PlayerState::Idle;
-			axe_anim_thrown = false;
-			axe_throw_pwr_counter = 0;
-			if (taking_dmg)
-			{
-				SetAnimation("P_HURT");
-				state = PlayerState::Hurting;
-			}
-		}
-	}
-	else
-	{
-		m_has_axe = false;
-		if (axe_throw_pwr_counter <= 3.0f)
-		{
-			axe_throw_pwr_counter += dt*2.0f;
-		}
-		
-		if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT))
-		{
-			SetAnimation("P_IDLE");
-			state = PlayerState::Idle;
-			axe_anim_thrown = false;
-			axe_throw_pwr_counter = 0;
-			m_has_axe = true;
-			if (taking_dmg)
-			{
-				SetAnimation("P_HURT");
-				state = PlayerState::Hurting;
-			}
-		}
+		//if damage taken
 		if (taking_dmg)
 		{
-			axe_anim_thrown = false;
-			axe_throw_pwr_counter = 0;
-			m_has_axe = true;
 			SetAnimation("P_HURT");
 			state = PlayerState::Hurting;
 		}
 	}
+	else // no logner aiming, axe was thrown or canceled
+	{
+		if (AnimationEnded("P_AXE_THROW2") && axe_just_thrown) // throwing animation ended
+		{
+			axe_throw_pwr_counter = 0;
+			axe_just_thrown = false;
+			m_has_axe = false;
+			SetAnimation("P_IDLE");
+			state = PlayerState::Idle;
+		}
+		else if (!axe_just_thrown) // throwing was canceled - give back axe
+		{
+			axe_throw_pwr_counter = 0;
+			axe_just_thrown = false;
+			m_has_axe = true;
+			SetAnimation("P_IDLE");
+			state = PlayerState::Idle;
+		}
+	}
+
 }
 
 void Player::UpdateAttackingState(float dt)
@@ -705,16 +752,16 @@ void Player::UpdateAttackingState(float dt)
 		b2PolygonShape attack_box;
 		if (!looking_right)
 		{
-			attack_box.SetAsBox(1.2, 0.7f, b2Vec2(-1.2, -0.1), 0);
+			attack_box.SetAsBox(1.2, 0.6f, b2Vec2(-1.2, -0.2), 0);
 		}
 		else
 		{
-			attack_box.SetAsBox(1.2, 0.7f, b2Vec2(1.2, -0.1), 0);;
+			attack_box.SetAsBox(1.2, 0.6f, b2Vec2(1.2, -0.2), 0);;
 		}
 		FixtureUserData* attack_sesnorName = new FixtureUserData;
 		attack_sesnorName->name = "p_axe_att";
 		b2FixtureDef attack_def;
-		attack_def.isSensor = false;
+		attack_def.isSensor = true;
 		attack_def.shape = &attack_box;
 		attack_def.density = 100.0f;
 		attack_def.userData.pointer = reinterpret_cast<uintptr_t>(attack_sesnorName);
@@ -731,7 +778,7 @@ void Player::UpdateAttackingState(float dt)
 	{
 		m_has_axe = true;
 		m_body->DestroyFixture(m_attack_sensor);
-		SetRandomAttAnim();
+		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
 		if (taking_dmg)
 		{

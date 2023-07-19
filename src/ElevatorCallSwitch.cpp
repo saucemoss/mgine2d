@@ -101,4 +101,8 @@ void ElevatorCallSwitch::InitAnimations()
 	SetAnimation("ELEV_SW_IDLE");
 }
 
+void ElevatorCallSwitch::Interract()
+{
+}
+
 

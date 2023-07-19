@@ -13,7 +13,6 @@
 #include "AnimatedDecor.h"
 #include "Elevator.h"
 #include "ElevatorCallSwitch.h"
-#include <rlgl.h>
 #include "MovingBlock.h"
 #include "WoodCrate.h"
 #include "Platform.h"
@@ -21,206 +20,25 @@
 #include "FireAxe.h"
 #include "ContactListener.h"
 #include "FlyingInfected.h"
+#include "LightManager.h"
+
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
+const ldtk::Level* LevelManager::currentLdtkLevel;
+float LevelManager::m_darkness_strength;
 std::vector<std::unique_ptr<Entity>> LevelManager::level_entities_safe;
+std::vector<std::unique_ptr<Collidable>> LevelManager::solid_tiles;
 
-
-// Move a light and mark it as dirty so that we update it's mask next frame
-void LevelManager::MoveLight(LightInfo& light, float x, float y)
-{
-	light.dirty = true;
-	light.position.x = x;
-	light.position.y = y;
-
-	// update the cached bounds
-	light.bounds.x = x - light.outerRadius ;
-	light.bounds.y = y - light.outerRadius ;
-
-}
-
-// Compute a shadow volume for the edge
-// It takes the edge and projects it back by the light radius and turns it into a quad
-void LevelManager::ComputeShadowVolumeForEdge(LightInfo& light, Vector2 sp, Vector2 ep)
-{
-	if (light.shadowCount >= MAX_SHADOWS) return;
-
-	float extension = light.outerRadius * 2;
-
-	Vector2 spVector = Vector2Normalize(Vector2Subtract(sp, light.position));
-	Vector2 spProjection = Vector2Add(sp, Vector2Scale(spVector, extension));
-
-	Vector2 epVector = Vector2Normalize(Vector2Subtract(ep, light.position));
-	Vector2 epProjection = Vector2Add(ep, Vector2Scale(epVector, extension));
-
-	light.shadows[light.shadowCount].vertices[0] = sp;
-	light.shadows[light.shadowCount].vertices[1] = ep;
-	light.shadows[light.shadowCount].vertices[2] = epProjection;
-	light.shadows[light.shadowCount].vertices[3] = spProjection;
-
-	light.shadowCount++;
-}
-
-// Draw the light and shadows to the mask for a light
-void LevelManager::DrawLightMask(LightInfo& light)
-{
-	// Use the light mask
-	BeginTextureMode(light.mask);
-
-	ClearBackground(WHITE);
-	// Force the blend mode to only set the alpha of the destination
-	rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
-	rlSetBlendMode(BLEND_CUSTOM);
-
-	// If we are valid, then draw the light radius to the alpha mask
-	if (light.valid) DrawCircleGradient((int)light.position.x, (int)light.position.y, light.outerRadius, ColorAlpha(WHITE, 0), WHITE); 
-
-	rlDrawRenderBatchActive();
-	
-	// Cut out the shadows from the light radius by forcing the alpha to maximum
-	rlSetBlendMode(BLEND_ALPHA);
-	rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MAX);
-	rlSetBlendMode(BLEND_CUSTOM);
-
-	// Draw the shadows to the alpha mask
-	for (int i = 0; i < light.shadowCount; i++)
-	{
-		DrawTriangleFan(light.shadows[i].vertices, 4, WHITE);
-	}
-
-	rlDrawRenderBatchActive();
-
-	// Go back to normal blend mode
-	rlSetBlendMode(BLEND_ALPHA);
-	
-	DrawCircleGradient((int)light.position.x, (int)light.position.y, light.outerRadius, ColorAlpha(WHITE,0), WHITE);
-	
-	EndTextureMode();
-}
 
 void LevelManager::RemoveEntityFromLevel(Entity& e)
 {
 	e.m_destroy = true;
 }
 
-bool LevelManager::UpdateLight(LightInfo& light, std::vector<Rectangle*> m_light_walls)
-{
-	if (!light.active || !light.dirty) return false;
-
-	light.dirty = false;
-	light.shadowCount = 0;
-	light.valid = false;
-
-	for (int i = 0; i < m_light_walls.size(); i++)
-	{
-		// Are we in a box? if so we are not valid
-		if (CheckCollisionPointRec(light.position, *m_light_walls[i])) return false;
-
-		// If this box is outside our bounds, we can skip it
-		if (!CheckCollisionRecs(light.bounds, *m_light_walls[i])) continue;
-
-		// Check the edges that are on the same side we are, and cast shadow volumes out from them
-
-		// Top
-		Vector2 sp = { m_light_walls[i]->x, m_light_walls[i]->y };
-		Vector2 ep = { m_light_walls[i]->x + m_light_walls[i]->width, m_light_walls[i]->y };
-
-		if (light.position.y > ep.y) ComputeShadowVolumeForEdge(light, sp, ep);
-
-		// Right
-		sp = ep;
-		ep.y += m_light_walls[i]->height;
-		if (light.position.x < ep.x) ComputeShadowVolumeForEdge(light, sp, ep);
-
-		// Bottom
-		sp = ep;
-		ep.x -= m_light_walls[i]->width;
-		if (light.position.y < ep.y) ComputeShadowVolumeForEdge(light, sp, ep);
-
-		// Left
-		sp = ep;
-		ep.y -= m_light_walls[i]->height;
-		if (light.position.x > ep.x) ComputeShadowVolumeForEdge(light, sp, ep);
-
-		// The box itself
-		light.shadows[light.shadowCount].vertices[0] = { m_light_walls[i]->x, m_light_walls[i]->y };
-		light.shadows[light.shadowCount].vertices[1] = { m_light_walls[i]->x, m_light_walls[i]->y + m_light_walls[i]->height };
-		light.shadows[light.shadowCount].vertices[2] = { m_light_walls[i]->x + m_light_walls[i]->width, m_light_walls[i]->y + m_light_walls[i]->height };
-		light.shadows[light.shadowCount].vertices[3] = { m_light_walls[i]->x + m_light_walls[i]->width, m_light_walls[i]->y };
-		light.shadowCount++;
-	}
-
-	light.valid = true;
-
-	DrawLightMask(light);
-
-	return true;
-};
-
-void LevelManager::SetupLight(float x, float y, float radius)
-{
-	m_lights.push_back(LightInfo());
-	m_lights.back().active = true;
-	m_lights.back().valid = false;  // The light must prove it is valid
-	m_lights.back().mask = LoadRenderTexture(currentLdtkLevel->size.x, currentLdtkLevel->size.y);
-	m_lights.back().outerRadius = radius;
-
-	m_lights.back().bounds.width = radius * 2;
-	m_lights.back().bounds.height = radius * 2;
-
-	MoveLight(m_lights.back(), x, y);
-
-	// Force the render texture to have something in it
-	DrawLightMask(m_lights.back());
-}
-
-void LevelManager::SetupBoxes()
-{
-
-	//auto currentBody = world->GetBodyList();
-	//while (currentBody != nullptr)
-	//{
-	//	auto pos = currentBody->GetPosition();
-	//	auto fixture = currentBody->GetFixtureList();
-	//	while (fixture != nullptr)
-	//	{
-	//		auto shape = fixture->GetShape();
-	//		// Note, right now supposing all shapes are polygons, use to determine shape->GetType();
-
-	//			auto polygonShape = (b2PolygonShape*)shape;
-	//			
-	//			Rectangle r = {
-	//				pos.x * settings::PPM, pos.y * settings::PPM ,
-	//				32,32};
-	//			m_light_walls.push_back(&r);
-
-	//		fixture = fixture->GetNext();
-	//	}
-
-	//	currentBody = currentBody->GetNext();
-	//}
-
-	for (auto& s : solid_tiles)
-	{
-		m_light_walls.push_back(&s->m_rectangle);
-	}
-	for (auto& e : level_entities_safe)
-	{
-		Collidable* c = dynamic_cast<Collidable*>(e.get());
-		if (c != nullptr)
-		{
-			if (c->m_colliderTag == M_BLOCK)
-			{
-				m_light_walls.push_back(&c->m_rectangle);
-			}
-		}
-	}
-}
-
 LevelManager::LevelManager()
 {
-
+	
 	ldtk::Project* p = new ldtk::Project();
 	p->loadFromFile("res\\level\\TestLevel.ldtk");
 	ldtkProject = p;
@@ -234,7 +52,6 @@ LevelManager::LevelManager()
 	world->SetDestructionListener(destruction_listener);
 	Collidable::world = world;
 	LoadLevel("Level_0");
-	m_darkness_strength = 0.95f;
 
 }
 
@@ -253,6 +70,8 @@ void LevelManager::LoadLevel(std::string level_name)
 	//Set to new current level
 	currentLdtkLevel = &ldtkWorld->getLevel(level_name);
 	levelSize = currentLdtkLevel->size;
+	lights = new LightManager();
+	m_darkness_strength = currentLdtkLevel->getField<float>("DarknessLevel").value();
 
 	if (world == nullptr)
 	{
@@ -275,7 +94,11 @@ void LevelManager::LoadLevel(std::string level_name)
 	}
 
 
-	SetupLight(0, 0, 100);
+	lights->m_lights.emplace_back();
+	//lights->m_lights[0].Move(Vector2{ (float)currentLdtkLevel->size.x, (float)currentLdtkLevel->size.y });
+
+	lights->SetupBoxes();
+
 	//Textures setup:
 	// 
 	//Background Texture
@@ -471,14 +294,24 @@ void LevelManager::LoadLevel(std::string level_name)
 		}
 		if (entity.getName() == "Light64")
 		{
-			float radius = entity.getField<float>("Radius").value();
-			SetupLight(rect.x + rect.width/2, rect.y + rect.height/2, radius);
-			SetupLight(2*rect.x + rect.width / 2, rect.y + rect.height / 2, radius);
+			float in_radius = entity.getField<float>("InRadius").value();
+			float out_radius = entity.getField<float>("OutRadius").value();
+			bool is_color = entity.getField<bool>("isColor").value();
+			auto c = entity.getField<ldtk::Color>("Color").value();
+			Color color = { c.r, c.g, c.b, c.a };
+
+			lights->SetupLight(rect.x + rect.width * 0.25f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color);
+			lights->SetupLight(rect.x + rect.width * 0.75f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color);
 		}
 		if (entity.getName() == "Light32")
 		{
-			float radius = entity.getField<float>("Radius").value();
-			SetupLight(rect.x + rect.width / 2, rect.y + rect.height / 2, radius);
+			float in_radius = entity.getField<float>("InRadius").value();
+			float out_radius = entity.getField<float>("OutRadius").value();
+			bool is_color = entity.getField<bool>("isColor").value();
+			auto c = entity.getField<ldtk::Color>("Color").value();
+			Color color = { c.r, c.g, c.b, c.a };
+
+			lights->SetupLight(rect.x + rect.width / 2, rect.y + rect.height / 2, in_radius, out_radius, color, is_color);
 		}
 		if (entity.getName() == "MovingBlock")
 		{
@@ -520,13 +353,8 @@ void LevelManager::LoadLevel(std::string level_name)
 	}
 	
 	//Light walls
-	SetupBoxes();
+	lights->SetupBoxes();
 
-	std::cout << m_lights.size() << std::endl;
-	// Create a global light mask to hold all the blended m_lights
-	lightMask = LoadRenderTexture(
-		currentLdtkLevel->size.x,
-		currentLdtkLevel->size.y);
 }
 
 void LevelManager::UnloadLevel()
@@ -555,14 +383,14 @@ void LevelManager::UnloadLevel()
 	UnloadRenderTexture(decorationRenderTexture);
 	UnloadRenderTexture(baseBackgroundRenderTexture);
 		
-	UnloadRenderTexture(lightMask);
-	for (int i = 0; i < m_lights.size(); i++)
+	UnloadRenderTexture(lights->LightMask);
+	for (int i = 0; i < lights->m_lights.size(); i++)
 	{
-		if (m_lights[i].active) UnloadRenderTexture(m_lights[i].mask);
+		UnloadRenderTexture(lights->m_lights[i].GlowTexture);
 	}
-	m_light_walls.clear();
-	m_lights.clear();
-	nextLight = 0;
+	lights->m_light_walls.clear();
+	lights->m_lights.clear();
+
 	level_entities_safe.clear();
 	solid_tiles.clear();
 }
@@ -581,96 +409,8 @@ void LevelManager::Update(float dt)
 		LoadLevel(next_level);
 		next_level = "";
 	}
-
-	// Drag light 0
-	Vector2 mp = GetScreenToWorld2D(GetMousePosition(), GameScreen::camera);
-	Vector2 pp = GetScreenToWorld2D(GameScreen::player_focused_cam.target, GameScreen::player_focused_cam);
-
-	MoveLight(m_lights.at(0), GameScreen::player_focused_cam.target.x, GameScreen::player_focused_cam.target.y);
-
-	for (int i = 1; i < m_lights.size(); i++)
-	{
-		MoveLight(m_lights.at(i), m_lights.at(i).position.x, m_lights.at(i).position.y);
-	}
-
-
-	// Make a new light
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-	{
-
-	}
 	
-	//// Toggle debug info
-	//if (IsKeyPressed(KEY_TWO))
-	//{
-	//	showLines = !showLines;
-	//}
-
-	// Update the m_lights and keep track if any were dirty so we know if we need to update the master light mask
-	bool dirtyLights = false;
-	for (int i = 0; i < m_lights.size(); i++)
-	{
-		if (UpdateLight(m_lights.at(i), m_light_walls)) dirtyLights = true;
-	}
-
-	// Update the light mask
-	if (dirtyLights)
-	{
-		// Build up the light mask
-		BeginTextureMode(lightMask);
-
-		ClearBackground(BLACK);
-
-		// Force the blend mode to only set the alpha of the destination
-		rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
-		rlSetBlendMode(BLEND_CUSTOM);
-
-		// Merge in all the light masks
-		for (int i = 0; i < m_lights.size(); i++)
-		{
-			if (m_lights[i].active) DrawTextureRec(m_lights[i].mask.texture, { 0, 0,
-				(float)GameScreen::LevelMgr->currentLdtkLevel->size.x ,
-				-(float)GameScreen::LevelMgr->currentLdtkLevel->size.y }, Vector2Zero(), WHITE);
-		}
-
-		rlDrawRenderBatchActive();
-
-		// Go back to normal blend
-		rlSetBlendMode(BLEND_ALPHA);
-		EndTextureMode();
-	}
-}
-
-void LevelManager::DrawSpotLights()
-{
-
-	// Overlay the shadows from all the m_lights
-	DrawTextureRec(lightMask.texture,
-		{ 0, 0, (float)lightMask.texture.width,
-				-(float)lightMask.texture.height },
-		Vector2Zero(), ColorAlpha(WHITE, m_darkness_strength));
-
-	// Draw the m_lights
-	//for (int i = 0; i < m_lights.size(); i++)
-	//{
-	//	if (m_lights[i].active) DrawCircle((int)m_lights[i].position.x, (int)m_lights[i].position.y, 10, (i == 0) ? YELLOW : WHITE);
-	//}
-
-	if (showLines)
-	{
-		for (int s = 0; s < m_lights[0].shadowCount; s++)
-		{
-			DrawTriangleFan(m_lights[0].shadows[s].vertices, 4, DARKPURPLE);
-		}
-
-		for (int b = 0; b < m_light_walls.size(); b++)
-		{
-			if (CheckCollisionRecs(*m_light_walls[b], m_lights[0].bounds)) DrawRectangleRec(*m_light_walls[b], PURPLE);
-
-			DrawRectangleLines((int)m_light_walls[b]->x, (int)m_light_walls[b]->y, (int)m_light_walls[b]->width, (int)m_light_walls[b]->height, DARKBLUE);
-		}
-	}
-	
+	lights->UpdateLights();
 }
 
 bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)

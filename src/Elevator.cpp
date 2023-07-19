@@ -198,7 +198,6 @@ void Elevator::Update(float dt)
 
 void Elevator::ResetY(int next_level)
 {
-	
 	m_body->SetTransform({ m_body->GetPosition().x, next_level / settings::PPM}, 0);
 	m_body->SetLinearVelocity({ 0, 0 });
 	//open = true;

@@ -82,6 +82,18 @@
     <Filter Include="Pliki nagłówkowe\Entities\Objects\Weapons">
       <UniqueIdentifier>{3c059955-e826-4a42-837f-fb2b4a3391cf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Sound">
+      <UniqueIdentifier>{85eda8c1-5835-4b0a-88ee-10e5e2690193}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Sound">
+      <UniqueIdentifier>{2c6c6338-3928-425c-9067-f5b1ee693692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Lights">
+      <UniqueIdentifier>{975f71ba-c2ac-49a9-9f95-05cffdeeaf7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Lights">
+      <UniqueIdentifier>{ea3b6042-9491-477b-91e7-c1a133358b87}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -142,7 +154,13 @@
       <Filter>Pliki źródłowe\Entities\Objects\Weapons</Filter>
     </ClCompile>
     <ClCompile Include="src\FlyingInfected.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SoundManager.cpp">
+      <Filter>Pliki źródłowe\Systems\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LightManager.cpp">
+      <Filter>Pliki źródłowe\Systems\Lights</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -221,8 +239,17 @@
     <ClInclude Include="src\ContactListener.h">
       <Filter>Pliki nagłówkowe\Systems\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="src\SoundManager.h">
+      <Filter>Pliki nagłówkowe\Systems\Sound</Filter>
+    </ClInclude>
     <ClInclude Include="src\FlyingInfected.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interactable.h">
+      <Filter>Pliki nagłówkowe\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LightManager.h">
+      <Filter>Pliki nagłówkowe\Systems\Lights</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

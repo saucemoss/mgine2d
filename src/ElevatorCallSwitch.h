@@ -3,6 +3,7 @@
 #include "Collidable.h"
 #include "Settings.h"
 #include "Animations.h"
+#include "Interactable.h"
 #include "LDtkLoader/Project.hpp"
 #include "Elevator.h"
 enum class ECallSwitchState
@@ -10,7 +11,7 @@ enum class ECallSwitchState
     IDLE,
     PRESSED
 };
-class ElevatorCallSwitch : public Collidable, public Entity, public Animated
+class ElevatorCallSwitch : public Collidable, public Entity, public Animated, public Interactable
 {
 public:
     ElevatorCallSwitch(const Rectangle& rectangle, const ldtk::IID elevator_reference);
@@ -38,5 +39,9 @@ private:
     float press_delay;
     float press_delay_counter;
     
+
+
+    // Inherited via Interactable
+    virtual void Interract() override;
 
 };

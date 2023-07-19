@@ -163,6 +163,7 @@
     <ClCompile Include="src\InfectedHazmat.cpp" />
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LevelPortal.cpp" />
+    <ClCompile Include="src\LightManager.cpp" />
     <ClCompile Include="src\MovingBlock.cpp" />
     <ClCompile Include="src\Platform.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
@@ -171,14 +172,17 @@
     <ClCompile Include="src\GameScreen.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\SoundManager.cpp" />
     <ClCompile Include="src\TitleScreen.cpp" />
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\LightManager.h" />
     <ClInclude Include="src\ContactListener.h" />
     <ClInclude Include="src\FireAxe.h" />
     <ClInclude Include="src\FlyingInfected.h" />
     <ClInclude Include="src\InfectedHazmat.h" />
+    <ClInclude Include="src\Interactable.h" />
     <ClInclude Include="src\Platform.h" />
     <ClInclude Include="src\MovingBlock.h" />
     <ClInclude Include="src\Collidable.h" />
@@ -198,6 +202,7 @@
     <ClInclude Include="src\Screens.h" />
     <ClInclude Include="src\ScreensManager.h" />
     <ClInclude Include="src\Settings.h" />
+    <ClInclude Include="src\SoundManager.h" />
     <ClInclude Include="src\TitleScreen.h" />
     <ClInclude Include="src\Util.h" />
     <ClInclude Include="src\WoodCrate.h" />

@@ -10,6 +10,7 @@ RenderTexture2D frameBuffer;
 
 Game::Game(int width, int height, int fps, std::string title)
 {
+	SetConfigFlags(/*FLAG_VSYNC_HINT ||*/ FLAG_MSAA_4X_HINT);
 	assert(!GetWindowHandle());	//If assertion triggers : Window is already opened
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
@@ -17,6 +18,10 @@ Game::Game(int width, int height, int fps, std::string title)
 	TextureLoader::LoadTextures();
 	ScreensManager::Initialize();
 	ScreensManager::SetCurrentScreen(Screens::GAME); //TO BE CHANGED TO TITLE
+	
+	InitAudioDevice();
+	SoundManager::LoadSounds();
+	SetMasterVolume(0.5f);
 	
 }
 

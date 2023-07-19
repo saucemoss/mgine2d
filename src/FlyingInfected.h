@@ -43,6 +43,7 @@ public:
     bool right_player_touch = false;
     bool looking_right = true;
     bool player_in_dmg_zone = false;
+    bool player_in_wingflap = false;
     float speed = 4.0f;
     float linear_dumping = 2.0f;
     int solid_contacts = 0;
@@ -51,6 +52,7 @@ public:
     b2Fixture* m_right_sensor;
     b2Fixture* m_agro_sensor;
     b2Fixture* m_attack_sensor;
+    b2Fixture* m_winghflap_sensor;
 
 
     //HP

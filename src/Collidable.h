@@ -51,7 +51,7 @@ public:
 			switch (collider_tag)
 			{
 			case PLAYER:
-				SetupSimpleBox(rectangle, type, true);
+				SetupPolyBody(rectangle, type, true);
 				break;
 			case W_CRATE:
 				SetupSimpleBox(rectangle, type, false);
@@ -109,6 +109,24 @@ public:
 		m_fixtureDef.friction = 1.0f;
 		m_fixtureDef.shape = &m_circle;
 		m_fixture = m_body->CreateFixture(&m_circle, density);
+	}
+
+	void SetupPolyBody(Rectangle& rectangle, b2BodyType type, bool fix_rotate, float density = 1.0f)
+	{
+		//test polygon collider
+		b2PolygonShape poly_body_shape;
+		b2Vec2 verices[6] = { {-0.4f,-0.8f},{0.4f,-0.8f},{0.4f,0.5f},{0.3f,0.6f},{-0.3f,0.6f},{-0.4f,0.5f}};
+		m_box.Set(verices, 6);
+		m_bodyDef.position.Set((rectangle.x + rectangle.width / 2) / settings::PPM,
+			(rectangle.y + rectangle.height / 2) / settings::PPM);
+
+		m_bodyDef.fixedRotation = fix_rotate;
+		m_bodyDef.type = type;
+		m_bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
+		m_body = world->CreateBody(&m_bodyDef);
+		m_fixtureDef.friction = 1.0f;
+		m_fixtureDef.shape = &m_box;
+		m_fixture = m_body->CreateFixture(&m_box, density);
 	}
 
 	~Collidable()

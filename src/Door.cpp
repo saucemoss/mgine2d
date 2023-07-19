@@ -1,5 +1,6 @@
 #include "Door.h"
 #include "LevelManager.h"
+#include "SoundManager.h"
 Door::Door(const Rectangle& rect, bool is_right)
 	:
 	Collidable(rect, b2_staticBody, DOOR),
@@ -55,7 +56,7 @@ void Door::Update(float dt)
 		if (!player_in_sensor)
 		{
 			state = DoorState::Closing;
-			PlayOnce("D_CLOSE");
+			PlayOnce("D_CLOSE");	
 		}
 		else
 		{
@@ -79,6 +80,7 @@ void Door::Update(float dt)
 			if (AnimationEnded())
 			{
 				state = DoorState::Closed;
+				PlaySound(SoundManager::sounds["robo9"]);
 			}
 		}
 		else
@@ -102,6 +104,7 @@ void Door::Update(float dt)
 			if (AnimationEnded())
 			{
 				state = DoorState::Open;
+				PlaySound(SoundManager::sounds["robo8"]);
 			}
 		}
 		break;

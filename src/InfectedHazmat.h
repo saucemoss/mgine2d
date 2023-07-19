@@ -62,6 +62,7 @@ public:
     InfectedHazmatState state;
     void UpdateIdleState(float dt);
     void UpdateRunningState(float dt);
+    void SetAttacking();
     void UpdateAttackingState(float dt);
     void UpdateHurtingState(float dt);
     void UpdateDyingState(float dt);

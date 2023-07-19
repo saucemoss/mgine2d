@@ -1,6 +1,8 @@
 #include "InfectedHazmat.h"
 #include "LevelManager.h"
 #include "GameScreen.h"
+#include "Util.h"
+
 InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	Collidable({ rectangle.x,rectangle.y,12,30 }, b2_dynamicBody, INFECTED_H)
 {
@@ -17,7 +19,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 
 	//Physics body cfg
 	//add more mass 
-	m_fixture->SetDensity(20.0f);
+	m_fixture->SetDensity(60.0f);
 	m_body->ResetMassData();
 
 	//feet collider box
@@ -170,16 +172,24 @@ void InfectedHazmat::Die(int death_option)
 	{
 	case 1:
 		SetAnimation("IH_DEATH");
+		PlaySound(SoundManager::sounds["hurt12"]);
+		PlaySound(SoundManager::sounds["slime2short"]);
 		break;
 	case 2:
-	solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
+		solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
+		PlaySound(SoundManager::sounds["hurt9"]);
+		PlaySound(SoundManager::sounds["splat5"]);
+		PlaySound(SoundManager::sounds["splat1"]);
+		PlaySound(SoundManager::sounds["slime1"]);
 		break;
 	}
+	
 	state = InfectedHazmatState::Dying;
 }
 
 void InfectedHazmat::CheckAgroSensor()
 {
+
 	if (player_in_agro && GameScreen::player->center_pos().x > center_pos().x)
 	{
 		looking_right = true;
@@ -202,6 +212,8 @@ void InfectedHazmat::CheckTouchGround()
 
 void InfectedHazmat::TakeDmg(int dmg)
 {
+	std::string dmgs[] = { "hit2","hit3","hit4" };
+	SoundManager::PlayRandSounds(dmgs, 3);
 	m_current_hp -= dmg;
 	state = InfectedHazmatState::Hurting;
 	SetAnimation("IH_DMG");
@@ -258,7 +270,7 @@ void InfectedHazmat::Draw(int l)
 		0.0f,
 		c);
 
-	DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
+	//DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
 }
 
 void InfectedHazmat::InitAnimations()
@@ -297,8 +309,7 @@ void InfectedHazmat::UpdateRunningState(float dt)
 
 	if (left_player_touch && player_in_dmg_zone)
 	{
-		SetAnimation("IH_ATT");
-		state = InfectedHazmatState::Attacking;
+		SetAttacking();
 	}
 	else if (left_player_touch)
 	{
@@ -307,13 +318,19 @@ void InfectedHazmat::UpdateRunningState(float dt)
 	
 	if (right_player_touch && player_in_dmg_zone)
 	{
-		SetAnimation("IH_ATT");
-		state = InfectedHazmatState::Attacking;		
+		SetAttacking();
 	}
 	else if (right_player_touch)
 	{
 		looking_right = true;
 	}
+}
+
+void InfectedHazmat::SetAttacking()
+{
+	SetAnimation("IH_ATT");
+	PlaySound(SoundManager::sounds["slime1"]);
+	state = InfectedHazmatState::Attacking;
 }
 
 void InfectedHazmat::UpdateAttackingState(float dt)

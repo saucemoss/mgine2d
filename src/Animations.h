@@ -163,6 +163,10 @@ public:
 	{
 		return animation->AnimationEnded();
 	}
+	bool AnimationEnded(std::string anim_name)
+	{
+		return animation->AnimationEnded() && animations->m_CurrentActiveAnimation == anim_name;
+	}
 	bool IsCurrentAnimation(std::string name)
 	{
 		return name == animations->m_CurrentActiveAnimation;

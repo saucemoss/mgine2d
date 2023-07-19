@@ -24,7 +24,7 @@ FlyingInfected::FlyingInfected(const Rectangle& rectangle) :
 
 	//player agro sensor
 	b2PolygonShape agro_sesnor_box;
-	agro_sesnor_box.SetAsBox(6.0f, 6.0f, b2Vec2(0.0, 0.0), 0);
+	agro_sesnor_box.SetAsBox(7.0f, 7.0f, b2Vec2(0.0, 0.0), 0);
 	//fixture user data
 	FixtureUserData* agroSensorName = new FixtureUserData;
 	agroSensorName->name = "fi_agro";
@@ -35,6 +35,8 @@ FlyingInfected::FlyingInfected(const Rectangle& rectangle) :
 	agroDef.userData.pointer = reinterpret_cast<uintptr_t>(agroSensorName);
 	//create fixture using definition
 	m_agro_sensor = m_body->CreateFixture(&agroDef);
+
+	m_winghflap_sensor = util::SimpleSensor(m_body, "wingflap", 13.0f, 13.0f);
 
 
 	//attack sensor
@@ -67,6 +69,11 @@ void FlyingInfected::Update(float dt)
 	CheckPlayerTouch();
 	CheckTouchGround();
 	CheckAgroSensor();
+	
+	if (player_in_wingflap && !IsSoundPlaying(SoundManager::sounds["wing_flap"]) && (state != FlyingInfectedStates::Dying))
+	{
+		PlaySound(SoundManager::sounds["wing_flap"]);
+	}
 
 	if (state != FlyingInfectedStates::Dying)
 	{
@@ -100,22 +107,14 @@ void FlyingInfected::Update(float dt)
 
 void FlyingInfected::Die(int death_option)
 {
-
-	//switch (death_option)
-	//{
-	//case 1:
-	//	SetAnimation("IH_DEATH");
-	//	break;
-	//case 2:
-	//	solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
-	//	break;
-	//}
+	PlaySound(SoundManager::sounds["hurt4"]);
 	SetAnimation("FLY_I_DEAD");
 	state = FlyingInfectedStates::Dying;
 }
 
 void FlyingInfected::CheckAgroSensor()
 {
+
 	if (player_in_agro && GameScreen::player->center_pos().x > center_pos().x)
 	{
 		looking_right = true;
@@ -138,17 +137,19 @@ void FlyingInfected::CheckTouchGround()
 void FlyingInfected::CheckPlayerTouch()
 {
 
-	if (animation->GetCurrentFrameNum() >= 6 &&
-		player_in_dmg_zone &&
-		state == FlyingInfectedStates::Attacking)
-	{
-		GameScreen::player->Die();
-	}
+	//if (animation->GetCurrentFrameNum() >= 6 &&
+	//	player_in_dmg_zone &&
+	//	state == FlyingInfectedStates::Attacking)
+	//{
+	//	GameScreen::player->Die();
+	//}
 
 }
 
 void FlyingInfected::TakeDmg(int dmg)
 {
+	std::string dmgs[] = {"hit6","hit7","hit8"};
+	SoundManager::PlayRandSounds(dmgs, 3);
 	m_current_hp -= dmg;
 	state = FlyingInfectedStates::Hurting;
 	SetAnimation("FLY_I_DMG");
@@ -207,14 +208,8 @@ void FlyingInfected::Draw(int l)
 		angle,
 		c);
 
-	if (animation->GetCurrentFrameNum() >= 6 &&
-		player_in_dmg_zone &&
-		state == FlyingInfectedStates::Attacking)
-	{
-		DrawText("DEAD!", center_pos().x - 50, center_pos().y - 40, 40, RED);
-	}
 	//DrawText(std::to_string(solid_contacts).c_str(), center_pos().x - 50, center_pos().y - 40, 40, RED);
-	DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
+	//DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
 }
 
 void FlyingInfected::InitAnimations()
@@ -245,6 +240,7 @@ void FlyingInfected::UpdateFlyingState(float dt)
 		if (player_in_dmg_zone)
 		{
 			SetAnimation("FLY_I_ATT");
+			PlaySound(SoundManager::sounds["splat8"]);
 			state = FlyingInfectedStates::Attacking;
 		}
 
