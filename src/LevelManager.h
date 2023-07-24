@@ -39,11 +39,13 @@ public:
     Vector2 new_player_pos;
 
     //physics
+    static b2World* world;
     b2Vec2 gravity = b2Vec2(0.0f, 80.0f);
     static bool CheckPlayerInSensor(b2Fixture& sensor);
     void SolidTilesToBigBoxes();
     ContactListener* contacts;
     DestructionListener* destruction_listener;
+    ContactFilter* contact_filter;
   
     //Textures definition
     //static background
@@ -70,8 +72,7 @@ public:
     static std::vector<std::unique_ptr<Collidable>> solid_tiles;
     static std::vector<std::unique_ptr<Entity>> level_entities_safe;
 
-    //Box2d
-    static b2World* world;
+
 
 };
 

@@ -4,131 +4,47 @@
 #include "Util.h"
 
 InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
-	Collidable({ rectangle.x,rectangle.y,12,30 }, b2_dynamicBody, INFECTED_H)
+	Enemy({ rectangle.x,rectangle.y,12,30 }, INFECTED_H)
 {
 	
 	InitAnimations();
-	state = InfectedHazmatState::Idle;
-
+	state = EnemyState::Idle;
+	m_max_hp = 100;
+	m_current_hp = m_max_hp;
 
 	// Add mappings for debug purposes
-	StatesStrMap[InfectedHazmatState::Idle] = "Idle";
-	StatesStrMap[InfectedHazmatState::Running] = "Running";
-	StatesStrMap[InfectedHazmatState::Attacking] = "Attacking";
+	StatesStrMap[EnemyState::Idle] = "Idle";
+	StatesStrMap[EnemyState::Running] = "Running";
+	StatesStrMap[EnemyState::Attacking] = "Attacking";
 
 
 	//Physics body cfg
 	//add more mass 
 	m_fixture->SetDensity(60.0f);
 	m_body->ResetMassData();
+	FixtureUserData* data = new FixtureUserData;
+	data->tag = ENEMY_GROUP;
+	m_fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(data);
 
 	//feet collider box
-	b2PolygonShape feet_sesnor_box;
-	feet_sesnor_box.SetAsBox(0.3f, 0.3f, b2Vec2(0, 0.80f), 0);
-	//fixture user data
-	FixtureUserData* feetFixtureName = new FixtureUserData;
-	feetFixtureName->name = "ih_feet";
-	//fixture definition
-	b2FixtureDef feetDef;
-	feetDef.isSensor = true;
-	feetDef.shape = &feet_sesnor_box;
-	feetDef.userData.pointer = reinterpret_cast<uintptr_t>(feetFixtureName);
-	//create fixture using definition
-	m_feet_sensor = m_body->CreateFixture(&feetDef);
+	m_feet_sensor = util::SimpleSensor(m_body, "ih_feet", 0.3f, 0.3f, 0, 0.80f);
 
 	//player agro sensor
-	b2PolygonShape agro_sesnor_box;
-	agro_sesnor_box.SetAsBox(2.0f, 2.0f, b2Vec2(-3.0, 0.0), 0);
-	//fixture user data
-	FixtureUserData* agroSensorName = new FixtureUserData;
-	agroSensorName->name = "ih_agro";
-	//fixture definition
-	b2FixtureDef agroDef;
-	agroDef.isSensor = true;
-	agroDef.shape = &agro_sesnor_box;
-	agroDef.userData.pointer = reinterpret_cast<uintptr_t>(agroSensorName);
-	//create fixture using definition
-	m_agro_sensor = m_body->CreateFixture(&agroDef);
-
-	
-	b2PolygonShape agro_sesnor_box2;
-	agro_sesnor_box2.SetAsBox(-2.0f, 2.0f, b2Vec2(3.0, 0.0), 0);
-	//fixture user data
-	FixtureUserData* agroSensorName2 = new FixtureUserData;
-	agroSensorName2->name = "ih_agro";
-	//fixture definition
-	b2FixtureDef agroDef2;
-	agroDef2.isSensor = true;
-	agroDef2.shape = &agro_sesnor_box2;
-	agroDef2.userData.pointer = reinterpret_cast<uintptr_t>(agroSensorName2);
-	//create fixture using definition
-	m_body->CreateFixture(&agroDef2);
-
+	m_agro_sensor = util::SimpleSensor(m_body, "ih_agro", 2.0f, 2.0f, -3.0, 0.0);
+	m_agro_sensor = util::SimpleSensor(m_body, "ih_agro", -2.0f, 2.0f, 3.0, 0.0);
 
 	//proximity sensor (used for animation purposes)
-	b2PolygonShape proximity_sesnor_box1;
-	proximity_sesnor_box1.SetAsBox(0.2f, 0.2f, b2Vec2(2.0, 1.1), 0);
-	//fixture user data
-	FixtureUserData* proximitySensorName1 = new FixtureUserData;
-	proximitySensorName1->name = "proxi";
-	//fixture definition
-	b2FixtureDef proximityDef1;
-	proximityDef1.isSensor = true;
-	proximityDef1.shape = &proximity_sesnor_box1;
-	proximityDef1.userData.pointer = reinterpret_cast<uintptr_t>(proximitySensorName1);
-	//create fixture using definition
-	m_body->CreateFixture(&proximityDef1);
-	b2PolygonShape proximity_sesnor_box2;
-	proximity_sesnor_box2.SetAsBox(0.2f, 0.2f, b2Vec2(-2.0, 1.1), 0);
-	//fixture user data
-	FixtureUserData* proximitySensorName2 = new FixtureUserData;
-	proximitySensorName2->name = "proxi";
-	//fixture definition
-	b2FixtureDef proximityDef2;
-	proximityDef2.isSensor = true;
-	proximityDef2.shape = &proximity_sesnor_box2;
-	proximityDef2.userData.pointer = reinterpret_cast<uintptr_t>(proximitySensorName2);
-	//create fixture using definition
-	m_body->CreateFixture(&proximityDef2);
+	util::SimpleSensor(m_body, "proxi", 0.2f, 0.2f, 2.0, 1.1);
+	util::SimpleSensor(m_body, "proxi", 0.2f, 0.2f,-2.0, 1.1);
 
 	//attack sensor
-	b2PolygonShape attack_sesnor_box;
-	attack_sesnor_box.SetAsBox(1.0f, 0.8f, b2Vec2(0.0, 0.0), 0);
-	//fixture user data
-	FixtureUserData* attackSensorName = new FixtureUserData;
-	attackSensorName->name = "ih_att";
-	//fixture definition
-	b2FixtureDef attackDef;
-	attackDef.isSensor = true;
-	attackDef.shape = &attack_sesnor_box;
-	attackDef.userData.pointer = reinterpret_cast<uintptr_t>(attackSensorName);
-	//create fixture using definition
-	m_attack_sensor = m_body->CreateFixture(&attackDef);
+	m_attack_sensor = util::SimpleSensor(m_body, "ih_att", 1.0f, 0.8f, 0.0, 0.0);
 
 	//left&right collider boxes
-	b2PolygonShape left_sesnor_box;
-	left_sesnor_box.SetAsBox(0.05f, 0.61f, b2Vec2(-0.4f, 0), 0);
-	b2PolygonShape right_sesnor_box;
-	right_sesnor_box.SetAsBox(0.05f, 0.61f, b2Vec2(0.4f, 0), 0);
-	//fixture user data
-	FixtureUserData* right_sesnorName = new FixtureUserData;
-	FixtureUserData* left_sesnorName = new FixtureUserData;
-	right_sesnorName->name = "ih_r_s";
-	left_sesnorName->name = "ih_l_s";
-	//fixture definition
-	b2FixtureDef left_sensor_def;
-	left_sensor_def.isSensor = true;
-	left_sensor_def.shape = &left_sesnor_box;
-	left_sensor_def.userData.pointer = reinterpret_cast<uintptr_t>(left_sesnorName);
-	b2FixtureDef right_sensor_def;
-	right_sensor_def.isSensor = true;
-	right_sensor_def.shape = &right_sesnor_box;
-	right_sensor_def.userData.pointer = reinterpret_cast<uintptr_t>(right_sesnorName);
-	//create fixture using definition
-	m_left_sensor = m_body->CreateFixture(&left_sensor_def);
-	m_right_sensor = m_body->CreateFixture(&right_sensor_def);
+	m_left_sensor = util::SimpleSensor(m_body, "ih_l_s", 0.05f, 0.61f, -0.4f, 0);
+	m_right_sensor = util::SimpleSensor(m_body, "ih_r_s", 0.05f, 0.61f, 0.4f, 0);
+
 	m_body->SetLinearDamping(linear_dumping);
-	EnitityManager::Add(this);
 }
 
 InfectedHazmat::~InfectedHazmat()
@@ -146,19 +62,19 @@ void InfectedHazmat::Update(float dt)
 
 	switch (state)
 	{
-	case InfectedHazmatState::Idle:
+	case EnemyState::Idle:
 		UpdateIdleState(dt);
 		break;
-	case InfectedHazmatState::Running:
+	case EnemyState::Running:
 		UpdateRunningState(dt);
 		break;
-	case InfectedHazmatState::Attacking:
+	case EnemyState::Attacking:
 		UpdateAttackingState(dt);
 		break;
-	case InfectedHazmatState::Hurting:
+	case EnemyState::Hurting:
 		UpdateHurtingState(dt);
 		break;
-	case InfectedHazmatState::Dying:
+	case EnemyState::Dying:
 		UpdateDyingState(dt);
 		break;
 	}
@@ -184,7 +100,7 @@ void InfectedHazmat::Die(int death_option)
 		break;
 	}
 	
-	state = InfectedHazmatState::Dying;
+	state = EnemyState::Dying;
 }
 
 void InfectedHazmat::CheckAgroSensor()
@@ -200,77 +116,15 @@ void InfectedHazmat::CheckAgroSensor()
 	}
 }
 
-void InfectedHazmat::CheckTouchGround()
-{
-	is_touching_floor = false;
-	if (ground_contacts > 0)
-	{
-		is_touching_floor = true;
-	}
-}
-
 
 void InfectedHazmat::TakeDmg(int dmg)
 {
 	std::string dmgs[] = { "hit2","hit3","hit4" };
 	SoundManager::PlayRandSounds(dmgs, 3);
 	m_current_hp -= dmg;
-	state = InfectedHazmatState::Hurting;
+	state = EnemyState::Hurting;
 	SetAnimation("IH_DMG");
 	
-}
-
-void InfectedHazmat::set_velocity_x(float vx)
-{
-	m_body->SetLinearVelocity({
-	vx,
-	m_body->GetLinearVelocity().y,
-		});
-}
-
-void InfectedHazmat::set_velocity_y(float vy)
-{
-	m_body->SetLinearVelocity({
-	m_body->GetLinearVelocity().x,
-	vy,
-		});
-}
-
-void InfectedHazmat::set_velocity_xy(float vx, float vy)
-{
-	m_body->SetLinearVelocity({ vx, vy });
-}
-
-void InfectedHazmat::Draw(int l)
-{
-	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
-																	CurrentFrame().y,
-																	CurrentFrame().width * -1,
-																	CurrentFrame().height };
-	auto spritePosX = center_pos().x - 10;
-	auto spritePosY = center_pos().y - 1 ;
-
-
-	if (CurrentFrame().width==96)
-	{
-		spritePosX = center_pos().x-42;
-		spritePosY = center_pos().y-33;
-	}
-
-	Color c = WHITE;
-	if (state == InfectedHazmatState::Hurting)
-	{
-		c = RED;
-	}
-
-	DrawTexturePro(*animation->GetTexture(),
-		cframe,
-		Rectangle{ spritePosX,spritePosY,CurrentFrame().width,CurrentFrame().height },
-		{ 0,0 },
-		0.0f,
-		c);
-
-	//DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
 }
 
 void InfectedHazmat::InitAnimations()
@@ -283,7 +137,7 @@ void InfectedHazmat::UpdateIdleState(float dt)
 {
 	if (player_in_agro)
 	{
-		state = InfectedHazmatState::Running;
+		state = EnemyState::Running;
 		SetAnimation("IH_RUN");
 	}
 }
@@ -292,7 +146,7 @@ void InfectedHazmat::UpdateRunningState(float dt)
 {
 	if (!player_in_agro)
 	{
-		state = InfectedHazmatState::Idle;
+		state = EnemyState::Idle;
 		SetAnimation("IH_IDLE");
 	}
 	else
@@ -330,7 +184,7 @@ void InfectedHazmat::SetAttacking()
 {
 	SetAnimation("IH_ATT");
 	PlaySound(SoundManager::sounds["slime1"]);
-	state = InfectedHazmatState::Attacking;
+	state = EnemyState::Attacking;
 }
 
 void InfectedHazmat::UpdateAttackingState(float dt)
@@ -339,12 +193,13 @@ void InfectedHazmat::UpdateAttackingState(float dt)
 	if (!left_player_touch && !right_player_touch)
 	{
 		SetAnimation("IH_IDLE");
-		state = InfectedHazmatState::Idle;
+		state = EnemyState::Idle;
 	}
 	if (animation->GetCurrentFrameNum() >= 6 &&
 		player_in_dmg_zone)
 	{
 		GameScreen::player->take_dmg(10);
+		PlaySound(SoundManager::sounds["slime1"]);
 	}
 }
 
@@ -363,7 +218,7 @@ void InfectedHazmat::UpdateHurtingState(float dt)
 		else
 		{
 			SetAnimation("IH_IDLE");
-			state = InfectedHazmatState::Idle;
+			state = EnemyState::Idle;
 		}
 
 	}

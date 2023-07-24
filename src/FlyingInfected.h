@@ -5,6 +5,7 @@
 #include "Collidable.h"
 #include <map>
 #include <box2d.h>
+#include "Enemy.h"
 
 
 enum class FlyingInfectedStates
@@ -17,41 +18,25 @@ enum class FlyingInfectedStates
 };
 
 
-class FlyingInfected : public Entity, public Animated, public Collidable
+class FlyingInfected : public Enemy
 {
 public:
     FlyingInfected(const Rectangle& rectangle);
     ~FlyingInfected();
 
-    void Update(float dt) override;
-    void Die(int death_option);
+    virtual void Update(float dt) override;
+    virtual void Die(int death_option) override;
     void CheckAgroSensor();
-    void CheckTouchGround();
-    void CheckPlayerTouch();
-    void TakeDmg(int dmg);
-    void set_velocity_x(float vx);
-    void set_velocity_y(float vy);
-    void set_velocity_xy(float vx, float vy);
+    virtual void TakeDmg(int dmg) override;
 
-    void Draw(int l) override;
-    void InitAnimations() override;
+
+    virtual void InitAnimations() override;
 
     //Movement Control
-    bool player_in_agro = false;
-    bool is_touching_floor = false;
-    bool left_player_touch = false;
-    bool right_player_touch = false;
-    bool looking_right = true;
-    bool player_in_dmg_zone = false;
+    
     bool player_in_wingflap = false;
     float speed = 4.0f;
     float linear_dumping = 2.0f;
-    int solid_contacts = 0;
-    int ground_contacts = 0;
-    b2Fixture* m_left_sensor;
-    b2Fixture* m_right_sensor;
-    b2Fixture* m_agro_sensor;
-    b2Fixture* m_attack_sensor;
     b2Fixture* m_winghflap_sensor;
 
 
@@ -61,32 +46,14 @@ public:
 
 
     //States
-    FlyingInfectedStates state;
-    void UpdateIdleState(float dt);
+    virtual void UpdateIdleState(float dt);
     void UpdateFlyingState(float dt);
-    void UpdateAttackingState(float dt);
-    void UpdateHurtingState(float dt);
-    void UpdateDyingState(float dt);
+    virtual void UpdateAttackingState(float dt);
+    virtual void UpdateHurtingState(float dt);
+    virtual void UpdateDyingState(float dt);
 
-    //Debug
-    std::map<FlyingInfectedStates, std::string> StatesStrMap{};
-    std::map<ColliderTag, std::string> ColStrMap{};
-    std::string contact_debug_str;
-    std::string axe_vel_str;
-    float axe_vel;
-
-
-
-
-    Shader shdrOutline;
-
-    float outlineSize = 1.0f;
-    float outlineColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };      // Normalized RED color 
-    float textureSize[2] = { 192.0f,160.0f };
-
-    int outlineSizeLoc;
-    int outlineColorLoc;
-    int textureSizeLoc;
+    // Inherited via Enemy
+    virtual void UpdateRunningState(float dt);
 
 };
 

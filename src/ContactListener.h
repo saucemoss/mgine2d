@@ -7,7 +7,7 @@ class ContactListener : public b2ContactListener
 {
 public:
     ContactListener();
-    std::map<ColliderTag, std::string> ColStrMap{};
+    static std::map<ColliderTag, std::string> ColStrMap;
     int player_floor_contacts = 0;
     int player_left_wall_contacts = 0;
     int player_right_wall_contacts = 0;
@@ -23,4 +23,10 @@ class DestructionListener : public b2DestructionListener
 {
     void SayGoodbye(b2Joint* joint);
     void SayGoodbye(b2Fixture* fixture);
+};
+
+class ContactFilter : public b2ContactFilter
+{
+    bool ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB);
+    bool Group(ContactGroup a, ContactGroup b, ContactGroup compare1, ContactGroup compare2);
 };

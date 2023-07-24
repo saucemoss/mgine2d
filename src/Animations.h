@@ -53,10 +53,14 @@ class Animations
 public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
+	void InitializeRibbsAnimations();
+	void InitializeFootballAnimations();
+	void InitializeLeggyAnimations();
 	void InitializeFlyingInfectedAnimations();
 	void InitializeInfectedHAnimations();
 	void InitializeDecorAnimations();
 	void InitializeDoorAnimations();
+	void InitializeHeadSpitAnimations();
 	Animation* GetAnimation(std::string name);
 	std::string m_CurrentActiveAnimation;
 private:

@@ -18,6 +18,7 @@ public:
 	RenderTexture GlowTexture;
 	bool Valid = false;
 	bool HasColor = false;
+	bool Dynamic = false;
 	Color LightColor = WHITE;
 
 	LightInfo();
@@ -62,7 +63,7 @@ public:
 	RenderTexture LightMask;
 	bool showLines = false;
 
-	void SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color);
+	void SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color, bool is_dynamic);
 
 	void SetupBoxes();
 

@@ -1,5 +1,6 @@
 #include "LightManager.h"
 #include "LevelManager.h"
+#include "GameScreen.h"
 
 LightManager::LightManager()
 {
@@ -29,15 +30,23 @@ void LightManager::SetupBoxes()
 
 void LightManager::UpdateLights()
 {
+	//player light
+	//m_lights[0].Move(GameScreen::player->center_pos());
+
+
 	if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_RIGHT))
 		showLines = !showLines;
 
 	bool dirtyLights = false;
 	for (auto& light : m_lights)
 	{
+		if (light.Dynamic)
+			light.Dirty = true;
+
+			
 		if (light.Dirty)
 			dirtyLights = true;
-
+		
 		light.Update(m_light_walls);
 	}
 
@@ -54,7 +63,7 @@ void LightManager::UpdateLights()
 
 		for (auto& light : m_lights)
 		{
-			//	if (light.Valid)
+				if (light.Valid)
 			DrawTextureRec(light.ShadowMask.texture, Rectangle{ 0, 0, (float)light.ShadowMask.texture.width, -(float)light.ShadowMask.texture.height }, Vector2Zero(), WHITE);
 		}
 
@@ -108,7 +117,7 @@ void LightManager::DrawLightMask()
 	DrawText(TextFormat("Lights %d", (int)m_lights.size()), 1050, 20, 20, GREEN);
 }
 
-void LightManager::SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color)
+void LightManager::SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color, bool is_dynamic)
 {
 	m_lights.emplace_back(Vector2{ x,y });
 	if (is_color)
@@ -117,6 +126,7 @@ void LightManager::SetupLight(float x, float y, float in_radius, float out_radiu
 	}
 	m_lights.back().SetInRadius(in_radius);
 	m_lights.back().SetOutRadius(out_radius);
+	m_lights.back().Dynamic = is_dynamic;
 }
 
 LightInfo::LightInfo()

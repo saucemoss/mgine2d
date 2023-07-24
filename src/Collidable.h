@@ -16,18 +16,25 @@ class Collidable;
 
 enum ColliderTag {
 	UNASSIGNED,
+	ENEMY,
 	SOLID,
 	PLAYER,
 	LEVEL_PORTAL,
 	DOOR,
 	ELEVATOR, ELEVATOR_CALL_SW,
 	M_BLOCK, M_BLOCK_TOP, W_CRATE,
-	INFECTED_H, FLYING_INF, FIREAXE
+	INFECTED_H, FLYING_INF, RIBBS, LEGGY, FOOTB, HSPIT,
+	FIREAXE
+};
+
+enum ContactGroup {
+	UNASSIGNED_GROUP, PLAYER_GROUP, ENEMY_GROUP, SOLID_GROUP, INTERRACTABLE_GROUP
 };
 
 struct FixtureUserData
 {
 	std::string name;
+	ContactGroup tag;
 };
 
 class Collidable

@@ -17,6 +17,53 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("P_ATT_1", LoadTexture("res/PlayerTextures/p_attack_1.png"));
 	m_Textures.emplace("INFECTED_H_1", LoadTexture("res/enemies/infected_hazmat.png"));
 	m_Textures.emplace("FLY_INF_1", LoadTexture("res/enemies/flying_infected.png"));
+	m_Textures.emplace("RIBBS_1", LoadTexture("res/enemies/ribbs.png"));
+	m_Textures.emplace("LEGGY_1", LoadTexture("res/enemies/legs.png"));
+	m_Textures.emplace("FOOTB_1", LoadTexture("res/enemies/football.png"));
+	m_Textures.emplace("HSPIT_1", LoadTexture("res/enemies/headspit.png"));
+}
+
+void Animations::InitializeRibbsAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("RIBBS_1");
+	animations.emplace("RIBBS_ATT", *(new Animation(texture, 0, 7, 96, 0.08f)));
+	animations.emplace("RIBBS_RUN", *(new Animation(texture, 4, 4, 32, 0.08f)));
+	animations.emplace("RIBBS_IDLE", *(new Animation(texture, 5, 5, 32, 0.28f)));
+	animations.emplace("RIBBS_DMG", *(new Animation(texture, 6, 1, 32, 0.26f)));
+
+	Animation* RIBBS_DEAD = new Animation(texture, 3, 9, 32, 0.06f);
+	RIBBS_DEAD->SetCustomFrameTime(9, 3.12f);
+	animations.emplace("RIBBS_DEAD", *RIBBS_DEAD);
+}
+
+void Animations::InitializeFootballAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("FOOTB_1");
+
+	Animation* FOOTB_ATT = new Animation(texture, 0, 12, 32, 0.04f);
+	FOOTB_ATT->SetCustomFrameTime(7, 0.03f);
+	animations.emplace("FOOTB_ATT", *FOOTB_ATT);
+
+	animations.emplace("FOOTB_IDLE", *(new Animation(texture, 1, 5, 32, 0.28f)));
+	animations.emplace("FOOTB_DMG", *(new Animation(texture, 1, 1, 32, 0.18f)));
+
+	Animation* FOOTB_DEAD = new Animation(texture, 2, 6, 32, 0.06f);
+	FOOTB_DEAD->SetCustomFrameTime(6, 3.12f);
+	animations.emplace("FOOTB_DEAD", *FOOTB_DEAD);
+}
+
+void Animations::InitializeLeggyAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("LEGGY_1");
+	animations.emplace("LEGGY_STAND", *(new Animation(texture, 0, 9, 96, 0.10f)));
+	animations.emplace("LEGGY_IDLE", *(new Animation(texture, 1, 5, 96, 0.08f)));
+	animations.emplace("LEGGY_RUN", *(new Animation(texture, 2, 5, 96, 0.08f)));
+	animations.emplace("LEGGY_ATT", *(new Animation(texture, 5, 5, 96, 0.08f)));
+	animations.emplace("LEGGY_DMG", *(new Animation(texture, 3, 1, 96, 0.32f)));
+
+	Animation* LEGGY_DEAD = new Animation(texture, 4, 11, 96, 0.08f);
+	LEGGY_DEAD->SetCustomFrameTime(11, 2.00f);
+	animations.emplace("LEGGY_DEAD", *LEGGY_DEAD);
 }
 
 void Animations::InitializeFlyingInfectedAnimations()
@@ -25,7 +72,7 @@ void Animations::InitializeFlyingInfectedAnimations()
 	animations.emplace("FLY_I_IDLE", *(new Animation(texture, 0, 5, 96, 0.06f)));
 	animations.emplace("FLY_I_FLY", *(new Animation(texture, 0, 5, 96, 0.06f)));
 	animations.emplace("FLY_I_ATT", *(new Animation(texture, 1, 6, 96, 0.06f)));
-	animations.emplace("FLY_I_DMG", *(new Animation(texture, 2, 1, 96, 0.16f)));
+	animations.emplace("FLY_I_DMG", *(new Animation(texture, 3, 1, 96, 0.18f)));
 	animations.emplace("FLY_I_DEAD", *(new Animation(texture, 2, 6, 96, 0.16f)));
 }
 
@@ -94,6 +141,18 @@ void Animations::InitializeDoorAnimations()
 	animations.emplace("D_OPEN", *(new Animation(texture, 0, 17, 32, 0.02f)));
 	animations.emplace("D_CLOSE", *(new Animation(texture, 1, 17, 32, 0.02f)));
 	
+}
+
+void Animations::InitializeHeadSpitAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("HSPIT_1");
+
+	animations.emplace("HSPIT_EXP", *(new Animation(texture, 0, 7, 96, 0.04f)));
+	animations.emplace("HSPIT_PROJ", *(new Animation(texture, 3, 5, 32, 0.04f)));
+	animations.emplace("HSPIT_IDLE", *(new Animation(texture, 4, 4, 32, 0.12f)));
+	animations.emplace("HSPIT_DEAD", *(new Animation(texture, 5, 5, 32, 0.08f)));
+	animations.emplace("HSPIT_ATT", *(new Animation(texture, 6, 9, 32, 0.06f)));
+	animations.emplace("HSPIT_DMG", *(new Animation(texture, 3, 1, 32, 0.18f)));
 }
 
 void Animations::InitializePlayerAnimations()

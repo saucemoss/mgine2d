@@ -21,6 +21,10 @@
 #include "ContactListener.h"
 #include "FlyingInfected.h"
 #include "LightManager.h"
+#include "Ribbs.h"
+#include "Leggy.h"
+#include "Football.h"
+#include "HeadSpit.h"
 
 
 b2World* LevelManager::world = nullptr;
@@ -45,11 +49,13 @@ LevelManager::LevelManager()
 
 	laboratorySolidsSpriteAtlas = LoadTexture("res\\level\\lab4.png");
 	ldtkWorld = &ldtkProject->getWorld();
+	contact_filter = new ContactFilter();
 	contacts = new ContactListener();
 	destruction_listener = new DestructionListener();
 	world = new b2World(gravity);
 	world->SetContactListener(contacts);
 	world->SetDestructionListener(destruction_listener);
+	world->SetContactFilter(contact_filter);
 	Collidable::world = world;
 	LoadLevel("Level_0");
 
@@ -77,9 +83,11 @@ void LevelManager::LoadLevel(std::string level_name)
 	{
 		contacts = new ContactListener();
 		destruction_listener = new DestructionListener();
+		contact_filter = new ContactFilter();
 		world = new b2World(gravity);
 		world->SetContactListener(contacts);
 		world->SetDestructionListener(destruction_listener);
+		world->SetContactFilter(contact_filter);
 	}
 	Collidable::world = world;
 
@@ -95,7 +103,6 @@ void LevelManager::LoadLevel(std::string level_name)
 
 
 	lights->m_lights.emplace_back();
-	//lights->m_lights[0].Move(Vector2{ (float)currentLdtkLevel->size.x, (float)currentLdtkLevel->size.y });
 
 	lights->SetupBoxes();
 
@@ -297,21 +304,23 @@ void LevelManager::LoadLevel(std::string level_name)
 			float in_radius = entity.getField<float>("InRadius").value();
 			float out_radius = entity.getField<float>("OutRadius").value();
 			bool is_color = entity.getField<bool>("isColor").value();
+			bool is_dynamic = entity.getField<bool>("isDynamic").value();
 			auto c = entity.getField<ldtk::Color>("Color").value();
 			Color color = { c.r, c.g, c.b, c.a };
 
-			lights->SetupLight(rect.x + rect.width * 0.25f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color);
-			lights->SetupLight(rect.x + rect.width * 0.75f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color);
+			lights->SetupLight(rect.x + rect.width * 0.25f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic);
+			lights->SetupLight(rect.x + rect.width * 0.75f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic);
 		}
 		if (entity.getName() == "Light32")
 		{
 			float in_radius = entity.getField<float>("InRadius").value();
 			float out_radius = entity.getField<float>("OutRadius").value();
 			bool is_color = entity.getField<bool>("isColor").value();
+			bool is_dynamic = entity.getField<bool>("isDynamic").value();
 			auto c = entity.getField<ldtk::Color>("Color").value();
 			Color color = { c.r, c.g, c.b, c.a };
 
-			lights->SetupLight(rect.x + rect.width / 2, rect.y + rect.height / 2, in_radius, out_radius, color, is_color);
+			lights->SetupLight(rect.x + rect.width / 2, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic);
 		}
 		if (entity.getName() == "MovingBlock")
 		{
@@ -332,6 +341,26 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "InfectedHazmat")
 		{
 			level_entities_safe.push_back(std::make_unique<InfectedHazmat>(rect));
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
+		if (entity.getName() == "Ribbs")
+		{
+			level_entities_safe.push_back(std::make_unique<Ribbs>(rect));
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
+		if (entity.getName() == "Leggy")
+		{
+			level_entities_safe.push_back(std::make_unique<Leggy>(rect));
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
+		if (entity.getName() == "Footb")
+		{
+			level_entities_safe.push_back(std::make_unique<Football>(rect));
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
+		if (entity.getName() == "HeadSpit")
+		{
+			level_entities_safe.push_back(std::make_unique<HeadSpit>(rect));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
 		if (entity.getName() == "FlyingInfected")
@@ -366,6 +395,8 @@ void LevelManager::UnloadLevel()
 		// a new one for the new level
 		delete contacts;
 		contacts = nullptr;
+		delete contact_filter;
+		contact_filter = nullptr;
 		delete destruction_listener;
 		destruction_listener = nullptr;
 		delete world;

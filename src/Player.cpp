@@ -84,7 +84,9 @@ void Player::NewBody()
 	//prismaticJointDef.bodyB = bodyB;
 	//prismaticJointDef.collideConnected = false;;
 
-
+	FixtureUserData* data = new FixtureUserData;
+	data->tag = PLAYER_GROUP;
+	m_fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(data);
 	//feet collider box
 	b2PolygonShape feet_sesnor_box;
 	feet_sesnor_box.SetAsBox(0.3f, 0.3f, b2Vec2(0, 0.80f), 0);
@@ -787,7 +789,7 @@ void Player::UpdateAttackingState(float dt)
 			state = PlayerState::Hurting;
 		}
 	}
-	else if (AnimationEnded() && m_has_axe == false)
+	else if (animation->GetCurrentFrameNum() >= 3 && m_has_axe == false)
 	{
 		m_has_axe = true;
 		m_body->DestroyFixture(m_attack_sensor);
@@ -812,6 +814,11 @@ void Player::UpdateHurtingingState(float dt)
 	
 	if (!is_dying && AnimationEnded())
 	{
+		if (is_aiming)
+		{
+			is_aiming = false;
+			m_has_axe = true;
+		}
 		SetAnimation("P_IDLE");
 		state = PlayerState::Idle;
 		taking_dmg = false;

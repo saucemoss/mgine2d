@@ -94,6 +94,12 @@
     <Filter Include="Pliki źródłowe\Systems\Lights">
       <UniqueIdentifier>{ea3b6042-9491-477b-91e7-c1a133358b87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki źródłowe\Entities\Objects\Projectiles">
+      <UniqueIdentifier>{38b0bba3-da55-4c04-a890-d8ce32d95563}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Entities\Objects\Projectiles">
+      <UniqueIdentifier>{69c293f6-b66d-489a-aeff-6b56a44ce889}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -161,6 +167,21 @@
     </ClCompile>
     <ClCompile Include="src\LightManager.cpp">
       <Filter>Pliki źródłowe\Systems\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enemy.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ribbs.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Leggy.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Football.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HeadSpit.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -250,6 +271,21 @@
     </ClInclude>
     <ClInclude Include="src\LightManager.h">
       <Filter>Pliki nagłówkowe\Systems\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ribbs.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enemy.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Leggy.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Football.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HeadSpit.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

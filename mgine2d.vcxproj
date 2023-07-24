@@ -158,14 +158,19 @@
     <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Elevator.cpp" />
     <ClCompile Include="src\ElevatorCallSwitch.cpp" />
+    <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\FireAxe.cpp" />
     <ClCompile Include="src\FlyingInfected.cpp" />
+    <ClCompile Include="src\Football.cpp" />
+    <ClCompile Include="src\HeadSpit.cpp" />
     <ClCompile Include="src\InfectedHazmat.cpp" />
+    <ClCompile Include="src\Leggy.cpp" />
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LevelPortal.cpp" />
     <ClCompile Include="src\LightManager.cpp" />
     <ClCompile Include="src\MovingBlock.cpp" />
     <ClCompile Include="src\Platform.cpp" />
+    <ClCompile Include="src\Ribbs.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
     <ClCompile Include="src\Animations.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -177,6 +182,11 @@
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\HeadSpit.h" />
+    <ClInclude Include="src\Football.h" />
+    <ClInclude Include="src\Leggy.h" />
+    <ClInclude Include="src\Enemy.h" />
+    <ClInclude Include="src\Ribbs.h" />
     <ClInclude Include="src\LightManager.h" />
     <ClInclude Include="src\ContactListener.h" />
     <ClInclude Include="src\FireAxe.h" />
