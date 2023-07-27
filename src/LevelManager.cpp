@@ -25,6 +25,7 @@
 #include "Leggy.h"
 #include "Football.h"
 #include "HeadSpit.h"
+#include "NPCSecurityGuy.h"
 
 
 b2World* LevelManager::world = nullptr;
@@ -32,6 +33,7 @@ b2World* Collidable::world = nullptr;
 const ldtk::Level* LevelManager::currentLdtkLevel;
 float LevelManager::m_darkness_strength;
 std::vector<std::unique_ptr<Entity>> LevelManager::level_entities_safe;
+std::vector<Entity*> LevelManager::queue_entities;
 std::vector<std::unique_ptr<Collidable>> LevelManager::solid_tiles;
 
 
@@ -57,7 +59,7 @@ LevelManager::LevelManager()
 	world->SetDestructionListener(destruction_listener);
 	world->SetContactFilter(contact_filter);
 	Collidable::world = world;
-	LoadLevel("Level_0");
+	LoadLevel("Level_6");
 
 }
 
@@ -368,6 +370,10 @@ void LevelManager::LoadLevel(std::string level_name)
 			level_entities_safe.push_back(std::make_unique<FlyingInfected>(rect));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
+		if (entity.getName() == "NPCSec1")
+		{
+			level_entities_safe.push_back(std::make_unique<NPCSecurityGuy>(rect));
+		}
 		if (entity.getName() == "LevelPortal_in")
 		{
 			rect = {		(float)entity.getPosition().x - rect.width / 2,
@@ -442,6 +448,15 @@ void LevelManager::Update(float dt)
 	}
 	
 	lights->UpdateLights();
+
+
+	for (auto& e : level_entities_safe)
+	{
+		if(e->queue_entity_add)
+		EnitityManager::Add(e.get());
+	}
+	
+	
 }
 
 bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)

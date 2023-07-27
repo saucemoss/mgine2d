@@ -33,6 +33,6 @@ private:
 	RenderTexture2D RenderShaderTexture;
 	Texture2D ShaderTexture;
 
-	//Shader bloom;
+	Shader bloom;
 
 };

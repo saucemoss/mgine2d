@@ -13,6 +13,7 @@ public:
 	virtual void Update(float dt) = 0;
 	ldtk::IID m_ldtkID;;
 	bool m_destroy = false;
+	bool queue_entity_add = false;
 };
 
 

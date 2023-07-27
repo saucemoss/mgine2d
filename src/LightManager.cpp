@@ -113,8 +113,6 @@ void LightManager::DrawLightMask()
 		}
 
 	}
-
-	DrawText(TextFormat("Lights %d", (int)m_lights.size()), 1050, 20, 20, GREEN);
 }
 
 void LightManager::SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color, bool is_dynamic)

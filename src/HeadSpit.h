@@ -6,7 +6,7 @@ class HeadSpit : public Enemy
 public:
 	HeadSpit(const Rectangle& rectangle);
 	~HeadSpit();
-
+	bool shot = false;
 
 	// Inherited via Enemy
 	virtual void Update(float dt) override;

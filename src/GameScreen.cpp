@@ -122,6 +122,7 @@ Screens GameScreen::Update(float dt)
 	player->Update(dt);
 	LevelMgr->Update(dt);
 	EnitityManager::Update(dt);
+	
 
 	
 	return Screens::NONE;

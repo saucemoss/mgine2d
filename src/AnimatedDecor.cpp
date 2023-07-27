@@ -11,7 +11,7 @@ AnimatedDecor::AnimatedDecor(Rectangle rect, int tile)
 	
 
 	//Shader test
-	//bloom = LoadShader(0, TextFormat("res/shaders/glsl%i/bloom.fs", 330));
+	bloom = LoadShader(0, TextFormat("res/shaders/glsl%i/bloom.fs", 330));
 	shdrOutline = LoadShader(0, TextFormat("res/shaders/glsl%i/outline.fs", 330));
 	
 	// Get shader locations
@@ -58,7 +58,7 @@ void AnimatedDecor::Draw(int l)
 		WHITE);
 
 
-	BeginShaderMode(shdrOutline);
+	BeginShaderMode(bloom);
 	DrawTexturePro(ShaderTexture,
 		{ 0, 0, (float)ShaderTexture.width, -(float)ShaderTexture.height },
 		{ 0, 0, settings::screenWidth, settings::screenHeight },

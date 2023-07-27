@@ -24,6 +24,7 @@ public:
     bool m_is_active = true;
     bool player_in_sensor = false;
     b2Fixture* sensor;
+    Sound my_engine_sound;
 
     // Inherited via Entity
     virtual void Update(float dt) override;

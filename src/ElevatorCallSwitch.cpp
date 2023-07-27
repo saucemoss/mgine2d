@@ -32,6 +32,7 @@ void ElevatorCallSwitch::Update(float dt)
 			SetAnimation("ELEV_SW_PRESSED");
 			CallElevator();
 			state = ECallSwitchState::PRESSED;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		
 		break;

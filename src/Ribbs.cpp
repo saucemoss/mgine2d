@@ -94,13 +94,14 @@ void Ribbs::Die(int death_option)
 
 void Ribbs::TakeDmg(int dmg)
 {
-	if (state != EnemyState::Dying && dmg_counter >= 1.0f)
+
+	if (state != EnemyState::Dying && dmg_counter >= 0.85f)
 	{
-		taking_dmg = true;
-		dmg_counter = 0.0f;
 		std::string dmgs[] = { "hit2","hit3","hit4" };
 		SoundManager::PlayRandSounds(dmgs, 3);
 		m_current_hp -= dmg;
+		taking_dmg = true;
+		dmg_counter = 0.0f;
 		state = EnemyState::Hurting;
 		SetAnimation("RIBBS_DMG");
 		

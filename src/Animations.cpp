@@ -21,6 +21,16 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("LEGGY_1", LoadTexture("res/enemies/legs.png"));
 	m_Textures.emplace("FOOTB_1", LoadTexture("res/enemies/football.png"));
 	m_Textures.emplace("HSPIT_1", LoadTexture("res/enemies/headspit.png"));
+	m_Textures.emplace("NPC_S_GUY1", LoadTexture("res/NPCs/NPCSecurityGuy.png"));
+}
+
+void Animations::InitializeNPCSec1Animations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("NPC_S_GUY1");
+	animations.emplace("SEC1_IDLE", *(new Animation(texture, 0, 4, 32, 0.25f)));
+	animations.emplace("SEC1_LETGO", *(new Animation(texture, 1, 1, 32, 0.12f)));
+	animations.emplace("SEC1_STOP", *(new Animation(texture, 2, 1, 32, 0.12f)));
+	animations.emplace("SEC1_TALK", *(new Animation(texture, 3, 4, 32, 0.18f)));
 }
 
 void Animations::InitializeRibbsAnimations()
@@ -147,8 +157,8 @@ void Animations::InitializeHeadSpitAnimations()
 {
 	Texture2D* texture = TextureLoader::GetTexture("HSPIT_1");
 
-	animations.emplace("HSPIT_EXP", *(new Animation(texture, 0, 7, 96, 0.04f)));
-	animations.emplace("HSPIT_PROJ", *(new Animation(texture, 3, 5, 32, 0.04f)));
+	animations.emplace("HSPIT_EXP", *(new Animation(texture, 0, 7, 96, 0.06f)));
+	animations.emplace("HSPIT_PROJ", *(new Animation(texture, 3, 5, 32, 0.12f)));
 	animations.emplace("HSPIT_IDLE", *(new Animation(texture, 4, 4, 32, 0.12f)));
 	animations.emplace("HSPIT_DEAD", *(new Animation(texture, 5, 5, 32, 0.08f)));
 	animations.emplace("HSPIT_ATT", *(new Animation(texture, 6, 9, 32, 0.06f)));

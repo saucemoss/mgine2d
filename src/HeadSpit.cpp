@@ -1,6 +1,7 @@
 #include "HeadSpit.h"
 #include "SoundManager.h"
 #include "GameScreen.h"
+#include "BioBomb.h"
 
 HeadSpit::HeadSpit(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 10, 20 }, HSPIT)
 {
@@ -96,17 +97,19 @@ void HeadSpit::UpdateAttackingState(float dt)
 	{
 		SetAnimation("HSPIT_IDLE");
 		state = EnemyState::Idle;
+		shot = false;
 	}
-	else if (animation->GetCurrentFrameNum() >= 8 && animation->GetCurrentFrameNum() <= 10 &&
-		player_in_dmg_zone)
+	else if (animation->GetCurrentFrameNum() >= 6 &&
+		player_in_dmg_zone && shot == false)
 	{
+		shot = true;
 		PlaySound(SoundManager::sounds["splat4"]);
-		GameScreen::player->take_dmg(10);
-	}
-	else if (animation->GetCurrentFrameNum() >= 10 &&
-		player_in_dmg_zone)
-	{
-		PlayFromFrame(6, "HSPIT_ATT");
+		//GameScreen::player->take_dmg(10);
+		Rectangle rect = Rectangle{ center_pos().x , center_pos().y - 1.0f , 16, 16 };
+		LevelManager::level_entities_safe.push_back(std::make_unique<BioBomb>(rect));
+		BioBomb* bomb = reinterpret_cast<BioBomb*>(LevelManager::level_entities_safe.back().get());
+		bomb->m_body->ApplyAngularImpulse((looking_right ? 30.5f : -30.5f), true);
+		bomb->m_body->ApplyLinearImpulseToCenter({ -100.0f, -100.0f }, true);
 	}
 }
 

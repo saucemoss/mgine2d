@@ -11,6 +11,7 @@
 #include "LevelManager.h"
 #include "WoodCrate.h"
 #include "FireAxe.h"
+#include "BioBomb.h"
 
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION            330
@@ -22,30 +23,15 @@ FireAxe* Player::axe = nullptr;
 
 Player::Player()
 	:
-	Collidable({50,250,12,20}, b2_dynamicBody, PLAYER)
+	Collidable({ 150,150,12,20 }, b2_dynamicBody, PLAYER) // lvl6
+	//Collidable({50,250,12,20}, b2_dynamicBody, PLAYER)
+	
 {
 	NewBody();
 	InitAnimations();
 	state = PlayerState::Idle;
-	
-
-	// Add mappings for debug purposes
-	StatesStrMap[PlayerState::Idle] = "Idle";
-	StatesStrMap[PlayerState::Running] = "Running";
-	StatesStrMap[PlayerState::Jumping] = "Jumping";
-	StatesStrMap[PlayerState::Falling] = "Falling";
-	StatesStrMap[PlayerState::Attacking] = "Attacking";
-	StatesStrMap[PlayerState::Hurting] = "Hurting";
-	StatesStrMap[PlayerState::Dying] = "Dying";
-	ColStrMap[ColliderTag::DOOR] = "DOOR";
-	ColStrMap[ColliderTag::ELEVATOR] = "ELEVATOR";
-	ColStrMap[ColliderTag::ELEVATOR_CALL_SW] = "ELEVATOR_CALL_SW";
-	ColStrMap[ColliderTag::LEVEL_PORTAL] = "LEVEL_PORTAL";
-	ColStrMap[ColliderTag::M_BLOCK] = "M_BLOCK";
-	ColStrMap[ColliderTag::PLAYER] = "PLAYER";
-	ColStrMap[ColliderTag::SOLID] = "SOLID";
-	ColStrMap[ColliderTag::UNASSIGNED] = "UNASSIGNED";
-
+	m_max_hp = 1000;
+	current_hp = m_max_hp;
 
 	//Shader test
 	shdrOutline = LoadShader(0, TextFormat("res/shaders/glsl%i/outline.fs", GLSL_VERSION));
@@ -64,25 +50,6 @@ Player::Player()
 
 void Player::NewBody()
 {
-	//m_knockback_circle
-	//b2CircleShape knock_back_shape;
-	//knock_back_shape.m_radius = float(0.4f);
-	//knock_back_shape.m_p.Set(0, -10.5f);
-	////fixture user data
-	//FixtureUserData* knock_back_name = new FixtureUserData;
-	//knock_back_name->name = "p_kback";
-	////fixture definition
-	//b2FixtureDef knock_back_def;
-	//knock_back_def.isSensor = false;
-	//knock_back_def.shape = &knock_back_shape;
-	//knock_back_def.userData.pointer = reinterpret_cast<uintptr_t>(knock_back_name);
-	////create fixture using definition
-	//m_knockback_circle = m_body->CreateFixture(&knock_back_def);
-
-	//b2PrismaticJointDef prismaticJointDef;
-	//prismaticJointDef.bodyA = bodyA;
-	//prismaticJointDef.bodyB = bodyB;
-	//prismaticJointDef.collideConnected = false;;
 
 	FixtureUserData* data = new FixtureUserData;
 	data->tag = PLAYER_GROUP;
@@ -748,7 +715,7 @@ void Player::UpdateThrowingState(float dt)
 
 void Player::UpdateAttackingState(float dt)
 {
-	
+
 	if (m_has_axe)
 	{
 		b2PolygonShape attack_box;

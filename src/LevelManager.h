@@ -71,6 +71,7 @@ public:
     //Object containers
     static std::vector<std::unique_ptr<Collidable>> solid_tiles;
     static std::vector<std::unique_ptr<Entity>> level_entities_safe;
+    static std::vector<Entity*> queue_entities;
 
 
 

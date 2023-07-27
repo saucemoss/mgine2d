@@ -100,6 +100,18 @@
     <Filter Include="Pliki nagłówkowe\Entities\Objects\Projectiles">
       <UniqueIdentifier>{69c293f6-b66d-489a-aeff-6b56a44ce889}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Dialogue">
+      <UniqueIdentifier>{effd91a6-3950-471a-b581-f9d74a5e4d10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Dialogue">
+      <UniqueIdentifier>{a1f0a01e-673f-4fb0-b510-3d3d4d4ff521}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\Entities\NPCs">
+      <UniqueIdentifier>{6f7439a3-be39-4a1e-8d11-f33f95f4294f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Entities\NPCs">
+      <UniqueIdentifier>{808ca08f-6358-44ef-922a-080117d0531a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -182,6 +194,15 @@
     </ClCompile>
     <ClCompile Include="src\HeadSpit.cpp">
       <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BioBomb.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dialogue.cpp">
+      <Filter>Pliki źródłowe\Systems\Dialogue</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NPCSecurityGuy.cpp">
+      <Filter>Pliki źródłowe\Entities\NPCs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +307,15 @@
     </ClInclude>
     <ClInclude Include="src\HeadSpit.h">
       <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BioBomb.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Dialogue.h">
+      <Filter>Pliki nagłówkowe\Systems\Dialogue</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NPCSecurityGuy.h">
+      <Filter>Pliki nagłówkowe\Entities\NPCs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

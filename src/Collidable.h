@@ -16,7 +16,7 @@ class Collidable;
 
 enum ColliderTag {
 	UNASSIGNED,
-	ENEMY,
+	ENEMY, NPC,
 	SOLID,
 	PLAYER,
 	LEVEL_PORTAL,
@@ -24,7 +24,7 @@ enum ColliderTag {
 	ELEVATOR, ELEVATOR_CALL_SW,
 	M_BLOCK, M_BLOCK_TOP, W_CRATE,
 	INFECTED_H, FLYING_INF, RIBBS, LEGGY, FOOTB, HSPIT,
-	FIREAXE
+	FIREAXE, BIOBOMB
 };
 
 enum ContactGroup {
@@ -67,6 +67,9 @@ public:
 				SetupSimpleBox(rectangle, type, false);
 				break;
 			case FLYING_INF:
+				SetupSimpleCircle(rectangle, type, false);
+				break;
+			case BIOBOMB:
 				SetupSimpleCircle(rectangle, type, false);
 				break;
 			default:

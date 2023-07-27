@@ -5,6 +5,7 @@
 #include <iostream>
 #include "Animations.h"
 #include "ScreensManager.h"
+#include "Dialogue.h"
 
 RenderTexture2D frameBuffer;
 
@@ -18,7 +19,7 @@ Game::Game(int width, int height, int fps, std::string title)
 	TextureLoader::LoadTextures();
 	ScreensManager::Initialize();
 	ScreensManager::SetCurrentScreen(Screens::GAME); //TO BE CHANGED TO TITLE
-	
+	DialogueManager::InitDialogues();
 	InitAudioDevice();
 	SoundManager::LoadSounds();
 	SetMasterVolume(0.5f);

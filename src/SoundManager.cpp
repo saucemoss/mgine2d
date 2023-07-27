@@ -90,6 +90,9 @@ void SoundManager::LoadSounds()
 	sounds.emplace("land", LoadSound("res/sound/collected/land.wav"));
 	sounds.emplace("grunt", LoadSound("res/sound/collected/grunt.wav"));
 	sounds.emplace("dead", LoadSound("res/sound/collected/dead.wav"));
+	sounds.emplace("elevator", LoadSound("res/sound/collected/elevator.wav"));
+	sounds.emplace("elevator_stop", LoadSound("res/sound/collected/elevator_stop.wav"));
+	sounds.emplace("door_close", LoadSound("res/sound/collected/door_close.wav"));
 
 
 	sounds.emplace("step1", LoadSound("res/sound/steps/stepstone01.wav"));

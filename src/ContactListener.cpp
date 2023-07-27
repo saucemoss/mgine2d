@@ -9,6 +9,7 @@
 #include "Leggy.h"
 #include "Football.h"
 #include "HeadSpit.h"
+#include "NPCSecurityGuy.h"
 
 std::map<ColliderTag, std::string> ContactListener::ColStrMap;
 
@@ -31,6 +32,7 @@ ContactListener::ContactListener()
 	ColStrMap[ColliderTag::LEGGY] = "LEGGY";
 	ColStrMap[ColliderTag::FOOTB] = "FOOTB";
 	ColStrMap[ColliderTag::HSPIT] = "HSPIT";
+	ColStrMap[ColliderTag::NPC] = "NPC";
 }
 
 void ContactListener::BeginContact(b2Contact* contact)
@@ -475,7 +477,51 @@ void ContactListener::BeginContact(b2Contact* contact)
 			e->player_in_sensor = true;
 		}
 	}
-
+	//Door
+	{
+		std::string other = "";
+		std::string subject = "";
+		Door* e = nullptr;
+		if (c1->m_colliderTag == DOOR)
+		{
+			e = static_cast<Door*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == DOOR)
+		{
+			e = static_cast<Door*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "door_sensor")
+		{
+			e->player_in_sensor = true;
+		}
+	}
+	//NPC
+	{
+		std::string other = "";
+		std::string subject = "";
+		NPCSecurityGuy* e = nullptr;
+		if (c1->m_colliderTag == NPC)
+		{
+			e = static_cast<NPCSecurityGuy*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == NPC)
+		{
+			e = static_cast<NPCSecurityGuy*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "npc_sensor")
+		{
+			e->looking_right = false;
+			e->player_in_sensor = true;
+		}
+	}
 	//Fireaxe
 	{
 		std::string other = "";
@@ -874,6 +920,51 @@ void ContactListener::EndContact(b2Contact* contact)
 			e->player_in_sensor = false;
 		}
 	}
+	//Door
+	{
+		std::string other = "";
+		std::string subject = "";
+		Door* e = nullptr;
+		if (c1->m_colliderTag == DOOR)
+		{
+			e = static_cast<Door*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == DOOR)
+		{
+			e = static_cast<Door*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "door_sensor")
+		{
+			e->player_in_sensor = false;
+		}
+	}
+	//NPC
+	{
+		std::string other = "";
+		std::string subject = "";
+		NPCSecurityGuy* e = nullptr;
+		if (c1->m_colliderTag == NPC)
+		{
+			e = static_cast<NPCSecurityGuy*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == NPC)
+		{
+			e = static_cast<NPCSecurityGuy*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "npc_sensor")
+		{
+			e->looking_right = true;
+			e->player_in_sensor = false;
+		}
+	}
 }
 
 void ContactListener::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
@@ -959,7 +1050,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			}
 		}
 	}
-	//Ribbs
+	//Leggy
 	{
 		std::string other = "";
 		Leggy* e = nullptr;
@@ -1129,15 +1220,29 @@ bool ContactFilter::ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB)
 		other_c = c1;
 	}
 
-
 	if (subject == "PLAYER" && other == "FOOTB")
 	{
 		return false;
 	}
-	else
+
+	if (c1->m_colliderTag == NPC)
 	{
-		return true;
+		other = nameB;
+		subject = nameA;
+		other_c = c2;
 	}
+	else if (c2->m_colliderTag == NPC)
+	{
+		other = nameA;
+		subject = nameB;
+		other_c = c1;
+	}
+	if (subject == "NPC" && other != "SOLID")
+	{
+		return false;
+	}
+
+	return true;
 
 	//auto fa_userdata = reinterpret_cast<FixtureUserData*>(fixtureA->GetUserData().pointer);
 	//auto fb_userdata = reinterpret_cast<FixtureUserData*>(fixtureB->GetUserData().pointer);

@@ -83,7 +83,7 @@ void Leggy::InitAnimations()
 void Leggy::Die(int death_option)
 {
 
-	SetAnimation("LEGGY_DEAD");
+	PlayFromFrame(2, "LEGGY_DEAD");
 	PlaySound(SoundManager::sounds["hurt12"]);
 	PlaySound(SoundManager::sounds["slime2short"]);
 	state = EnemyState::Dying;

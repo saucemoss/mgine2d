@@ -10,23 +10,7 @@ Elevator::Elevator(const Rectangle& rect, ldtk::ArrayField<int> levels, const ld
 	InitAnimations();
 
 	m_fixture->SetSensor(true);
-	//walls:
-	//b2Vec2 vs[4];
-	//vs[0].Set(-1.0f, -1.0f);
-	//vs[1].Set(-1.0f, 1.0f);
-	//vs[2].Set(1.0f, 1.0f);
-	//vs[3].Set(1.0f, -1.0f);
-	//b2ChainShape chain;
-	//chain.CreateLoop(vs, 4);
-	////fixture user data
-	//FixtureUserData* elevator_walls = new FixtureUserData;
-	//elevator_walls->name = "elevator_walls";
-	////fixture definition
-	//b2FixtureDef walls_fix_def;
-	//walls_fix_def.shape = &chain;
-	//walls_fix_def.userData.pointer = reinterpret_cast<uintptr_t>(elevator_walls);
-	////create fixture using definition
-	//walls_fixture = m_body->CreateFixture(&walls_fix_def);
+
 
 	//floor&roof
 	b2PolygonShape floor_box;
@@ -79,11 +63,13 @@ void Elevator::Update(float dt)
 		{
 			state = ElevatorState::GOING_DOWN;
 			m_current_level = 0;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)))
 		{
 			state = ElevatorState::GOING_UP;
 			m_current_level = m_levels.size();
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		break;
 	case ElevatorState::GOING_DOWN:
@@ -100,6 +86,7 @@ void Elevator::Update(float dt)
 		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level != 0) //change of dir
 		{
 			state = ElevatorState::GOING_UP;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 
 		break;
@@ -117,26 +104,31 @@ void Elevator::Update(float dt)
 		if (player_in_sensor && (IsKeyPressed(KEY_E)|| IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level != m_levels.size() - 1) //change of dir
 		{
 			state = ElevatorState::GOING_DOWN;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		break;
 	case ElevatorState::NEXT_LEVEL:
 		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == m_levels.size()-1)
 		{
 			state = ElevatorState::GOING_UP; // last level
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)))
 		{
 			state = ElevatorState::GOING_DOWN;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		} 
 		break;
 	case ElevatorState::PREVIOUS_LEVEL:
 		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == 0)
 		{
 			state = ElevatorState::GOING_DOWN; // first level
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)))
 		{
 			state = ElevatorState::GOING_UP;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		break;
 	case ElevatorState::GOING_TO_SW:
@@ -170,34 +162,32 @@ void Elevator::Update(float dt)
 		if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == 0)
 		{
 			state = ElevatorState::GOING_DOWN; // first level
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_current_level == m_levels.size() - 1)
 		{
 			state = ElevatorState::GOING_UP;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && !m_going_up)
 		{
 			state = ElevatorState::GOING_DOWN;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		else if (player_in_sensor && (IsKeyPressed(KEY_E) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_UP)) && m_going_up)
 		{
 			state = ElevatorState::GOING_UP;
+			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		break;
 	}
 	
-	//if (open)
-	//{
-	//	walls_fixture->SetSensor(true);
-	//}
-	//else
-	//{
-	//	walls_fixture->SetSensor(false);
-	//}
 }
 
 void Elevator::ResetY(int next_level)
 {
+	StopSound(SoundManager::sounds["elevator"]);
+	PlaySound(SoundManager::sounds["elevator_stop"]);
 	m_body->SetTransform({ m_body->GetPosition().x, next_level / settings::PPM}, 0);
 	m_body->SetLinearVelocity({ 0, 0 });
 	//open = true;
@@ -206,11 +196,13 @@ void Elevator::ResetY(int next_level)
 void Elevator::MoveUp(float speed)
 {
 	m_body->SetLinearVelocity({ 0, -speed });
+	if (!IsSoundPlaying(SoundManager::sounds["elevator"])) PlaySound(SoundManager::sounds["elevator"]);
 	//open = false;
 }
 
 void Elevator::MoveDown(float speed)
 {
+	if (!IsSoundPlaying(SoundManager::sounds["elevator"])) PlaySound(SoundManager::sounds["elevator"]);
 	m_body->SetLinearVelocity({ 0, speed });
 	//open = false;
 

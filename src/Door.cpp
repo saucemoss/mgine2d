@@ -8,19 +8,8 @@ Door::Door(const Rectangle& rect, bool is_right)
 {
 	InitAnimations();
 	//sensor collider box
-	b2PolygonShape sensor_shape;
-	sensor_shape.SetAsBox(2.8f, 1.0f, b2Vec2(0.0f, 0.0f), 0);
-	//fixture user data
-	FixtureUserData* sensorFixtureName = new FixtureUserData;
-	sensorFixtureName->name = "door_sensor";
-	//fixture definition
-	b2FixtureDef sensorFixDef;
-	sensorFixDef.isSensor = true;
-	sensorFixDef.shape = &sensor_shape;
-	sensorFixDef.userData.pointer = reinterpret_cast<uintptr_t>(sensorFixtureName);
-	//create fixture using definition
-	sensor = m_body->CreateFixture(&sensorFixDef);
-
+	sensor = util::SimpleSensor(m_body, "door_sensor", 2.8f, 1.0f, 0.0f, 0.0f);
+	my_engine_sound = LoadSound("res/sound/collected/Engine.wav");
 	state = DoorState::Closed;
 	EnitityManager::Add(this);
 
@@ -30,17 +19,13 @@ Door::Door(const Rectangle& rect, bool is_right)
 Door::~Door()
 {
 	EnitityManager::Remove(this);
-
+	UnloadSound(my_engine_sound);
 }
 
 
 void Door::Update(float dt)
 {
-
-	player_in_sensor = LevelManager::CheckPlayerInSensor(*sensor);
-	// Swtich animation frames for current anim
 	SwitchFrames(dt);
-
 	if (player_in_sensor)
 	{
 		m_fixture->SetSensor(true);
@@ -53,6 +38,7 @@ void Door::Update(float dt)
 	switch (state)
 	{
 	case DoorState::Open:
+		StopSound(my_engine_sound);
 		if (!player_in_sensor)
 		{
 			state = DoorState::Closing;
@@ -64,6 +50,7 @@ void Door::Update(float dt)
 		}
 		break;
 	case DoorState::Closed:
+		StopSound(my_engine_sound);
 		if (!player_in_sensor)
 		{
 
@@ -77,10 +64,12 @@ void Door::Update(float dt)
 	case DoorState::Closing:
 		if (!player_in_sensor)
 		{
+			if(!IsSoundPlaying(my_engine_sound)) PlaySound(my_engine_sound);
+			
 			if (AnimationEnded())
 			{
 				state = DoorState::Closed;
-				PlaySound(SoundManager::sounds["robo9"]);
+				PlaySound(SoundManager::sounds["door_close"]);
 			}
 		}
 		else
@@ -89,6 +78,7 @@ void Door::Update(float dt)
 			//transfer current anim frame num to new anim
 			int frameNum = 17 - animation->GetCurrentFrameNum();
 			PlayFromFrame(frameNum, "D_OPEN");
+			animation->PlayOnce();
 		}
 		break;
 	case DoorState::Opening:
@@ -98,13 +88,15 @@ void Door::Update(float dt)
 			//transfer current anim frame num to new anim
 			int frameNum = 17 - animation->GetCurrentFrameNum();
 			PlayFromFrame(frameNum, "D_CLOSE");
+			animation->PlayOnce();
 		}
 		else
 		{
+			if (!IsSoundPlaying(my_engine_sound)) PlaySound(my_engine_sound);
 			if (AnimationEnded())
 			{
 				state = DoorState::Open;
-				PlaySound(SoundManager::sounds["robo8"]);
+				PlaySound(SoundManager::sounds["door_close"]);
 			}
 		}
 		break;
