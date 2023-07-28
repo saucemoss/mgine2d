@@ -8,7 +8,6 @@ std::unordered_map<std::string, Texture2D> TextureLoader::m_Textures;
 
 void TextureLoader::LoadTextures()
 {
-	m_Textures.emplace("BIG_Z", LoadTexture("res/bigzombie.png"));
 	m_Textures.emplace("PLAYER", LoadTexture("res/PlayerTextures/player32.png"));
 	m_Textures.emplace("NP1", LoadTexture("res/PlayerTextures/new_player2.png"));
 	m_Textures.emplace("DOOR", LoadTexture("res/level/door.png"));
@@ -22,6 +21,7 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("FOOTB_1", LoadTexture("res/enemies/football.png"));
 	m_Textures.emplace("HSPIT_1", LoadTexture("res/enemies/headspit.png"));
 	m_Textures.emplace("NPC_S_GUY1", LoadTexture("res/NPCs/NPCSecurityGuy.png"));
+	m_Textures.emplace("NPC_S_GUY2", LoadTexture("res/NPCs/NPCSecutiry2.png"));
 }
 
 void Animations::InitializeNPCSec1Animations()
@@ -29,8 +29,16 @@ void Animations::InitializeNPCSec1Animations()
 	Texture2D* texture = TextureLoader::GetTexture("NPC_S_GUY1");
 	animations.emplace("SEC1_IDLE", *(new Animation(texture, 0, 4, 32, 0.25f)));
 	animations.emplace("SEC1_LETGO", *(new Animation(texture, 1, 1, 32, 0.12f)));
-	animations.emplace("SEC1_STOP", *(new Animation(texture, 2, 1, 32, 0.12f)));
+	animations.emplace("SEC1_STOP", *(new Animation(texture, 2, 4, 32, 0.12f)));
 	animations.emplace("SEC1_TALK", *(new Animation(texture, 3, 4, 32, 0.18f)));
+	animations.emplace("SEC1_RUN", *(new Animation(texture, 4, 2, 32, 0.04f)));
+}
+void Animations::InitializeNPCSec2Animations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("NPC_S_GUY2");
+	animations.emplace("SEC2_IDLE", *(new Animation(texture, 0, 1, 32, 0.25f)));
+	animations.emplace("SEC2_RUN", *(new Animation(texture, 1, 2, 32, 0.04f)));
+	animations.emplace("SEC2_GUN", *(new Animation(texture, 2, 1, 32, 0.25f)));
 }
 
 void Animations::InitializeRibbsAnimations()

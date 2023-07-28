@@ -12,7 +12,6 @@
 #include <b2_settings.h>
 #include "Util.h"
 
-class Collidable;
 
 enum ColliderTag {
 	UNASSIGNED,

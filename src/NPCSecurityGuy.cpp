@@ -4,8 +4,11 @@ NPCSecurityGuy::NPCSecurityGuy(const Rectangle& rect):
 Collidable({rect.x,rect.y, 16,22 }, b2_kinematicBody, NPC)
 {
 	//m_fixture->SetSensor(true);
-	util::SimpleSensor(m_body, "npc_sensor", 2.0f, 1.0f, 0.0f, 0.0f);
+	util::SimpleSensor(m_body, "npc_sensor", 1.0f, 1.0f, -1.0f, 0.0f);
+	util::SimpleSensor(m_body, "npc_fear_sensor", 3.0f, 1.0f, 1.0f, 0.0f);
+	state = Idling;
 	InitAnimations();
+	
 	EnitityManager::Add(this);
 }
 
@@ -34,18 +37,73 @@ void NPCSecurityGuy::Draw(int l)
 void NPCSecurityGuy::Update(float dt)
 {
 	SwitchFrames(dt);
-	if (AnimationEnded())
+
+	switch (state)
 	{
+	case Idling:
+		if (enemy_in_sensor)
+		{
+			SetAnimation("SEC1_RUN");
+			state = Running;
+		}
 		if (player_in_sensor)
 		{
-			SetAnimation("SEC1_TALK");
+			if (DialogueManager::DialogBoxExhausted())
+			{
+				state = TalkingOption2;
+				SetAnimation("SEC1_TALK");
+			}
+			else
+			{
+				state = TalkingOption1;
+				SetAnimation("SEC1_STOP");
+			}
+		}
+		break;
+	case TalkingOption1:
+		if (enemy_in_sensor)
+		{
+			SetAnimation("SEC1_RUN");
+			state = Running;
+		}
+		if (!player_in_sensor)
+		{
+			state = Idling;
+			SetAnimation("SEC1_IDLE");
+			DialogueManager::EndDialogue();
+		}
+		else if (!DialogueManager::DialogBoxExhausted())
+		{
+			DialogueManager::StartDialogue(1, center_pos());
+		}
+
+		break;
+	case TalkingOption2:
+		if (enemy_in_sensor)
+		{
+			SetAnimation("SEC1_RUN");
+			state = Running;
+		}
+		if (!player_in_sensor)
+		{
+			state = Idling;
+			SetAnimation("SEC1_IDLE");
+			DialogueManager::EndDialogue();
 		}
 		else
 		{
-			SetAnimation("SEC1_IDLE");
+			DialogueManager::StartDialogue(6, center_pos());
 		}
-	}
+		break;
 
+	case Running:
+		looking_right = false;
+		m_body->SetLinearVelocity({
+		-4.0f,
+		m_body->GetLinearVelocity().y,
+			});
+		break;
+	}
 	
 }
 

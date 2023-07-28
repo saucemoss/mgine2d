@@ -172,6 +172,7 @@
     <ClCompile Include="src\LightManager.cpp" />
     <ClCompile Include="src\MovingBlock.cpp" />
     <ClCompile Include="src\NPCSecurityGuy.cpp" />
+    <ClCompile Include="src\NPCSecurityGuy2.cpp" />
     <ClCompile Include="src\Platform.cpp" />
     <ClCompile Include="src\Ribbs.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
@@ -185,6 +186,7 @@
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\NPCSecurityGuy2.h" />
     <ClInclude Include="src\NPCSecurityGuy.h" />
     <ClInclude Include="src\Dialogue.h" />
     <ClInclude Include="src\BioBomb.h" />

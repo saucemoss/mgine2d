@@ -2,10 +2,13 @@
 #include <raylib.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <memory>
+
 
 enum DialogueState
 {
-	Writing, Idle
+	Writing, Idle, Exhausted
 };
 
 class Dialogue
@@ -23,21 +26,69 @@ public:
 
 };
 
-class DialogueManager
-{
-public:
-	static std::unordered_map<int, Dialogue> DialogueMap;
-	static void InitDialogues();
-};
-
-class DialogueBox 
+class DialogueBox
 {
 public:
 	DialogueBox(Vector2 pos, Vector2 widht_height, int start)
+		:pos(pos), widht_height(widht_height), current_id(start)
 	{
+	}
+	Vector2 pos;
+	Vector2 widht_height;
+	int current_id;
+	void DrawDialogue();
+	void UpdateDialogue(float dt);
+	DialogueState state = Idle;
+	float f_counter = 0.0f;
 
+};
+
+class DialogueManager
+{
+public:
+	static DialogueState state;
+	static std::unordered_map<int, Dialogue> DialogueMap;
+	static void InitDialogues();
+	static std::vector<std::unique_ptr<DialogueBox>> DialogueBoxes;
+	static bool DialogBoxExhausted()
+	{
+		return state == Exhausted;
+	}
+
+	static void DrawDialogues()
+	{
+		for (auto& d : DialogueManager::DialogueBoxes)
+		{
+			d->DrawDialogue();
+		}
+	}
+	static void UpdateDialogues(float dt)
+	{
+		for (auto& d : DialogueManager::DialogueBoxes)
+		{
+			d->UpdateDialogue(dt);
+		}
 	}
 
 
-
+	static void EndDialogue()
+	{
+		state = Exhausted;
+		DialogueBoxes.clear();
+	}
+	static void StartDialogue(int i, Vector2 pos)
+	{
+		if (state != Writing)
+		{
+			state = Writing;
+			DialogueBoxes.push_back(std::make_unique<DialogueBox>(Vector2{ pos.x - 40.0f, pos.y - 40.0f }, Vector2{ 80.0f, 20.0f }, i));
+		}
+		
+	}
 };
+
+
+
+
+
+

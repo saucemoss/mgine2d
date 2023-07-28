@@ -26,6 +26,7 @@
 #include "Football.h"
 #include "HeadSpit.h"
 #include "NPCSecurityGuy.h"
+#include "NPCSecurityGuy2.h"
 
 
 b2World* LevelManager::world = nullptr;
@@ -374,6 +375,10 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			level_entities_safe.push_back(std::make_unique<NPCSecurityGuy>(rect));
 		}
+		if (entity.getName() == "NPCSec2")
+		{
+			level_entities_safe.push_back(std::make_unique<NPCSecurityGuy2>(rect));
+		}
 		if (entity.getName() == "LevelPortal_in")
 		{
 			rect = {		(float)entity.getPosition().x - rect.width / 2,
@@ -424,6 +429,7 @@ void LevelManager::UnloadLevel()
 	for (int i = 0; i < lights->m_lights.size(); i++)
 	{
 		UnloadRenderTexture(lights->m_lights[i].GlowTexture);
+		UnloadRenderTexture(lights->m_lights[i].ShadowMask);
 	}
 	lights->m_light_walls.clear();
 	lights->m_lights.clear();

@@ -54,6 +54,7 @@ public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
 	void InitializeNPCSec1Animations();
+	void InitializeNPCSec2Animations();
 	void InitializeRibbsAnimations();
 	void InitializeFootballAnimations();
 	void InitializeLeggyAnimations();

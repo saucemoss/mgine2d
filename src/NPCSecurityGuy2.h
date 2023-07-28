@@ -2,18 +2,14 @@
 #include "Entity.h"
 #include "Collidable.h"
 #include "Animations.h"
-#include "Dialogue.h"
+#include "NPCSecurityGuy.h"
 
-enum NPCState
-{
-	Idling, TalkingOption1, TalkingOption2, Running
-};
 
-class NPCSecurityGuy : public Entity, public Collidable, public Animated
+class NPCSecurityGuy2 : public Entity, public Collidable, public Animated
 {
 public:
-	NPCSecurityGuy(const Rectangle& rect);
-	~NPCSecurityGuy();
+	NPCSecurityGuy2(const Rectangle& rect);
+	~NPCSecurityGuy2();
 	bool looking_right = true;
 	bool player_in_sensor = false;
 	bool enemy_in_sensor = false;

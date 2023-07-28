@@ -204,6 +204,9 @@
     <ClCompile Include="src\NPCSecurityGuy.cpp">
       <Filter>Pliki źródłowe\Entities\NPCs</Filter>
     </ClCompile>
+    <ClCompile Include="src\NPCSecurityGuy2.cpp">
+      <Filter>Pliki źródłowe\Entities\NPCs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -315,6 +318,9 @@
       <Filter>Pliki nagłówkowe\Systems\Dialogue</Filter>
     </ClInclude>
     <ClInclude Include="src\NPCSecurityGuy.h">
+      <Filter>Pliki nagłówkowe\Entities\NPCs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NPCSecurityGuy2.h">
       <Filter>Pliki nagłówkowe\Entities\NPCs</Filter>
     </ClInclude>
   </ItemGroup>

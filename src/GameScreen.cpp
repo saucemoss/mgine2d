@@ -6,6 +6,7 @@
 #include "LDtkLoader/Project.hpp"
 #include <raymath.h>
 #include "rlgl.h"
+#include "Dialogue.h"
 
 std::vector<Entity*> EnitityManager::EntityList;
 Camera2D GameScreen::camera;
@@ -122,6 +123,7 @@ Screens GameScreen::Update(float dt)
 	player->Update(dt);
 	LevelMgr->Update(dt);
 	EnitityManager::Update(dt);
+	DialogueManager::UpdateDialogues(dt);
 	
 
 	
@@ -136,10 +138,12 @@ void GameScreen::Draw()
 	EnitityManager::Draw(0);			// Entities/Objects behind player
 	//TODO								// Entities Shaders?
 	player->Draw(0);					// Player		
-	EnitityManager::Draw(1);			// Entities/Objects in front of player	
-	LevelMgr->lights->DrawLightMask();	// Darkness and lights
+	EnitityManager::Draw(1);			// Entities/Objects in front of player
 	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
+	LevelMgr->lights->DrawLightMask();	// Darkness and lights
+	
 	player->DrawUI();					// Player UI
+	DialogueManager::DrawDialogues();	// Dialogue Boxes
 	
 
 	//DEBUG:

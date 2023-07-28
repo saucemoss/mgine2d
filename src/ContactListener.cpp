@@ -521,6 +521,10 @@ void ContactListener::BeginContact(b2Contact* contact)
 			e->looking_right = false;
 			e->player_in_sensor = true;
 		}
+		if (other == "INFECTED_H" && subject == "npc_fear_sensor")
+		{
+			e->enemy_in_sensor = true;
+		}
 	}
 	//Fireaxe
 	{
