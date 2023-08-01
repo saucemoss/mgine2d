@@ -50,6 +50,9 @@ public:
     bool is_dying = false;
     bool taking_dmg = false;
     bool is_aiming = false;
+    bool invincible = false;
+    float invincible_counter;
+    float invincible_time = 1.0f;
     float speed = 7.0f;
     float jump_force = 21.0f;
     float linear_dumping = 2.0f;

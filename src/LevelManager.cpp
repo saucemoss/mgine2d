@@ -60,7 +60,7 @@ LevelManager::LevelManager()
 	world->SetDestructionListener(destruction_listener);
 	world->SetContactFilter(contact_filter);
 	Collidable::world = world;
-	LoadLevel("Level_6");
+	LoadLevel("Level_0");
 
 }
 
@@ -184,6 +184,28 @@ void LevelManager::LoadLevel(std::string level_name)
 									 (float)tile.getPosition().y ,
 									 tile_size , tile_size };
 					//solid_tiles.push_back(std::make_unique<SolidTile>(rec));
+					DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
+				}
+				if (layer.getName() == "Slopes")
+				{
+					Rectangle rec = { (float)tile.getPosition().x ,
+									 (float)tile.getPosition().y ,
+									 tile_size , tile_size };
+
+					std::cout << "TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+					std::cout << tile.tileId << std::endl;
+					if (tile.tileId == 881)
+					{
+						b2Vec2 verices[3] = { {-1.0f,-1.0f},{1.0f,1.0f},{-1.0f, 1.0f}};
+						solid_tiles.push_back(std::make_unique<SolidTile>(verices, 3, rec));
+						
+					}
+					if (tile.tileId == 884)
+					{
+						b2Vec2 verices[3] = {{-1.0f, 1.0f},{1.0f,-1.0f}, {1.0f,1.0f} };
+						solid_tiles.push_back(std::make_unique<SolidTile>(verices, 3, rec));
+
+					}
 					DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
 				}
 			}

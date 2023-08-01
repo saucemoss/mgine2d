@@ -136,8 +136,8 @@ void HeadSpit::UpdateDyingState(float dt)
 	if (AnimationEnded())
 	{
 		m_destroy = true;
-		if (!LevelManager::world->IsLocked())
-			LevelManager::world->DestroyBody(m_body);
+		//if (!LevelManager::world->IsLocked())
+		//	LevelManager::world->DestroyBody(m_body);
 	}
 }
 

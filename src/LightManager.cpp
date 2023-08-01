@@ -12,7 +12,8 @@ void LightManager::SetupBoxes()
 	
 	for (auto& s : LevelManager::solid_tiles)
 	{
-		m_light_walls.push_back(&s->m_rectangle);
+		SolidTile* sptr = static_cast<SolidTile*>(s.get());
+		if(!sptr->is_slope) m_light_walls.push_back(&s->m_rectangle);
 	}
 	for (auto& e : LevelManager::level_entities_safe)
 	{

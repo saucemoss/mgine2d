@@ -104,6 +104,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			}
 		}
 
+
 		if (other == "SOLID" || other == "M_BLOCK")
 		{
 			if (subject == "p_l_s")
@@ -1167,6 +1168,12 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 
 void DestructionListener::SayGoodbye(b2Joint* joint)
 {
+	//auto fa_userdata = reinterpret_cast<FixtureUserData*>(joint->GetUserData().pointer);
+	//	if (fa_userdata != nullptr)
+	//	{
+	//		std::cout << "TO DELETE";
+	//		std::cout << fa_userdata->name << std::endl;
+	//	}
 }
 
 void DestructionListener::SayGoodbye(b2Fixture* fixture)
@@ -1211,23 +1218,30 @@ bool ContactFilter::ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB)
 		nameB = ContactListener::ColStrMap[c2->m_colliderTag];
 	}
 
-	if (c1->m_colliderTag == PLAYER)
+	//player collision filter
 	{
-		other = nameB;
-		subject = nameA;
-		other_c = c2;
+		if (c1->m_colliderTag == PLAYER)
+		{
+			other = nameB;
+			subject = nameA;
+			other_c = c2;
+		}
+		else if (c2->m_colliderTag == PLAYER)
+		{
+			other = nameA;
+			subject = nameB;
+			other_c = c1;
+		}
+		//if (subject == "PLAYER" && other != "SOLID" && GameScreen::player->invincible)
+		//{
+		//	return false;
+		//}
+		if (subject == "PLAYER" && other == "FOOTB")
+		{
+			return false;
+		}
 	}
-	else if (c2->m_colliderTag == PLAYER)
-	{
-		other = nameA;
-		subject = nameB;
-		other_c = c1;
-	}
-
-	if (subject == "PLAYER" && other == "FOOTB")
-	{
-		return false;
-	}
+	
 
 	if (c1->m_colliderTag == NPC)
 	{

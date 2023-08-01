@@ -4,13 +4,15 @@
 #include "Util.h"
 
 InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
-	Enemy({ rectangle.x,rectangle.y,12,30 }, INFECTED_H)
+	Enemy({ rectangle.x,rectangle.y,12,26 }, INFECTED_H)
 {
 	
 	InitAnimations();
 	state = EnemyState::Idle;
 	m_max_hp = 100;
 	m_current_hp = m_max_hp;
+	custom_pos = true;
+
 
 	// Add mappings for debug purposes
 	StatesStrMap[EnemyState::Idle] = "Idle";
@@ -41,8 +43,8 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
 	m_attack_sensor = util::SimpleSensor(m_body, "ih_att", 1.0f, 0.8f, 0.0, 0.0);
 
 	//left&right collider boxes
-	m_left_sensor = util::SimpleSensor(m_body, "ih_l_s", 0.05f, 0.61f, -0.4f, 0);
-	m_right_sensor = util::SimpleSensor(m_body, "ih_r_s", 0.05f, 0.61f, 0.4f, 0);
+	m_left_sensor = util::SimpleSensor(m_body, "ih_l_s", 0.05f, 0.80f, -0.6f, 0);
+	m_right_sensor = util::SimpleSensor(m_body, "ih_r_s", 0.05f, 0.80f, 0.6f, 0);
 
 	m_body->SetLinearDamping(linear_dumping);
 }
@@ -55,6 +57,9 @@ InfectedHazmat::~InfectedHazmat()
 void InfectedHazmat::Update(float dt)
 {
 	SwitchFrames(dt);
+	spritePosX = CurrentFrame().width == 96 ? spritePosX = center_pos().x - 42 : (int)center_pos().x - 10;
+	spritePosY = CurrentFrame().width == 96 ? spritePosY = center_pos().y - 37 : (int)center_pos().y - 6;
+
 	CheckTouchGround();
 	CheckAgroSensor();
 
@@ -234,8 +239,8 @@ void InfectedHazmat::UpdateDyingState(float dt)
 	if (AnimationEnded())
 	{
 		m_destroy = true;
-		if (!LevelManager::world->IsLocked())
-			LevelManager::world->DestroyBody(m_body);
+		//if (!LevelManager::world->IsLocked())
+		//	LevelManager::world->DestroyBody(m_body);
 	}
 
 }

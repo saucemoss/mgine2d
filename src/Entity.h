@@ -3,12 +3,14 @@
 #include <iostream>
 #include <vector>
 #include "LDtkLoader/Project.hpp"
+#include "Collidable.h"
 
 class Entity
 {
 public:
     virtual ~Entity() = default;
-	int m_draw_layers = 0;
+	int m_layer = 0;
+	int m_draw_layers;
     virtual void Draw(int layer) = 0;
 	virtual void Update(float dt) = 0;
 	ldtk::IID m_ldtkID;;
@@ -32,6 +34,11 @@ public:
 		{
 			if (EntityList[i]->m_destroy)
 			{
+				Collidable* c = dynamic_cast<Collidable*>(EntityList[i]);
+				if (c != nullptr)
+				{
+					c->m_body->GetWorld()->DestroyBody(c->m_body);
+				}
 				Remove(EntityList[i]);
 			}
 		}

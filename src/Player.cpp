@@ -23,8 +23,7 @@ FireAxe* Player::axe = nullptr;
 
 Player::Player()
 	:
-	Collidable({ 150,150,12,20 }, b2_dynamicBody, PLAYER) // lvl6
-	//Collidable({50,250,12,20}, b2_dynamicBody, PLAYER)
+	Collidable({ 80,170,12,20 }, b2_dynamicBody, PLAYER) // lvl6
 	
 {
 	NewBody();
@@ -54,42 +53,13 @@ void Player::NewBody()
 	FixtureUserData* data = new FixtureUserData;
 	data->tag = PLAYER_GROUP;
 	m_fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(data);
+	
 	//feet collider box
-	b2PolygonShape feet_sesnor_box;
-	feet_sesnor_box.SetAsBox(0.3f, 0.3f, b2Vec2(0, 0.80f), 0);
-	//fixture user data
-	FixtureUserData* feetFixtureName = new FixtureUserData;
-	feetFixtureName->name = "p_feet";
-	//fixture definition
-	b2FixtureDef feetDef;
-	feetDef.isSensor = true;
-	feetDef.shape = &feet_sesnor_box;
-	feetDef.userData.pointer = reinterpret_cast<uintptr_t>(feetFixtureName);
-	//create fixture using definition
-	m_feet_sensor = m_body->CreateFixture(&feetDef);
+	m_feet_sensor = util::SimpleSensor(m_body, "p_feet", 0.3f, 0.3f, 0, 0.80f);
 
 	//left&right collider boxes
-	b2PolygonShape left_sesnor_box;
-	left_sesnor_box.SetAsBox(0.05f, 0.75f, b2Vec2(-0.4f, -0.2f), 0);
-	b2PolygonShape right_sesnor_box;
-	right_sesnor_box.SetAsBox(0.05f, 0.75f, b2Vec2(0.4f, -0.2f), 0);
-	//fixture user data
-	FixtureUserData* right_sesnorName = new FixtureUserData;
-	FixtureUserData* left_sesnorName = new FixtureUserData;
-	right_sesnorName->name = "p_r_s";
-	left_sesnorName->name = "p_l_s";
-	//fixture definition
-	b2FixtureDef left_sensor_def;
-	left_sensor_def.isSensor = true;
-	left_sensor_def.shape = &left_sesnor_box;
-	left_sensor_def.userData.pointer = reinterpret_cast<uintptr_t>(left_sesnorName);
-	b2FixtureDef right_sensor_def;
-	right_sensor_def.isSensor = true;
-	right_sensor_def.shape = &right_sesnor_box;
-	right_sensor_def.userData.pointer = reinterpret_cast<uintptr_t>(right_sesnorName);
-	//create fixture using definition
-	m_left_sensor = m_body->CreateFixture(&left_sensor_def);
-	m_right_sensor = m_body->CreateFixture(&right_sensor_def);
+	m_left_sensor = util::SimpleSensor(m_body, "p_l_s", 0.01f, 0.65f, -0.4f, -0.2f);
+	m_right_sensor = util::SimpleSensor(m_body, "p_r_s", 0.01f, 0.65f, 0.4f, -0.2f);
 
 	m_body->SetLinearDamping(linear_dumping);
 
@@ -137,6 +107,11 @@ void Player::Update(float dt)
 		}
 	}
 
+	invincible_counter += dt;
+	if (invincible_counter >= invincible_time)
+	{
+		invincible = false;
+	}
 
 	// Update player in one possible state
 	switch (state)
@@ -258,8 +233,10 @@ void Player::set_velocity_xy(float vx, float vy)
 
 void Player::take_dmg(int dmg)
 {
-	if (!taking_dmg)
+	if (!taking_dmg && !invincible)
 	{
+		invincible = true;
+		invincible_counter = 0.0f;
 		PlaySound(SoundManager::sounds["grunt"]);
 		current_hp -= dmg;
 		taking_dmg = true;
@@ -285,6 +262,16 @@ void Player::Draw(int l)
 		spritePosX = center_pos().x - 43;
 		spritePosY = center_pos().y - 44;
 	}
+
+	Color c = WHITE;
+	if (invincible)
+	{
+		c = int(invincible_counter * 9) % 2 == 0 ? RED : WHITE;
+	}
+	if (taking_dmg)
+	{
+		c = RED;
+	}
 	
 	if (m_has_axe && !is_dying)
 	{
@@ -304,7 +291,7 @@ void Player::Draw(int l)
 		Rectangle{ spritePosX,spritePosY,CurrentFrame().width,CurrentFrame().height },
 		{ 0,0 },
 		0.0f,
-		taking_dmg ? RED : WHITE);
+		c);
 
 	//EndShaderMode();
 	//DrawText(util::VecToString(start_aim_pos).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
@@ -599,8 +586,6 @@ void Player::UpdateFallingState(float dt)
 		state = PlayerState::Attacking;
 	}
 
-
-
 }
 
 void Player::UpdateDyingState(float dt)
@@ -736,7 +721,6 @@ void Player::UpdateAttackingState(float dt)
 		attack_def.userData.pointer = reinterpret_cast<uintptr_t>(attack_sesnorName);
 		m_attack_sensor = m_body->CreateFixture(&attack_def);
 		m_body->ResetMassData();
-		m_body->SetBullet(true);
 		m_has_axe = false;
 
 
@@ -746,6 +730,7 @@ void Player::UpdateAttackingState(float dt)
 	if (animation->GetCurrentFrameNum() >= 3 && !AnimationEnded() && IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && m_has_axe == false)
 	{
 		m_has_axe = true;
+		if (!LevelManager::world->IsLocked())
 		m_body->DestroyFixture(m_attack_sensor);
 		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
@@ -759,6 +744,7 @@ void Player::UpdateAttackingState(float dt)
 	else if (animation->GetCurrentFrameNum() >= 3 && m_has_axe == false)
 	{
 		m_has_axe = true;
+		if (!LevelManager::world->IsLocked())
 		m_body->DestroyFixture(m_attack_sensor);
 		SetAnimation("P_IDLE");
 		state = PlayerState::Idle;
@@ -781,6 +767,7 @@ void Player::UpdateHurtingingState(float dt)
 	
 	if (!is_dying && AnimationEnded())
 	{
+		taking_dmg = false;
 		if (is_aiming)
 		{
 			is_aiming = false;
@@ -788,7 +775,6 @@ void Player::UpdateHurtingingState(float dt)
 		}
 		SetAnimation("P_IDLE");
 		state = PlayerState::Idle;
-		taking_dmg = false;
 	}
 
 }

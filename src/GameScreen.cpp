@@ -51,7 +51,7 @@ void GameScreen::UpdateCamera(float dt)
 	// Camera stuff
 	// 
 	// Camera zoom controls
-	player_focused_cam.target = player->pos();
+	player_focused_cam.target = { player->pos().x,player->pos().y - 32 };
 	camera.zoom += ((float)GetMouseWheelMove() * 0.05f);
 
 	if (camera.zoom > 30.0f) camera.zoom = 30.0f;
@@ -69,7 +69,7 @@ void GameScreen::UpdateCamera(float dt)
 	static float fractionSpeed = 3.0f;
 
 	camera.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
-	Vector2 diff = Vector2Subtract(player->pos(), camera.target);
+	Vector2 diff = Vector2Subtract({ player->pos().x,player->pos().y - 32 }, camera.target);
 	float length = Vector2Length(diff);
 
 	if (length > minEffectLength)

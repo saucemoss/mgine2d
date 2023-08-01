@@ -31,8 +31,8 @@ Football::~Football()
 
 void Football::Update(float dt)
 {
-	spritePosX = center_pos().x - 10.0f;
-	spritePosY = center_pos().y - 12.0f;
+	spritePosX = (int)center_pos().x - 10;
+	spritePosY = (int)center_pos().y - 11;
 	SwitchFrames(dt);
 
 	switch (state)
@@ -135,8 +135,8 @@ void Football::UpdateDyingState(float dt)
 	if (AnimationEnded())
 	{
 		m_destroy = true;
-		if (!LevelManager::world->IsLocked())
-			LevelManager::world->DestroyBody(m_body);
+		//if (!LevelManager::world->IsLocked())
+		//	LevelManager::world->DestroyBody(m_body);
 	}
 }
 

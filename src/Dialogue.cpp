@@ -22,7 +22,7 @@ void DialogueBox::DrawDialogue()
 	{
 		DrawRectangleRounded({ pos.x - 5,pos.y - 5, widht_height.x + 10, widht_height.y + 10}
 									, 0.1f, 5, Color{0, 0, 0, 200});
-		DrawTextPro(GetFontDefault(), TextSubtext(DialogueManager::DialogueMap.at(current_id).text.c_str(), 0, f_counter), pos, { 0,0 }, 0.0f, 4.0f, 1, GREEN);
+		DrawTextPro(GetFontDefault(), TextSubtext(DialogueManager::DialogueMap.at(current_id).text.c_str(), 0, f_counter), pos, { 0,0 }, 0.0f, 6.0f, 1, GREEN);
 		DrawRectangleRoundedLines({ pos.x - 5, pos.y - 5, widht_height.x + 10, widht_height.y + 10 }
 									, 0.1f,5,1.5f, DARKGREEN);
 		DrawRectangleRoundedLines({ pos.x - 5, pos.y - 5, widht_height.x + 10, widht_height.y + 10 }

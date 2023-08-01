@@ -7,5 +7,7 @@ class SolidTile : public Collidable
 public:
     SolidTile();
     SolidTile(const Rectangle& rectangle);
+    SolidTile(const b2Vec2* verices, const int vertices_count, const Rectangle& rectangle);
     ~SolidTile();
+    bool is_slope = false;
 };

@@ -91,7 +91,7 @@ void Animations::InitializeFlyingInfectedAnimations()
 	animations.emplace("FLY_I_FLY", *(new Animation(texture, 0, 5, 96, 0.06f)));
 	animations.emplace("FLY_I_ATT", *(new Animation(texture, 1, 6, 96, 0.06f)));
 	animations.emplace("FLY_I_DMG", *(new Animation(texture, 3, 1, 96, 0.18f)));
-	animations.emplace("FLY_I_DEAD", *(new Animation(texture, 2, 6, 96, 0.16f)));
+	animations.emplace("FLY_I_DEAD", *(new Animation(texture, 2, 6, 96, 0.06f)));
 }
 
 void Animations::InitializeInfectedHAnimations()
@@ -213,7 +213,7 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_RUN", *(new Animation(texture, 5, 6, 32, 0.08f)));
 	animations.emplace("P_GROUND", *(new Animation(texture, 7, 1, 32, 0.08f)));
 	animations.emplace("P_FALL", *(new Animation(texture, 8, 1, 32, 0.08f)));
-	animations.emplace("P_HURT", *(new Animation(texture, 16, 1, 32, 0.33f)));
+	animations.emplace("P_HURT", *(new Animation(texture, 16, 1, 32, 0.15f)));
 	animations.emplace("P_IDLE", *(new Animation(texture, 6, 5, 32, 0.20f)));
 	Animation* jump_anim = new Animation(texture, 9, 3, 32, 0.08f);
 	jump_anim->SetCustomFrameTime(1, 0.10f);

@@ -202,7 +202,7 @@ void Ribbs::UpdateDyingState(float dt)
 		if (!LevelManager::world->IsLocked())
 		{
 			Rectangle r = { center_pos().x,center_pos().y, 13,30 };
-			LevelManager::world->DestroyBody(m_body);
+			//LevelManager::world->DestroyBody(m_body);
 			LevelManager::level_entities_safe.push_back(std::make_unique<Leggy>(r));
 			LevelManager::level_entities_safe.back().get()->m_draw_layers = 1;
 			Leggy* l = reinterpret_cast<Leggy*>(LevelManager::level_entities_safe.back().get());

@@ -48,10 +48,10 @@ void FireAxe::Draw(int l)
 
 void FireAxe::Update(float dt)
 {
-	if (m_destroy)
-	{
-		LevelManager::world->DestroyBody(m_body);
-	}
+	//if (m_destroy)
+	//{
+	//	LevelManager::world->DestroyBody(m_body);
+	//}
 }
 
 void FireAxe::InitAnimations()

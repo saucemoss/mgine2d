@@ -81,7 +81,7 @@ public:
 		if (state != Writing)
 		{
 			state = Writing;
-			DialogueBoxes.push_back(std::make_unique<DialogueBox>(Vector2{ pos.x - 40.0f, pos.y - 40.0f }, Vector2{ 80.0f, 20.0f }, i));
+			DialogueBoxes.push_back(std::make_unique<DialogueBox>(Vector2{ pos.x - 32.0f, pos.y - 40.0f }, Vector2{ 90.0f, 30.0f }, i));
 		}
 		
 	}
