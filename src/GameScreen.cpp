@@ -8,6 +8,8 @@
 #include "rlgl.h"
 #include "Dialogue.h"
 
+
+
 std::vector<Entity*> EnitityManager::EntityList;
 Camera2D GameScreen::camera;
 Camera2D GameScreen::player_focused_cam;
@@ -15,6 +17,9 @@ LevelManager* GameScreen::LevelMgr;
 SoundManager* GameScreen::SoundMgr;
 Player* GameScreen::player;
 bool GameScreen::debug = false;
+ParticlesManager* GameScreen::Particles;
+
+
 
 
 GameScreen::GameScreen()
@@ -25,6 +30,7 @@ GameScreen::GameScreen()
 	LevelMgr = new LevelManager();
 	SoundMgr = new SoundManager();
 	player = new Player();
+	Particles = new ParticlesManager();
 	
 	//Camera init
 
@@ -124,6 +130,7 @@ Screens GameScreen::Update(float dt)
 	LevelMgr->Update(dt);
 	EnitityManager::Update(dt);
 	DialogueManager::UpdateDialogues(dt);
+	Particles->Update(dt);
 	
 
 	
@@ -139,12 +146,12 @@ void GameScreen::Draw()
 	//TODO								// Entities Shaders?
 	player->Draw(0);					// Player		
 	EnitityManager::Draw(1);			// Entities/Objects in front of player
+	
 	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
 	LevelMgr->lights->DrawLightMask();	// Darkness and lights
-	
 	player->DrawUI();					// Player UI
 	DialogueManager::DrawDialogues();	// Dialogue Boxes
-	
+	Particles->Draw(1);					// Particles
 
 	//DEBUG:
 	if (debug)

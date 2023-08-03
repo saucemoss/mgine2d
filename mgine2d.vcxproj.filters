@@ -112,6 +112,12 @@
     <Filter Include="Pliki źródłowe\Entities\NPCs">
       <UniqueIdentifier>{808ca08f-6358-44ef-922a-080117d0531a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Particles">
+      <UniqueIdentifier>{61ec0a55-8906-4319-a2d8-2f6ebe3c0c9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Particles">
+      <UniqueIdentifier>{4a4ff623-af90-45a5-b29b-7eb3e4091315}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -206,6 +212,12 @@
     </ClCompile>
     <ClCompile Include="src\NPCSecurityGuy2.cpp">
       <Filter>Pliki źródłowe\Entities\NPCs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shard.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Particles.cpp">
+      <Filter>Pliki źródłowe\Systems\Particles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -322,6 +334,12 @@
     </ClInclude>
     <ClInclude Include="src\NPCSecurityGuy2.h">
       <Filter>Pliki nagłówkowe\Entities\NPCs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Shard.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Particles.h">
+      <Filter>Pliki nagłówkowe\Systems\Particles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

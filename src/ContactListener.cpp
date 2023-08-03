@@ -10,6 +10,7 @@
 #include "Football.h"
 #include "HeadSpit.h"
 #include "NPCSecurityGuy.h"
+#include "WoodCrate.h"
 
 std::map<ColliderTag, std::string> ContactListener::ColStrMap;
 
@@ -89,9 +90,24 @@ void ContactListener::BeginContact(b2Contact* contact)
 		if (subject == "p_axe_att" )
 		{
 			other_c->m_body->ApplyLinearImpulseToCenter((GameScreen::player->looking_right ? b2Vec2{ 100.f, 0.0f } : b2Vec2{ -100.0f, 0.0f }), true);
-			if (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR")
+			if (other == "SOLID" || other == "M_BLOCK" || other == "ELEVATOR")
 			{
 				PlaySound(SoundManager::sounds["axe_solid_hit"]);
+			}
+
+			if (other == "W_CRATE")
+			{
+				WoodCrate* wc = static_cast<WoodCrate*>(other_c);
+				wc->TakeDmg(1);
+
+				b2WorldManifold worldManifold;
+				ParticleEmitter* p = new ParticleEmitter(wc->pos(), 10, 1.0f, 2.0f, 8.0f, false, 3.0f);
+				ParticlesManager::Add(p);
+				for (int i = 0; i < 5; i++)
+				{
+					p->EmitParticles();
+				}
+				
 			}
 		}
 
@@ -1004,6 +1020,41 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 		nameB = ColStrMap[c2->m_colliderTag];
 	}
 
+
+	//wood crate
+	{
+		std::string other = "";
+		WoodCrate* e = nullptr;
+		if (c1->m_colliderTag == W_CRATE)
+		{
+			e = static_cast<WoodCrate*>(c1);
+			other = nameB;
+		}
+		else if (c2->m_colliderTag == W_CRATE)
+		{
+			e = static_cast<WoodCrate*>(c2);
+			other = nameA;
+		}
+
+		if (other == "FIREAXE"  &&
+			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
+		{
+			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
+			if (dmg_impulse > 20)
+			{
+				e->TakeDmg(dmg_impulse/50);
+				b2WorldManifold worldManifold;
+				contact->GetWorldManifold(&worldManifold);
+				Vector2 contact_point = { worldManifold.points[0].x * settings::PPM ,
+											worldManifold.points[0].y * settings::PPM };
+
+				std::cout << util::VecToString(contact_point) << std::endl;
+				ParticleEmitter* p = new ParticleEmitter(contact_point, 20, 2.0f, 2.0f, 10.0f, false, 3.0f);
+				ParticlesManager::Add(p);
+				p->EmitParticles();
+			}
+		}
+	}
 
 	//Infected hazmat
 	{

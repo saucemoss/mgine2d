@@ -101,8 +101,10 @@ void SoundManager::LoadSounds()
 	sounds.emplace("step4", LoadSound("res/sound/steps/stepstone04.wav"));
 	sounds.emplace("step5", LoadSound("res/sound/steps/stepstone05.wav"));
 
-
-
+	sounds.emplace("woodhit1", LoadSound("res/sound/collected/wood_hit1.wav"));
+	sounds.emplace("woodhit2", LoadSound("res/sound/collected/wood_hit2.wav"));
+	sounds.emplace("woodhit3", LoadSound("res/sound/collected/wood_hit3.wav"));
+	sounds.emplace("crate_break", LoadSound("res/sound/collected/crate_break.wav"));
 
 
 

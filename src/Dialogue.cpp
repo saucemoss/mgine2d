@@ -6,12 +6,15 @@ DialogueState DialogueManager::state = Idle;
 
 void DialogueManager::InitDialogues()
 {
+
 	DialogueMap.emplace(1, Dialogue(1, "STOP!", 2));
 	DialogueMap.emplace(2, Dialogue(2, "Haven't you heard?\nSecurity breach!", 3));
-	DialogueMap.emplace(3, Dialogue(3, "We DO have it under\ncontrol.", 4));
+	DialogueMap.emplace(3, Dialogue(3, "Now, we DO have it\nunder control.", 4));
 	DialogueMap.emplace(4, Dialogue(4, "So...\nI guess you can go ahead,\njoin your sciency friends.", 5));
-	DialogueMap.emplace(5, Dialogue(5, "I'll watch!", 0));
-	DialogueMap.emplace(6, Dialogue(6, "Go on,\nyour friends need you!\nGood luck... hehe...", 0));
+	DialogueMap.emplace(5, Dialogue(5, "If you'll manage to\nbypass our blockade.", 6));
+	DialogueMap.emplace(6, Dialogue(6, "I'll watch!", 0));
+	DialogueMap.emplace(7, Dialogue(7, "Go on,\nyour friends need you!\nGood luck... hehe...", 0));
+
 }
 
 void DialogueBox::DrawDialogue()

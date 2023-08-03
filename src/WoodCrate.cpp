@@ -1,9 +1,13 @@
 #include "WoodCrate.h"
+#include "Shard.h"
+#include "SoundManager.h"
+#include "Particles.h"
 
 WoodCrate::WoodCrate(const Rectangle& rect)
 	:
 	Collidable(rect, b2_dynamicBody, W_CRATE)
 {
+	crate_shards = nullptr;
 	m_fixture->SetDensity(8.0f);
 	m_body->ResetMassData();
 	InitAnimations();
@@ -12,6 +16,8 @@ WoodCrate::WoodCrate(const Rectangle& rect)
 
 WoodCrate::~WoodCrate()
 {
+	delete crate_shards;
+	crate_shards = nullptr;
 	EnitityManager::Remove(this);
 }
 
@@ -22,17 +28,29 @@ void WoodCrate::Draw(int l)
 	float angle = m_body->GetAngle() * 180 / PI;
 
 	DrawTexturePro(*sprite,
-		{
-			19 * 32,0,settings::tileSize,settings::tileSize
-		},
+		CurrentFrame(),
 		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
-		{ settings::tileSize/2,settings::tileSize/2 },
+		{ settings::tileSize / 2,settings::tileSize / 2 },
 		angle,
 		WHITE);
 }
 
 void WoodCrate::Update(float dt)
 {
+	SwitchFrames(dt);
+
+	if (dmg <= 5)
+	{
+		FreezeFrame("W_CRATE", dmg);
+	}
+	else if(!m_destroy)
+	{
+		crate_shards = new Shards(sprite, CurrentFrame(), center_pos(), 10, 2.0f);
+		m_destroy = true;
+		PlaySound(SoundManager::sounds["crate_break"]);
+	}
+
+
 	m_rectangle =
 	{
 		pos().x - m_rectangle.width / 2,
@@ -45,7 +63,18 @@ void WoodCrate::Update(float dt)
 void WoodCrate::InitAnimations()
 {
 	//0,19
-	sprite = TextureLoader::GetTexture("MOTHMAN");
+	//sprite = TextureLoader::GetTexture("MOTHMAN");
+	sprite = TextureLoader::GetTexture("DECOR_ANIM");
+	animations->InitializeDecorAnimations();
+	FreezeFrame("W_CRATE", dmg);
+
+}
+
+void WoodCrate::TakeDmg(int i)
+{
+	dmg += i;
+	std::string dmgs[] = { "woodhit1","woodhit2","woodhit3" };
+	SoundManager::PlayRandSounds(dmgs, 3);
 
 }
 

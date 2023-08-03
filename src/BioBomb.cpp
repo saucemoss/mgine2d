@@ -41,10 +41,6 @@ void BioBomb::Draw(int l)
 void BioBomb::Update(float dt)
 {
 	SwitchFrames(dt);
-	if (m_destroy)
-	{
-		LevelManager::world->DestroyBody(m_body);
-	}
 }
 
 void BioBomb::InitAnimations()

@@ -150,6 +150,7 @@ void Animations::InitializeDecorAnimations()
 	//animations.emplace("tbd", *(new Animation(texture, 5, tbd, tbd, tbd)));
 	animations.emplace("DECOR_212", *(new Animation(texture, 9, 6, 32, 0.08f)));
 	animations.emplace("M_BLOCK", *(new Animation(texture, 11, 1, 32, 0.50f)));
+	animations.emplace("W_CRATE", *(new Animation(texture, 15, 5, 32, 0.50f)));
 	
 }
 

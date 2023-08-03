@@ -14,6 +14,7 @@ enum class PlayerState
     Running,
     Jumping,
     Falling,
+    Sliding,
     Dying,
     Attacking,
     Throwing,
@@ -102,6 +103,7 @@ public:
     void UpdateJumpingState(float dt);
     void UpdateFallingState(float dt);
     void UpdateDyingState(float dt);
+    void UpdateSlidingState(float dt);
     b2Vec2 GetTrajectoryPoint(b2Vec2& startingPosition, b2Vec2& startingVelocity, float n);
     void UpdateThrowingState(float dt);
     void UpdateAttackingState(float dt);

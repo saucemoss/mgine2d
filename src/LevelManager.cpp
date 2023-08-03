@@ -123,7 +123,10 @@ void LevelManager::LoadLevel(std::string level_name)
 	//
 	//Paralax Textures
 	paralaxBackgroundRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
-	paralaxedBackgroundSpriteAtlas = LoadTexture("res//level//mothman.png");
+	paralaxedBackgroundSpriteAtlas = LoadTexture("res//level//bg.png");
+
+	paralaxedForegroundRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+	paralaxedForegroundSpriteAtlas = LoadTexture("res//level//mothman.png");
 	//
 	//Decoration Texture
 	decorationSpriteAtlas = LoadTexture("res//level//mothman.png");
@@ -191,9 +194,6 @@ void LevelManager::LoadLevel(std::string level_name)
 					Rectangle rec = { (float)tile.getPosition().x ,
 									 (float)tile.getPosition().y ,
 									 tile_size , tile_size };
-
-					std::cout << "TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-					std::cout << tile.tileId << std::endl;
 					if (tile.tileId == 881)
 					{
 						b2Vec2 verices[3] = { {-1.0f,-1.0f},{1.0f,1.0f},{-1.0f, 1.0f}};
@@ -268,11 +268,11 @@ void LevelManager::LoadLevel(std::string level_name)
 
 
 	//Paralax Layers Draw
-	BeginTextureMode(paralaxBackgroundRenderTexture);
+	BeginTextureMode(paralaxedForegroundRenderTexture);
 
 	for (auto&& layer : currentLdtkLevel->allLayers())
 	{
-		if (layer.getName() == "BGTiles")
+		if (layer.getName() == "FGTiles")
 		{
 			for (auto&& tile : layer.allTiles())
 			{
@@ -288,7 +288,37 @@ void LevelManager::LoadLevel(std::string level_name)
 
 				Vector2 target_paralax_pos = {
 					(float)tile.getPosition().x ,
-					(float)tile.getPosition().y ,
+					(float)tile.getPosition().y
+				};
+				DrawTextureRec(paralaxedForegroundSpriteAtlas, source_rect, target_paralax_pos, WHITE);
+
+			}
+		}
+	}
+	EndTextureMode();
+	paralaxedForegroundRenderedLevelTexture = paralaxedForegroundRenderTexture.texture;
+
+	//Paralax Layers Draw
+	BeginTextureMode(paralaxBackgroundRenderTexture);
+
+	for (auto&& layer : currentLdtkLevel->allLayers())
+	{
+		if (layer.getName() == "BGTiles")
+		{
+			for (auto&& tile : layer.allTiles())
+			{
+				auto source_pos = tile.getTextureRect();
+				auto tile_size = float(layer.getTileset().tile_size);
+				Rectangle source_rect = {
+					float(source_pos.x),
+					float(source_pos.y),
+					(tile.flipX ? -tile_size : tile_size),
+					(tile.flipY ? -tile_size : tile_size)
+				};
+
+				Vector2 target_paralax_pos = {
+					(float)tile.getPosition().x ,
+					(float)tile.getPosition().y
 				};
 				DrawTextureRec(paralaxedBackgroundSpriteAtlas, source_rect, target_paralax_pos, WHITE);
 
@@ -439,14 +469,18 @@ void LevelManager::UnloadLevel()
 
 	UnloadTexture(laboratorySolidsRenderedLevelTexture);
 	UnloadTexture(paralaxedBackgroundRenderedLevelTexture);
+	UnloadTexture(paralaxedForegroundRenderedLevelTexture);
 	UnloadTexture(baseBackgroundSpriteAtlas);
 	UnloadTexture(decorationRenderedLevelTexture);
 	UnloadTexture(decorationSpriteAtlas);
 	UnloadTexture(paralaxedBackgroundSpriteAtlas);
+	UnloadTexture(paralaxedForegroundSpriteAtlas);
+	UnloadRenderTexture(paralaxBackgroundRenderTexture);
+	UnloadRenderTexture(paralaxedForegroundRenderTexture);
 	UnloadRenderTexture(laboratorySolidsRenderTexture);
 	UnloadRenderTexture(decorationRenderTexture);
 	UnloadRenderTexture(baseBackgroundRenderTexture);
-		
+
 	UnloadRenderTexture(lights->LightMask);
 	for (int i = 0; i < lights->m_lights.size(); i++)
 	{
@@ -482,41 +516,12 @@ void LevelManager::Update(float dt)
 	{
 		if(e->queue_entity_add)
 		EnitityManager::Add(e.get());
+		e->queue_entity_add = false;
 	}
 	
 	
 }
 
-bool LevelManager::CheckPlayerInSensor(b2Fixture& sensor)
-{
-	bool player_in_sensor = false;
-	if (sensor.GetBody()->GetContactList() != nullptr)
-	{
-		auto con = sensor.GetBody()->GetContactList()->contact;
-		while (con != nullptr)
-		{
-			Collidable* playerPtr = nullptr;
-			if (con->GetFixtureA() == &sensor)
-			{
-				playerPtr = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-			}
-			else if (con->GetFixtureB() == &sensor)
-			{
-				playerPtr = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
-			}
-
-			if (playerPtr != nullptr && playerPtr->m_colliderTag == PLAYER && con->IsTouching())
-			{
-				return true;
-			}
-			else
-			{
-				con = con->GetNext();
-			}	
-		}
-	}
-	return player_in_sensor;
-}
 
 void LevelManager::SolidTilesToBigBoxes()
 {
@@ -585,8 +590,8 @@ void LevelManager::DrawForeGround()
 	Vector2 c_position = { (c.offset.x / c.zoom - c.target.x) , (c.offset.y / c.zoom - c.target.y) };
 	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
 	//Draw paralaxed foreground elements
-	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
-		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
+	DrawTexturePro(paralaxedForegroundRenderedLevelTexture,
+		{ 0, 0, (float)paralaxedForegroundRenderedLevelTexture.width, (float)-paralaxedForegroundRenderedLevelTexture.height },//source
 		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y }, //dest
 		{ 0,0 }, 0, WHITE);
 }
@@ -601,7 +606,7 @@ void LevelManager::Draw()
 	Vector2 c_position = { (c.offset.x / c.zoom - c.target.x) , (c.offset.y / c.zoom - c.target.y) };
 
 	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
-	Vector2 parallaxed_far = Vector2Multiply(c_position, { 0.01f,0.01f });
+	Vector2 parallaxed_far = Vector2Multiply(c_position, { 0.02f,0.02f });
 
 	ClearBackground(BLACK);
 	////Draw static background
@@ -614,11 +619,11 @@ void LevelManager::Draw()
 	}
 	ClearBackground(BLACK);
 	//Draw paralaxed background elements
-	//DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
-	//	{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
-	//	{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
-	//	{ 0,0 }, 0, WHITE);
-
+	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
+		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
+		{ parallaxed_far.x ,parallaxed_far.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
+		{ 0,0 }, 0, WHITE);
+	ClearBackground(BLACK);
 	//Draw level solids
 	DrawTexturePro(laboratorySolidsRenderedLevelTexture,
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },

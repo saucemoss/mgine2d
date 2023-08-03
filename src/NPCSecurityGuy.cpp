@@ -92,7 +92,7 @@ void NPCSecurityGuy::Update(float dt)
 		}
 		else
 		{
-			DialogueManager::StartDialogue(6, center_pos());
+			DialogueManager::StartDialogue(7, center_pos());
 		}
 		break;
 

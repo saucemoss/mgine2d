@@ -14,7 +14,7 @@ namespace util
 
 	static std::string VecToString(Vector2 vec)
 	{
-		return std::to_string((int)vec.x) + ", " + std::to_string((int)vec.y);
+		return std::to_string(vec.x) + ", " + std::to_string(vec.y);
 	}
 
 

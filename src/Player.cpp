@@ -23,7 +23,7 @@ FireAxe* Player::axe = nullptr;
 
 Player::Player()
 	:
-	Collidable({ 80,170,12,20 }, b2_dynamicBody, PLAYER) // lvl6
+	Collidable({ 250,170,12,20 }, b2_dynamicBody, PLAYER) // lvl6
 	
 {
 	NewBody();
@@ -139,6 +139,9 @@ void Player::Update(float dt)
 		break;
 	case PlayerState::Hurting:
 		UpdateHurtingingState(dt);
+		break;
+	case PlayerState::Sliding:
+		UpdateSlidingState(dt);
 		break;
 	}
 }
@@ -378,6 +381,14 @@ void Player::UpdateIdleState(float dt)
 		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
 	}
+
+	//sliding
+	if (m_body->GetLinearVelocity().y > 5.0f && m_body->GetLinearVelocity().x != 0.0f && is_touching_floor)
+	{
+		SetAnimation("P_FALL");
+		state = PlayerState::Sliding;
+		looking_right = m_body->GetLinearVelocity().x > 0.5f ? true : false;
+	}
 }
 
 void Player::Jump()
@@ -390,6 +401,15 @@ void Player::Jump()
 
 void Player::UpdateRunningState(float dt)
 {
+
+	//sliding
+	if (m_body->GetLinearVelocity().y > 5.0f && m_body->GetLinearVelocity().x != 0.0f && is_touching_floor)
+	{
+		SetAnimation("P_FALL");
+		state = PlayerState::Sliding;
+		looking_right = m_body->GetLinearVelocity().x > 0.5f ? true : false;
+	}
+
 	if (!IsSoundPlaying(SoundManager::sounds["step1"]) &&
 		!IsSoundPlaying(SoundManager::sounds["step2"]) &&
 		!IsSoundPlaying(SoundManager::sounds["step3"]) &&
@@ -447,8 +467,6 @@ void Player::UpdateRunningState(float dt)
 		SetRandomAxeAttack();
 		state = PlayerState::Attacking;
 	}
-
-
 
 }
 
@@ -604,6 +622,35 @@ void Player::UpdateDyingState(float dt)
 		GameScreen::LevelMgr->next_level = "Level_0";
 	}
 
+}
+
+void Player::UpdateSlidingState(float dt)
+{
+
+	if (taking_dmg)
+	{
+		SetAnimation("P_HURT");
+		state = PlayerState::Hurting;
+	}
+
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
+	{
+		SetAnimation("P_AXE_THROW1");
+		state = PlayerState::Throwing;
+	}
+
+	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
+	{
+		SetRandomAxeAttack();
+		state = PlayerState::Attacking;
+	}
+
+	//sliding end
+	if (m_body->GetLinearVelocity().y < 5.0f && is_touching_floor)
+	{
+		SetAnimation("P_IDLE");
+		state = PlayerState::Idle;
+	}
 }
 
 

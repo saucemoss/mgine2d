@@ -41,7 +41,6 @@ public:
     //physics
     static b2World* world;
     b2Vec2 gravity = b2Vec2(0.0f, 80.0f);
-    static bool CheckPlayerInSensor(b2Fixture& sensor);
     void SolidTilesToBigBoxes();
     ContactListener* contacts;
     DestructionListener* destruction_listener;
@@ -60,6 +59,10 @@ public:
     Texture2D laboratorySolidsSpriteAtlas;
     RenderTexture2D laboratorySolidsRenderTexture;
     Texture2D laboratorySolidsRenderedLevelTexture;
+    //paralaxed foreground
+    Texture2D paralaxedForegroundSpriteAtlas;
+    RenderTexture2D paralaxedForegroundRenderTexture;
+    Texture2D paralaxedForegroundRenderedLevelTexture;
     //paralaxed bg
     Texture2D paralaxedBackgroundSpriteAtlas;
     RenderTexture2D paralaxBackgroundRenderTexture;
