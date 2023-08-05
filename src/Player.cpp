@@ -13,11 +13,7 @@
 #include "FireAxe.h"
 #include "BioBomb.h"
 
-#if defined(PLATFORM_DESKTOP)
-#define GLSL_VERSION            330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-#define GLSL_VERSION            100
-#endif
+
 
 FireAxe* Player::axe = nullptr;
 
@@ -31,19 +27,6 @@ Player::Player()
 	state = PlayerState::Idle;
 	m_max_hp = 1000;
 	current_hp = m_max_hp;
-
-	//Shader test
-	shdrOutline = LoadShader(0, TextFormat("res/shaders/glsl%i/outline.fs", GLSL_VERSION));
-	// Get shader locations
-	int outlineSizeLoc = GetShaderLocation(shdrOutline, "outlineSize");
-	int outlineColorLoc = GetShaderLocation(shdrOutline, "outlineColor");
-	int textureSizeLoc = GetShaderLocation(shdrOutline, "textureSize");
-
-	// Set shader values (they can be changed later)
-	SetShaderValue(shdrOutline, outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
-	SetShaderValue(shdrOutline, outlineColorLoc, outlineColor, SHADER_UNIFORM_VEC4);
-	SetShaderValue(shdrOutline, textureSizeLoc, textureSize, SHADER_UNIFORM_VEC2);
-
 
 }
 
@@ -79,7 +62,6 @@ Player::~Player()
 
 void Player::Update(float dt)
 {
-	SetShaderValue(shdrOutline, outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
 
 	// Swtich animation frames for current anim
 	SwitchFrames(dt);
@@ -254,10 +236,10 @@ void Player::Draw(int l)
 																	CurrentFrame().width * -1,
 																	CurrentFrame().height};
 	auto spritePosX = center_pos().x - 10;
-	auto spritePosY = center_pos().y - 12;
+	auto spritePosY = center_pos().y - 14;
 
 	auto axe_spritePosX = center_pos().x +8;
-	auto axe_spritePosY = center_pos().y +6;
+	auto axe_spritePosY = center_pos().y +4;
 
 
 	if(CurrentFrame().width==96)

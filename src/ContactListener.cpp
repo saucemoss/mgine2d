@@ -1047,11 +1047,12 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 				contact->GetWorldManifold(&worldManifold);
 				Vector2 contact_point = { worldManifold.points[0].x * settings::PPM ,
 											worldManifold.points[0].y * settings::PPM };
-
-				std::cout << util::VecToString(contact_point) << std::endl;
-				ParticleEmitter* p = new ParticleEmitter(contact_point, 20, 2.0f, 2.0f, 10.0f, false, 3.0f);
+				ParticleEmitter* p = new ParticleEmitter(contact_point, 10, 1.0f, 2.0f, 8.0f, false, 3.0f);
 				ParticlesManager::Add(p);
-				p->EmitParticles();
+				for (int i = 0; i < 5; i++)
+				{
+					p->EmitParticles();
+				}
 			}
 		}
 	}

@@ -1,4 +1,5 @@
 #include "NPCSecurityGuy2.h"
+#include "GameScreen.h"
 
 NPCSecurityGuy2::NPCSecurityGuy2(const Rectangle& rect) :
 	Collidable({ rect.x,rect.y, 16,22 }, b2_kinematicBody, NPC)
@@ -20,7 +21,7 @@ NPCSecurityGuy2::~NPCSecurityGuy2()
 void NPCSecurityGuy2::Draw(int l)
 {
 	auto spritePosX = center_pos().x - 8;
-	auto spritePosY = center_pos().y;
+	auto spritePosY = center_pos().y + 1;
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{ CurrentFrame().x,
 																CurrentFrame().y,
 																CurrentFrame().width * -1,

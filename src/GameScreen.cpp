@@ -18,6 +18,7 @@ SoundManager* GameScreen::SoundMgr;
 Player* GameScreen::player;
 bool GameScreen::debug = false;
 ParticlesManager* GameScreen::Particles;
+Shaders* GameScreen::shaders;
 
 
 
@@ -31,6 +32,7 @@ GameScreen::GameScreen()
 	SoundMgr = new SoundManager();
 	player = new Player();
 	Particles = new ParticlesManager();
+	shaders = new Shaders();
 	
 	//Camera init
 
@@ -131,27 +133,25 @@ Screens GameScreen::Update(float dt)
 	EnitityManager::Update(dt);
 	DialogueManager::UpdateDialogues(dt);
 	Particles->Update(dt);
-	
 
-	
 	return Screens::NONE;
 }
 
 void GameScreen::Draw()
 {
-	BeginMode2D(camera);				// DRAW ORDER:
-	
+	BeginMode2D(camera);				// THE HOLY DRAW ORDER:
+
 	LevelMgr->Draw();					// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
 	EnitityManager::Draw(0);			// Entities/Objects behind player
-	//TODO								// Entities Shaders?
 	player->Draw(0);					// Player		
 	EnitityManager::Draw(1);			// Entities/Objects in front of player
-	
-	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
+	Particles->Draw(1);					// Particles
 	LevelMgr->lights->DrawLightMask();	// Darkness and lights
+	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
+	shaders->Draw();					// Shaders
 	player->DrawUI();					// Player UI
 	DialogueManager::DrawDialogues();	// Dialogue Boxes
-	Particles->Draw(1);					// Particles
+
 
 	//DEBUG:
 	if (debug)
@@ -176,8 +176,8 @@ void GameScreen::Draw()
 
 	EndMode2D();
 
-	DrawText(std::to_string(player->current_hp).c_str(), 40, 40, 40, GREEN);
-
+	//DrawText(std::to_string(player->current_hp).c_str(), 40, 40, 40, GREEN);
+	DrawFPS(5, 5);
 	//DEBUG:
 	if (debug)
 	{
@@ -192,7 +192,7 @@ void GameScreen::Draw()
 			DrawText(txt3.c_str(), 5, 60, 20, GREEN);
 		}
 	}
-	
+	shaders->ResetShaders();			// Have to reset shaders here or nothing else is drawn after shaders...
 }
 
 void GameScreen::DebugShapes()

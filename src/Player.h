@@ -109,15 +109,7 @@ public:
     void UpdateAttackingState(float dt);
     void UpdateHurtingingState(float dt);
 
-    Shader shdrOutline;
 
-    float outlineSize = 1.0f;
-    float outlineColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };      // Normalized RED color 
-    float textureSize[2] = { 2.0f,2.0f };
-
-    int outlineSizeLoc;
-    int outlineColorLoc;
-    int textureSizeLoc;
 
 };
 

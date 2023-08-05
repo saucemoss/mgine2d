@@ -14,7 +14,7 @@ Elevator::Elevator(const Rectangle& rect, ldtk::ArrayField<int> levels, const ld
 
 	//floor&roof
 	b2PolygonShape floor_box;
-	floor_box.SetAsBox(1, 0.1f, b2Vec2(0, 1.1f), 0);
+	floor_box.SetAsBox(1, 0.1f, b2Vec2(0, 1.2f), 0);
 	b2PolygonShape roof_box;
 	roof_box.SetAsBox(1, 0.1f, b2Vec2(0, -1.1f), 0);
 	//fixture user data

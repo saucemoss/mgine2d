@@ -118,6 +118,12 @@
     <Filter Include="Pliki źródłowe\Systems\Particles">
       <UniqueIdentifier>{4a4ff623-af90-45a5-b29b-7eb3e4091315}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Systems\Shaders">
+      <UniqueIdentifier>{15fb247b-18c7-4fcd-ab93-486e01062b17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Systems\Shaders">
+      <UniqueIdentifier>{454ee9ed-9075-43d8-a60d-28619a400c62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -218,6 +224,9 @@
     </ClCompile>
     <ClCompile Include="src\Particles.cpp">
       <Filter>Pliki źródłowe\Systems\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shaders.cpp">
+      <Filter>Pliki źródłowe\Systems\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -340,6 +349,9 @@
     </ClInclude>
     <ClInclude Include="src\Particles.h">
       <Filter>Pliki nagłówkowe\Systems\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Shaders.h">
+      <Filter>Pliki nagłówkowe\Systems\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

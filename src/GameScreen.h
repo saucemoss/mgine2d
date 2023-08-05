@@ -5,7 +5,7 @@
 #include "Player.h"
 #include "SoundManager.h"
 #include "Particles.h"
-
+#include "Shaders.h"
 
 class GameScreen : public BaseScreen
 {
@@ -23,6 +23,8 @@ public:
     static LevelManager* LevelMgr;
     static SoundManager* SoundMgr;
     static ParticlesManager* Particles;
+    static Shaders* shaders;
+
     static bool debug;
     void Draw() override;
 

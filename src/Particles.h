@@ -1,10 +1,14 @@
 #include <raylib.h>
 #include <vector>
 
+
 struct Particle {
     Vector2 position;
     Vector2 velocity;
     float lifetime;
+    float rotation;
+    float size;
+    Color color;
 };
 
 class ParticleEmitter {
@@ -14,6 +18,8 @@ public:
           forever(forever), emition_time(emition_time) {}
 
     bool m_destroy = false;
+    
+    Color color;
 
     void EmitParticles() {
         for (int i = 0; i < maxParticles; ++i) {
@@ -24,6 +30,9 @@ public:
              static_cast<float>(GetRandomValue(-spread, spread))
             };
             particle.lifetime = lifetime;
+            particle.rotation = static_cast<float>(GetRandomValue(0, 360));
+            particle.size = static_cast<float>(GetRandomValue(5, 20));
+
             particles.push_back(particle);
         }
     }

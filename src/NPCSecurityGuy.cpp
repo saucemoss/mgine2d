@@ -1,4 +1,6 @@
 #include "NPCSecurityGuy.h"
+#include "Shaders.h"
+#include "GameScreen.h"
 
 NPCSecurityGuy::NPCSecurityGuy(const Rectangle& rect):
 Collidable({rect.x,rect.y, 16,22 }, b2_kinematicBody, NPC)
@@ -20,7 +22,7 @@ NPCSecurityGuy::~NPCSecurityGuy()
 void NPCSecurityGuy::Draw(int l)
 {
 	auto spritePosX = center_pos().x - 8;
-	auto spritePosY = center_pos().y ;
+	auto spritePosY = center_pos().y + 1;
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{ CurrentFrame().x,
 																CurrentFrame().y,
 																CurrentFrame().width * -1,
@@ -37,6 +39,18 @@ void NPCSecurityGuy::Draw(int l)
 void NPCSecurityGuy::Update(float dt)
 {
 	SwitchFrames(dt);
+
+	if (player_in_sensor)
+	{
+		auto spritePosX = center_pos().x - 8;
+		auto spritePosY = center_pos().y + 1;
+		Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{ CurrentFrame().x,
+																	CurrentFrame().y,
+																	CurrentFrame().width * -1,
+																	CurrentFrame().height };
+		Rectangle source = { spritePosX,spritePosY,settings::tileSize,settings::tileSize };
+		GameScreen::shaders->Apply("outline", *sprite, cframe, source, { 0,0 }, 0.0f);
+	}
 
 	switch (state)
 	{

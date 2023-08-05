@@ -74,24 +74,4 @@ void AnimatedDecor::Update(float dt)
 	SwitchFrames(dt);
 
 
-	//	auto spritePosX = m_rectangle.x;
-	//	auto spritePosY = m_rectangle.y;
-
-	//	Rectangle cframe = m_is_right ? CurrentFrame() : Rectangle{ CurrentFrame().x,
-	//																	CurrentFrame().y,
-	//																	CurrentFrame().width * -1,
-	//																	CurrentFrame().height };
-	//	BeginTextureMode(RenderShaderTexture);
-	//	DrawTexturePro(*sprite,
-	//		cframe,
-	//		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
-	//		{ 0,0 },
-	//		0.0f,
-	//		WHITE);
-	//	EndTextureMode();
-	//
-	//ShaderTexture = RenderShaderTexture.texture;
-
-
-
 }

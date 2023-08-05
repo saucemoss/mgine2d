@@ -178,7 +178,16 @@ void LevelManager::LoadLevel(std::string level_name)
 				if (layer.getName() == "LabSolids")
 				{
 					Rectangle rec = { tile.getPosition().x, tile.getPosition().y, tile_size, tile_size };
-					//solid_tiles.push_back(std::make_unique<SolidTile>(rec));
+					
+					//if ((tile.tileId < 8 && tile.tileId > -1 ) || tile.tileId == 15 || tile.tileId == 16 || tile.tileId == 38 || tile.tileId == 39)
+					//{
+					//	Rectangle rec = { tile.getPosition().x, tile.getPosition().y + 4, tile_size, tile_size - 4 };
+					//	solid_tiles.push_back(std::make_unique<SolidTile>(rec, true));
+					//}
+					//else
+					//{
+					//	solid_tiles.push_back(std::make_unique<SolidTile>(rec));
+					//}
 					DrawTextureRec(laboratorySolidsSpriteAtlas, source_rect, target_pos, WHITE);
 				}
 				if (layer.getName() == "Platforms")
@@ -192,8 +201,8 @@ void LevelManager::LoadLevel(std::string level_name)
 				if (layer.getName() == "Slopes")
 				{
 					Rectangle rec = { (float)tile.getPosition().x ,
-									 (float)tile.getPosition().y ,
-									 tile_size , tile_size };
+									 (float)tile.getPosition().y + 8 ,
+									 tile_size , tile_size - 8 };
 					if (tile.tileId == 881)
 					{
 						b2Vec2 verices[3] = { {-1.0f,-1.0f},{1.0f,1.0f},{-1.0f, 1.0f}};
@@ -339,13 +348,21 @@ void LevelManager::LoadLevel(std::string level_name)
 
 		if (entity.getName() == "Door")
 		{
+			Rectangle r = { (float)entity.getPosition().x,
+					(float)entity.getPosition().y + 4,
+					(float)entity.getSize().x ,
+					(float)entity.getSize().y };
 			bool is_right = entity.getField<bool>("Right").value();
-			level_entities_safe.push_back(std::make_unique<Door>(rect, is_right));
+			level_entities_safe.push_back(std::make_unique<Door>(r, is_right));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
 		if (entity.getName() == "Elevator")
 		{
-			level_entities_safe.push_back(std::make_unique<Elevator>(rect, entity.getArrayField<int>("Levels"), entity));
+			Rectangle r = { (float)entity.getPosition().x,
+					(float)entity.getPosition().y + 4,
+					(float)entity.getSize().x ,
+					(float)entity.getSize().y };
+			level_entities_safe.push_back(std::make_unique<Elevator>(r, entity.getArrayField<int>("Levels"), entity));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 			level_entities_safe.back().get()->m_ldtkID = entity.iid;;
 		}
@@ -379,7 +396,11 @@ void LevelManager::LoadLevel(std::string level_name)
 		}
 		if (entity.getName() == "MovingBlock")
 		{
-			level_entities_safe.push_back(std::make_unique<MovingBlock>(rect, entity.getArrayField<ldtk::IntPoint>("Path")));
+			Rectangle r = { (float)entity.getPosition().x,
+					(float)entity.getPosition().y + 4,
+					(float)entity.getSize().x ,
+					(float)entity.getSize().y };
+			level_entities_safe.push_back(std::make_unique<MovingBlock>(r, entity.getArrayField<ldtk::IntPoint>("Path")));
 		}
 		if (entity.getName() == "WoodCrate")
 		{
@@ -391,7 +412,11 @@ void LevelManager::LoadLevel(std::string level_name)
 		}
 		if (entity.getName() == "PlatformBox")
 		{
-			level_entities_safe.push_back(std::make_unique<Platform>(rect));
+			Rectangle r = { (float)entity.getPosition().x,
+					(float)entity.getPosition().y + 4,
+					(float)entity.getSize().x ,
+					(float)entity.getSize().y - 4 };
+			level_entities_safe.push_back(std::make_unique<Platform>(r));
 		}
 		if (entity.getName() == "InfectedHazmat")
 		{
@@ -433,10 +458,6 @@ void LevelManager::LoadLevel(std::string level_name)
 		}
 		if (entity.getName() == "LevelPortal_in")
 		{
-			rect = {		(float)entity.getPosition().x - rect.width / 2,
-							(float)entity.getPosition().y - rect.height / 2,
-							(float)entity.getSize().x ,
-							(float)entity.getSize().y };
 			std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
 			ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
 			level_entities_safe.push_back(std::make_unique<LevelPortal>(rect, target_lvl, portal_out));
@@ -522,7 +543,6 @@ void LevelManager::Update(float dt)
 	
 }
 
-
 void LevelManager::SolidTilesToBigBoxes()
 {
 	int tiles = 0;
@@ -535,19 +555,25 @@ void LevelManager::SolidTilesToBigBoxes()
 	{
 		for (int x = 0; x < grid_x; x++)
 		{
-			int x_counter = 0;
-			if (layer.getIntGridVal(x, y).value != -1)
+			int tid = layer.getTile(x,y).tileId;	
+			bool tid_floor = ((tid < 8 && tid > -1) || tid == 15 || tid == 16 || tid == 38 || tid == 39);
+			
+			if (!tid_floor && tid != -1)
 			{
+				int x_counter = 0;
 				bool next = true;
 				while (next)
 				{
-					if (layer.getIntGridVal(x + x_counter, y).value == -1 || x + x_counter >= grid_x)
+					int next_tid = layer.getTile(x + x_counter, y).tileId;
+					bool next_tid_floor = ((next_tid < 8 && next_tid > -1) || next_tid == 15 || next_tid == 16 || next_tid == 38 || next_tid == 39);
+					if (next_tid == -1 || x + x_counter >= grid_x || next_tid_floor)
 					{
 						next = false;
-						x_line.push_back({	(float)x * settings::tileSize,
+						x_line.push_back({ (float)x * settings::tileSize,
 											(float)y * settings::tileSize,
 											float(x_counter * settings::tileSize),
 											settings::tileSize });
+						x += x_counter-1;
 					}
 					else
 					{
@@ -555,7 +581,30 @@ void LevelManager::SolidTilesToBigBoxes()
 					}
 				}
 			}
-			x += x_counter;
+			else if (tid_floor)
+			{
+				int x_fcounter = 0;
+				bool next = true;
+				while (next)
+				{
+					int next_tid = layer.getTile(x + x_fcounter, y).tileId;
+					bool next_tid_floor = ((next_tid < 8 && next_tid > -1) || next_tid == 15 || next_tid == 16 || next_tid == 38 || next_tid == 39);
+					if (next_tid == -1 || x + x_fcounter >= grid_x || !next_tid_floor)
+					{
+						next = false;
+						x_line.push_back({	(float)x * settings::tileSize,
+											(float)y * settings::tileSize + 4,
+											float(x_fcounter * settings::tileSize),
+											settings::tileSize -4 });
+						x += x_fcounter-1;
+					}
+					else
+					{
+						x_fcounter++;
+					}
+				}
+			} 
+			
 		}
 	}
 
@@ -579,7 +628,7 @@ void LevelManager::SolidTilesToBigBoxes()
 	for (auto r : b_boxes)
 	{
 		solid_tiles.push_back(std::make_unique<SolidTile>(r));
-		//DrawRectangleLinesEx(r, 1, BLUE);
+		DrawRectangleLinesEx(r, 1, BLUE);
 	}
 
 }

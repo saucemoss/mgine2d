@@ -13,7 +13,10 @@ void LightManager::SetupBoxes()
 	for (auto& s : LevelManager::solid_tiles)
 	{
 		SolidTile* sptr = static_cast<SolidTile*>(s.get());
-		if(!sptr->is_slope) m_light_walls.push_back(&s->m_rectangle);
+		if (!sptr->is_slope)
+		{
+			m_light_walls.push_back(&s->m_rectangle);
+		}
 	}
 	for (auto& e : LevelManager::level_entities_safe)
 	{
@@ -267,7 +270,7 @@ void LightInfo::Update(std::vector<Rectangle*>& boxes)
 		// compute shadow volumes for the faces we are opposite to
 		// top
 		Vector2 sp = { box->x, box->y };
-		Vector2 ep = { box->x + box->width, box->y };
+		Vector2 ep = { box->x + box->width, box->y};
 
 		if (Position.y > ep.y)
 			ShadowEdge(sp, ep);
@@ -293,7 +296,7 @@ void LightInfo::Update(std::vector<Rectangle*>& boxes)
 		// add the actual box as a shadow to get the corner of it.
 		// If the map is going to draw the box, then don't do this
 		std::vector<Vector2> polygon;
-		polygon.emplace_back(Vector2{ box->x, box->y });
+		polygon.emplace_back(Vector2{ box->x, box->y});
 		polygon.emplace_back(Vector2{ box->x, box->y + box->height });
 		polygon.emplace_back(Vector2{ box->x + box->width, box->y + box->height });
 		polygon.emplace_back(Vector2{ box->x + box->width, box->y });
