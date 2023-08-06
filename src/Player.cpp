@@ -125,6 +125,9 @@ void Player::Update(float dt)
 	case PlayerState::Sliding:
 		UpdateSlidingState(dt);
 		break;
+	case PlayerState::InDialogue:
+		UpdateInDialogueState(dt);
+		break;
 	}
 }
 
@@ -220,6 +223,7 @@ void Player::take_dmg(int dmg)
 {
 	if (!taking_dmg && !invincible)
 	{
+		GameScreen::add_trauma(0.4f);
 		invincible = true;
 		invincible_counter = 0.0f;
 		PlaySound(SoundManager::sounds["grunt"]);
@@ -379,6 +383,9 @@ void Player::Jump()
 	set_velocity_y(-jump_force);
 	state = PlayerState::Jumping;
 	SetAnimation("P_JUMP");
+	ParticleEmitter* p = new ParticleEmitter({ center_pos().x+6, center_pos().y + 16 });
+	ParticlesManager::Add(dust, p);
+	p->EmitParticles();
 }
 
 void Player::UpdateRunningState(float dt)
@@ -454,7 +461,6 @@ void Player::UpdateRunningState(float dt)
 
 void Player::UpdateJumpingState(float dt)
 {
-	
 	coyote_time_counter = 0;
 	if (m_body->GetLinearVelocity().y < 0.0f && 
 		(IsKeyPressed(KEY_UP) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)))
@@ -546,6 +552,7 @@ void Player::UpdateFallingState(float dt)
 	{
 		PlayOnce("P_GROUND");
 		PlaySound(SoundManager::sounds["land"]);
+		GameScreen::add_trauma(0.3f);
 	}
 	else if (is_touching_floor)
 	{
@@ -806,6 +813,11 @@ void Player::UpdateHurtingingState(float dt)
 		state = PlayerState::Idle;
 	}
 
+}
+
+void Player::UpdateInDialogueState(float dt)
+{
+	SetAnimation("P_IDLE");
 }
 
 

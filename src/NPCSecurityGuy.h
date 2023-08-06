@@ -18,6 +18,7 @@ public:
 	bool player_in_sensor = false;
 	bool enemy_in_sensor = false;
 	bool dialogue1_exhausted = false;
+	bool dialogue7_exhausted = false;
 	NPCState state;
 	// Inherited via Entity
 	virtual void Draw(int l) override;

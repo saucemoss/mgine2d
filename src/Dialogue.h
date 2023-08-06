@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include "GameScreen.h"
 
 
 enum DialogueState
@@ -75,11 +76,13 @@ public:
 	{
 		state = Exhausted;
 		DialogueBoxes.clear();
+		GameScreen::player->state = PlayerState::Idle;
 	}
 	static void StartDialogue(int i, Vector2 pos)
 	{
 		if (state != Writing)
 		{
+			GameScreen::player->state = PlayerState::InDialogue;
 			state = Writing;
 			DialogueBoxes.push_back(std::make_unique<DialogueBox>(Vector2{ pos.x - 32.0f, pos.y - 40.0f }, Vector2{ 90.0f, 30.0f }, i));
 		}

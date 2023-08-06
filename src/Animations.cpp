@@ -10,7 +10,7 @@ void TextureLoader::LoadTextures()
 {
 	m_Textures.emplace("PLAYER", LoadTexture("res/PlayerTextures/player32.png"));
 	m_Textures.emplace("NP1", LoadTexture("res/PlayerTextures/new_player2.png"));
-	m_Textures.emplace("DOOR", LoadTexture("res/level/door.png"));
+	m_Textures.emplace("DOOR", LoadTexture("res/level/door_new.png"));
 	m_Textures.emplace("DECOR_ANIM", LoadTexture("res/level/decor_anim.png"));
 	m_Textures.emplace("MOTHMAN", LoadTexture("res/level/mothman.png"));
 	m_Textures.emplace("P_ATT_1", LoadTexture("res/PlayerTextures/p_attack_1.png"));
@@ -157,8 +157,8 @@ void Animations::InitializeDecorAnimations()
 void Animations::InitializeDoorAnimations()
 {
 	Texture2D* texture = TextureLoader::GetTexture("DOOR");
-	animations.emplace("D_OPEN", *(new Animation(texture, 0, 17, 32, 0.02f)));
-	animations.emplace("D_CLOSE", *(new Animation(texture, 1, 17, 32, 0.02f)));
+	animations.emplace("D_OPEN", *(new Animation(texture, 0, 7, 40, 0.06f)));
+	animations.emplace("D_CLOSE", *(new Animation(texture, 1, 7, 40, 0.06f)));
 	
 }
 

@@ -102,11 +102,13 @@ void NPCSecurityGuy::Update(float dt)
 		{
 			state = Idling;
 			SetAnimation("SEC1_IDLE");
+			dialogue7_exhausted = false;
 			DialogueManager::EndDialogue();
 		}
-		else
+		else if (!dialogue7_exhausted)
 		{
 			DialogueManager::StartDialogue(7, center_pos());
+			dialogue7_exhausted = true;
 		}
 		break;
 

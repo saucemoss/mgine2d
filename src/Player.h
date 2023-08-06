@@ -18,7 +18,8 @@ enum class PlayerState
     Dying,
     Attacking,
     Throwing,
-    Hurting
+    Hurting,
+    InDialogue
 };
 
 
@@ -108,6 +109,7 @@ public:
     void UpdateThrowingState(float dt);
     void UpdateAttackingState(float dt);
     void UpdateHurtingingState(float dt);
+    void UpdateInDialogueState(float dt);
 
 
 

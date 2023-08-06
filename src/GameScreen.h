@@ -18,6 +18,7 @@ public:
     Screens Update(float dt) override;
     static Camera2D camera;
     static Camera2D player_focused_cam;
+    static Camera2D shake_cam;
    
     static Player* player;
     static LevelManager* LevelMgr;
@@ -30,4 +31,11 @@ public:
 
     void DebugShapes();
 
+    static void add_trauma(float intensity);
+private:
+    static float shake;
+    static float trauma;
+    float max_cam_rotation = 0.5f;
+    float max_cam_x_offset = 5.0f;
+    float max_cam_y_offset = 5.0f;
 };

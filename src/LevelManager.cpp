@@ -349,12 +349,12 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "Door")
 		{
 			Rectangle r = { (float)entity.getPosition().x,
-					(float)entity.getPosition().y + 4,
+					(float)entity.getPosition().y -4,
 					(float)entity.getSize().x ,
-					(float)entity.getSize().y };
+					(float)entity.getSize().y +8};
 			bool is_right = entity.getField<bool>("Right").value();
-			level_entities_safe.push_back(std::make_unique<Door>(r, is_right));
-			level_entities_safe.back().get()->m_draw_layers = 1;
+			level_entities_safe.push_back(std::make_unique<Door>(r, true));
+			level_entities_safe.back().get()->m_draw_layers = 0;
 		}
 		if (entity.getName() == "Elevator")
 		{

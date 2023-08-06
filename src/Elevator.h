@@ -55,7 +55,7 @@ private:
     bool m_going_up = false;
     int m_distance_counter = 0;
     int m_current_level;
-    int m_speed = 6;
+    int m_speed = 8;
     int next_level;
     ldtk::ArrayField<int> m_levels;
 

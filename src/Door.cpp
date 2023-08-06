@@ -1,6 +1,7 @@
 #include "Door.h"
 #include "LevelManager.h"
 #include "SoundManager.h"
+#include "GameScreen.h"
 Door::Door(const Rectangle& rect, bool is_right)
 	:
 	Collidable(rect, b2_staticBody, DOOR),
@@ -70,13 +71,14 @@ void Door::Update(float dt)
 			{
 				state = DoorState::Closed;
 				PlaySound(SoundManager::sounds["door_close"]);
+				GameScreen::add_trauma(0.2f);
 			}
 		}
 		else
 		{
 			state = DoorState::Opening;
 			//transfer current anim frame num to new anim
-			int frameNum = 17 - animation->GetCurrentFrameNum();
+			int frameNum = 7 - animation->GetCurrentFrameNum();
 			PlayFromFrame(frameNum, "D_OPEN");
 			animation->PlayOnce();
 		}
@@ -86,7 +88,7 @@ void Door::Update(float dt)
 		{
 			state = DoorState::Closing;
 			//transfer current anim frame num to new anim
-			int frameNum = 17 - animation->GetCurrentFrameNum();
+			int frameNum = 7 - animation->GetCurrentFrameNum();
 			PlayFromFrame(frameNum, "D_CLOSE");
 			animation->PlayOnce();
 		}
@@ -97,6 +99,7 @@ void Door::Update(float dt)
 			{
 				state = DoorState::Open;
 				PlaySound(SoundManager::sounds["door_close"]);
+				GameScreen::add_trauma(0.2f);
 			}
 		}
 		break;
@@ -116,7 +119,7 @@ void Door::Draw(int l)
 																	CurrentFrame().height };
 	DrawTexturePro(*sprite,
 		cframe,
-		Rectangle{ spritePosX,spritePosY,settings::tileSize,settings::tileSize },
+		Rectangle{ spritePosX,spritePosY,40,40 },
 		{ 0,0 },
 		0.0f,
 		WHITE);
@@ -127,5 +130,5 @@ void Door::InitAnimations()
 {
 	sprite = TextureLoader::GetTexture("DOOR");
 	animations->InitializeDoorAnimations();
-	FreezeFrame("D_CLOSE",17);
+	FreezeFrame("D_CLOSE",7);
 }

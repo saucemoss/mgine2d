@@ -13,13 +13,15 @@
 std::vector<Entity*> EnitityManager::EntityList;
 Camera2D GameScreen::camera;
 Camera2D GameScreen::player_focused_cam;
+Camera2D GameScreen::shake_cam;
 LevelManager* GameScreen::LevelMgr;
 SoundManager* GameScreen::SoundMgr;
 Player* GameScreen::player;
 bool GameScreen::debug = false;
 ParticlesManager* GameScreen::Particles;
 Shaders* GameScreen::shaders;
-
+float GameScreen::shake;
+float GameScreen::trauma;
 
 
 
@@ -27,7 +29,7 @@ GameScreen::GameScreen()
 
 {
 	HideCursor();
-	
+	srand(static_cast <unsigned> (time(0)));
 	LevelMgr = new LevelManager();
 	SoundMgr = new SoundManager();
 	player = new Player();
@@ -111,6 +113,25 @@ void GameScreen::UpdateCamera(float dt)
 		player_focused_cam.offset.y = settings::screenHeight / 2 - min.y;
 	}
 
+	//Camera shake
+	trauma -= dt * 2.4f;
+	trauma = trauma < 0.0f ? 0.0f : trauma;
+
+	shake = trauma * trauma;
+	
+	float temp = float(rand());
+	float rand = -1.0f + static_cast <float> (temp) / (static_cast <float> (RAND_MAX / (2.0f)));
+
+	shake_cam.target = camera.target;
+	shake_cam.zoom = camera.zoom;
+	shake_cam.offset = camera.offset;
+	shake_cam.rotation = camera.rotation;
+	if (shake > 0.0f)
+	{
+		shake_cam.rotation = camera.rotation + (max_cam_rotation * shake * rand);
+		shake_cam.offset.x = camera.offset.x + (max_cam_x_offset * shake * rand);
+		shake_cam.offset.y = camera.offset.y + (max_cam_y_offset * shake * rand);
+	}
 
 }
 
@@ -139,8 +160,9 @@ Screens GameScreen::Update(float dt)
 
 void GameScreen::Draw()
 {
-	BeginMode2D(camera);				// THE HOLY DRAW ORDER:
-
+	BeginMode2D(trauma > 0.0f ? shake_cam : camera);				
+	
+					// THE HOLY DRAW ORDER: //
 	LevelMgr->Draw();					// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
 	EnitityManager::Draw(0);			// Entities/Objects behind player
 	player->Draw(0);					// Player		
@@ -265,6 +287,19 @@ void GameScreen::DebugShapes()
 
 		currentBody = currentBody->GetNext();
 	}
+}
+
+void GameScreen::add_trauma(float intensity)
+{
+	if (trauma + intensity <= 1.0f)
+	{
+		trauma += intensity;
+	}
+	else
+	{
+		trauma = 1.0f;
+	}
+	
 }
 
 

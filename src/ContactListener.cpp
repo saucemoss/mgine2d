@@ -101,14 +101,17 @@ void ContactListener::BeginContact(b2Contact* contact)
 				wc->TakeDmg(1);
 
 				b2WorldManifold worldManifold;
-				ParticleEmitter* p = new ParticleEmitter(wc->pos(), 10, 1.0f, 2.0f, 8.0f, false, 3.0f);
-				ParticlesManager::Add(p);
+				ParticleEmitter* p = new ParticleEmitter(wc->pos());
+				ParticlesManager::Add(dust, p);
+
 				for (int i = 0; i < 5; i++)
 				{
 					p->EmitParticles();
 				}
-				
+				GameScreen::add_trauma(0.4f);
 			}
+			GameScreen::add_trauma(0.4f);
+
 		}
 
 
@@ -175,6 +178,11 @@ void ContactListener::BeginContact(b2Contact* contact)
 			if (subject == "INFECTED_H" && other == "p_axe_att" && !(e->state == EnemyState::Hurting))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.4f);
+				ParticleEmitter* p = new ParticleEmitter(e->pos());
+				ParticlesManager::Add(blood, p);
+				p->EmitParticles();
+			
 			}
 
 			if (other == "SOLID" && subject == "proxi")
@@ -234,6 +242,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			if (subject == "RIBBS" && other == "p_axe_att" && e->state != EnemyState::Hurting)
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.4f);
 			}
 
 			if (subject == "rib_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
@@ -279,6 +288,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			if (subject == "FOOTB" && other == "p_axe_att" && e->state != EnemyState::Hurting)
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.4f);
 			}
 
 			if (other == "PLAYER")
@@ -315,6 +325,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			if (subject == "HSPIT" && other == "p_axe_att" && e->state != EnemyState::Hurting)
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.4f);
 			}
 
 			if (other == "PLAYER")
@@ -351,6 +362,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			if (subject == "LEGGY" && other == "p_axe_att" && e->state != EnemyState::Hurting)
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.4f);
 			}
 
 			if (subject == "leg_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
@@ -418,6 +430,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			if (subject == "FLYING_INF" && other == "p_axe_att" && !(e->state == EnemyState::Hurting))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.4f);
 			}
 			if (subject == "wingflap" && other == "PLAYER")
 			{
@@ -1043,15 +1056,17 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			if (dmg_impulse > 20)
 			{
 				e->TakeDmg(dmg_impulse/50);
+				GameScreen::add_trauma(0.4f);
 				b2WorldManifold worldManifold;
 				contact->GetWorldManifold(&worldManifold);
 				Vector2 contact_point = { worldManifold.points[0].x * settings::PPM ,
 											worldManifold.points[0].y * settings::PPM };
-				ParticleEmitter* p = new ParticleEmitter(contact_point, 10, 1.0f, 2.0f, 8.0f, false, 3.0f);
-				ParticlesManager::Add(p);
+				ParticleEmitter* p = new ParticleEmitter(contact_point);
+				ParticlesManager::Add(dust, p);
 				for (int i = 0; i < 5; i++)
 				{
 					p->EmitParticles();
+
 				}
 			}
 		}
@@ -1079,6 +1094,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			if (dmg_impulse > 20)
 			{
 				e->TakeDmg(dmg_impulse);
+				GameScreen::add_trauma(0.4f);
 			}
 		}
 	}
@@ -1104,6 +1120,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			if (dmg_impulse > 20)
 			{
 				e->TakeDmg(dmg_impulse);
+				GameScreen::add_trauma(0.4f);
 			}
 		}
 	}
@@ -1129,6 +1146,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			if (dmg_impulse > 20)
 			{
 				e->TakeDmg(dmg_impulse);
+				GameScreen::add_trauma(0.4f);
 			}
 		}
 	}
@@ -1155,6 +1173,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			if (dmg_impulse > 20)
 			{
 				e->TakeDmg(dmg_impulse * 1.5f);
+				GameScreen::add_trauma(0.4f);
 			}
 
 		}
@@ -1183,6 +1202,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			if (dmg_impulse > 20)
 			{
 				e->TakeDmg(dmg_impulse * 1.5f);
+				GameScreen::add_trauma(0.4f);
 			}
 
 		}
@@ -1211,6 +1231,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			if (dmg_impulse > 20)
 			{
 				e->TakeDmg(dmg_impulse * 1.5f);
+				GameScreen::add_trauma(0.4f);
 			}
 
 		}
