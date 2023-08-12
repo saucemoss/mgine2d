@@ -19,7 +19,8 @@ enum class PlayerState
     Attacking,
     Throwing,
     Hurting,
-    InDialogue
+    InDialogue,
+    AxeReclaim
 };
 
 
@@ -38,7 +39,7 @@ public:
     void set_velocity_xy(float vx, float vy);
     void take_dmg(int dmg);
     void Die();
-    void SetRandomAxeAttack();
+    void SetAxeAttack();
 
     void Draw(int l) override;
     void DrawUI();
@@ -53,6 +54,7 @@ public:
     bool taking_dmg = false;
     bool is_aiming = false;
     bool invincible = false;
+    bool attack1 = true;
     float invincible_counter;
     float invincible_time = 1.0f;
     float speed = 7.0f;
@@ -66,6 +68,7 @@ public:
     float m_ground_slam_vel = 10.0f;
     float face_turning_counter = 0.1f;
     float pad_sensitivity_threshold = 0.5f;
+    float button_pressed_counter = 0.0f;
     b2Fixture* m_feet_sensor;
     b2Fixture* m_left_sensor;
     b2Fixture* m_right_sensor;
@@ -73,6 +76,13 @@ public:
     b2Fixture* m_left_att_sensor;
     b2Fixture* m_right_att_sensor;
     b2Fixture* m_knockback_circle;
+
+    //Last safe pos
+    float safe_pos_counter;
+    Vector2 last_safe_pos;
+    void UpdateSafePos(float dt);
+    Vector2 new_pos;
+    Vector2 old_pos;
 
     //States
     PlayerState state;
@@ -105,11 +115,14 @@ public:
     void UpdateFallingState(float dt);
     void UpdateDyingState(float dt);
     void UpdateSlidingState(float dt);
+    void SetThrowing();
     b2Vec2 GetTrajectoryPoint(b2Vec2& startingPosition, b2Vec2& startingVelocity, float n);
     void UpdateThrowingState(float dt);
     void UpdateAttackingState(float dt);
     void UpdateHurtingingState(float dt);
     void UpdateInDialogueState(float dt);
+    void UpdateAxeReclaimState(float dt);
+    
 
 
 

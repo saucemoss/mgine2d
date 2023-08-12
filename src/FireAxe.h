@@ -9,6 +9,7 @@ public:
 	FireAxe(const Rectangle& rect);
 	~FireAxe();
 	float axvel;
+	float time_to_live = 3.0f;
 
 	// Inherited via Entity
 	virtual void Draw(int l) override;

@@ -4,7 +4,8 @@
 
 Football::Football(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 10, 20 }, FOOTB)
 {
-	custom_pos = true;
+
+	sprite_offset_32 = { -10,-11 };
 
 	InitAnimations();
 	m_max_hp = 20;
@@ -31,8 +32,7 @@ Football::~Football()
 
 void Football::Update(float dt)
 {
-	spritePosX = (int)center_pos().x - 10;
-	spritePosY = (int)center_pos().y - 11;
+
 	SwitchFrames(dt);
 
 	switch (state)
@@ -78,6 +78,7 @@ void Football::TakeDmg(int dmg)
 		m_current_hp -= dmg;
 		state = EnemyState::Hurting;
 		SetAnimation("FOOTB_DMG");
+		bleed_particles();
 	}
 }
 

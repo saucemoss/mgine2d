@@ -25,7 +25,7 @@ Player::Player()
 	NewBody();
 	InitAnimations();
 	state = PlayerState::Idle;
-	m_max_hp = 1000;
+	m_max_hp = 50;
 	current_hp = m_max_hp;
 
 }
@@ -38,7 +38,7 @@ void Player::NewBody()
 	m_fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(data);
 	
 	//feet collider box
-	m_feet_sensor = util::SimpleSensor(m_body, "p_feet", 0.3f, 0.3f, 0, 0.80f);
+	m_feet_sensor = util::SimpleSensor(m_body, "p_feet", 0.3f, 0.3f, 0, 0.40f);
 
 	//left&right collider boxes
 	m_left_sensor = util::SimpleSensor(m_body, "p_l_s", 0.01f, 0.65f, -0.4f, -0.2f);
@@ -69,6 +69,8 @@ void Player::Update(float dt)
 	CheckTouchGround();
 
 	CheckWallTouch();
+
+	UpdateSafePos(dt);
 
 	if (GameScreen::debug)
 	{
@@ -128,6 +130,9 @@ void Player::Update(float dt)
 	case PlayerState::InDialogue:
 		UpdateInDialogueState(dt);
 		break;
+	case PlayerState::AxeReclaim:
+		UpdateAxeReclaimState(dt);
+		break;
 	}
 }
 
@@ -143,11 +148,11 @@ void Player::Die()
 
 }
 
-void Player::SetRandomAxeAttack()
+void Player::SetAxeAttack()
 {
 
-	int anim_num =  GetRandomValue(0, 1);
-	switch (anim_num)
+	attack1 = !attack1;
+	switch (attack1)
 	{
 	case 0: 
 		SetAnimation("P_ATT1");
@@ -223,7 +228,7 @@ void Player::take_dmg(int dmg)
 {
 	if (!taking_dmg && !invincible)
 	{
-		GameScreen::add_trauma(0.4f);
+		GameScreen::add_trauma(1.0f);
 		invincible = true;
 		invincible_counter = 0.0f;
 		PlaySound(SoundManager::sounds["grunt"]);
@@ -342,6 +347,9 @@ void Player::UpdateIdleState(float dt)
 	{
 		SetAnimation("P_RUN");
 		state = PlayerState::Running;
+		ParticleEmitter* p = new ParticleEmitter({ center_pos().x + 6, center_pos().y + 16 });
+		GameScreen::Particles->Add(DefinedEmitter::dust, p);
+		p->EmitParticles();
 	}
 
 	if (m_body->GetLinearVelocity().y >= 0 && !is_touching_floor)
@@ -358,13 +366,18 @@ void Player::UpdateIdleState(float dt)
 
 	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
-		SetAnimation("P_AXE_THROW1");
-		state = PlayerState::Throwing;
+		SetThrowing();
+	}
+	//axe reclaim
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && !m_has_axe)
+	{
+		SetAnimation("P_RECLAIM");
+		state = PlayerState::AxeReclaim;
 	}
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAxeAttack();
+		SetAxeAttack();
 		state = PlayerState::Attacking;
 	}
 
@@ -384,7 +397,7 @@ void Player::Jump()
 	state = PlayerState::Jumping;
 	SetAnimation("P_JUMP");
 	ParticleEmitter* p = new ParticleEmitter({ center_pos().x+6, center_pos().y + 16 });
-	ParticlesManager::Add(dust, p);
+	GameScreen::Particles->Add(DefinedEmitter::dust, p);
 	p->EmitParticles();
 }
 
@@ -397,6 +410,9 @@ void Player::UpdateRunningState(float dt)
 		SetAnimation("P_FALL");
 		state = PlayerState::Sliding;
 		looking_right = m_body->GetLinearVelocity().x > 0.5f ? true : false;
+		ParticleEmitter* p = new ParticleEmitter({ center_pos().x + 6, center_pos().y + 16 });
+		GameScreen::Particles->Add(DefinedEmitter::dust, p);
+		p->EmitParticles();
 	}
 
 	if (!IsSoundPlaying(SoundManager::sounds["step1"]) &&
@@ -447,14 +463,19 @@ void Player::UpdateRunningState(float dt)
 
 	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
-		SetAnimation("P_AXE_THROW1");
-		state = PlayerState::Throwing;
+		SetThrowing();
 	}
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAxeAttack();
+		SetAxeAttack();
 		state = PlayerState::Attacking;
+	}
+	//axe reclaim
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && !m_has_axe)
+	{
+		SetAnimation("P_RECLAIM");
+		state = PlayerState::AxeReclaim;
 	}
 
 }
@@ -504,13 +525,12 @@ void Player::UpdateJumpingState(float dt)
 
 	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
-		SetAnimation("P_AXE_THROW1");
-		state = PlayerState::Throwing;
+		SetThrowing();
 	}
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAxeAttack();
+		SetAxeAttack();
 		state = PlayerState::Attacking;
 	}
 
@@ -589,7 +609,7 @@ void Player::UpdateFallingState(float dt)
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAxeAttack();
+		SetAxeAttack();
 		state = PlayerState::Attacking;
 	}
 
@@ -601,10 +621,9 @@ void Player::UpdateDyingState(float dt)
 	{
 		is_dying = false;
 		taking_dmg = false;
-		current_hp = 100;
+		current_hp = m_max_hp;
 		state = PlayerState::Idle;
-		Vector2 newPos{ 50 ,
-						250 };
+		Vector2 newPos{ 250,170 };
 		GameScreen::camera.target = newPos;
 		GameScreen::LevelMgr->new_player_pos = newPos;
 		m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
@@ -624,13 +643,12 @@ void Player::UpdateSlidingState(float dt)
 
 	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && m_has_axe)
 	{
-		SetAnimation("P_AXE_THROW1");
-		state = PlayerState::Throwing;
+		SetThrowing();
 	}
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
 	{
-		SetRandomAxeAttack();
+		SetAxeAttack();
 		state = PlayerState::Attacking;
 	}
 
@@ -640,6 +658,13 @@ void Player::UpdateSlidingState(float dt)
 		SetAnimation("P_IDLE");
 		state = PlayerState::Idle;
 	}
+}
+
+void Player::SetThrowing()
+{
+	PlaySound(SoundManager::sounds["axe_pickup"]);
+	SetAnimation("P_AXE_THROW1");
+	state = PlayerState::Throwing;
 }
 
 
@@ -760,15 +785,15 @@ void Player::UpdateAttackingState(float dt)
 		m_has_axe = false;
 
 
-		m_body->ApplyForce(b2Vec2(looking_right ? -10.0f:10.0f, 0.0f), m_body->GetWorldCenter(), true);
+		m_body->ApplyForce(b2Vec2(looking_right ? -10.0f : 10.0f, 0.0f), m_body->GetWorldCenter(), true);
 	}
 
 	if (animation->GetCurrentFrameNum() >= 3 && !AnimationEnded() && IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1) && m_has_axe == false)
 	{
 		m_has_axe = true;
 		if (!LevelManager::world->IsLocked())
-		m_body->DestroyFixture(m_attack_sensor);
-		SetRandomAxeAttack();
+			m_body->DestroyFixture(m_attack_sensor);
+		SetAxeAttack();
 		state = PlayerState::Attacking;
 		if (taking_dmg)
 		{
@@ -781,7 +806,7 @@ void Player::UpdateAttackingState(float dt)
 	{
 		m_has_axe = true;
 		if (!LevelManager::world->IsLocked())
-		m_body->DestroyFixture(m_attack_sensor);
+			m_body->DestroyFixture(m_attack_sensor);
 		SetAnimation("P_IDLE");
 		state = PlayerState::Idle;
 		if (taking_dmg)
@@ -800,7 +825,7 @@ void Player::UpdateHurtingingState(float dt)
 	{
 		Die();
 	}
-	
+
 	if (!is_dying && AnimationEnded())
 	{
 		taking_dmg = false;
@@ -818,6 +843,65 @@ void Player::UpdateHurtingingState(float dt)
 void Player::UpdateInDialogueState(float dt)
 {
 	SetAnimation("P_IDLE");
+}
+
+void Player::UpdateAxeReclaimState(float dt)
+{
+	if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)))
+	{
+		button_pressed_counter += dt;
+	}
+	else
+	{
+		button_pressed_counter = 0.0f;
+	}
+	
+	if (!(IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && animation->GetCurrentFrameNum() > 14)
+	{
+		m_has_axe = true;
+		PlayFromFrame(14, "P_RECLAIM");
+		PlaySound(SoundManager::sounds["axe_pickup"]);
+		
+	}
+	else if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && AnimationEnded())
+	{
+		m_has_axe = true;
+		PlaySound(SoundManager::sounds["axe_pickup"]);
+		SetAnimation("P_IDLE");
+		if (button_pressed_counter >= 1.71f)
+		{
+			SetAnimation("P_AXE_THROW1");
+			state = PlayerState::Throwing;
+			button_pressed_counter = 0.0f;
+		}
+	}
+	else if(!IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1))
+	{
+		ParticleEmitter* p = new ParticleEmitter(GameScreen::player->pos());
+		GameScreen::Particles->Add(DefinedEmitter::dust, p);
+		p->EmitParticles();
+		state = PlayerState::Idle;
+		SetAnimation("P_IDLE");
+	}
+}
+
+void Player::UpdateSafePos(float dt)
+{
+	safe_pos_counter -= dt;
+	if (state != PlayerState::Hurting && !taking_dmg && safe_pos_counter <=0.0f && is_touching_floor)
+	{
+		last_safe_pos = pos();
+		safe_pos_counter = 4.0f;
+	}
+
+	if (!m_body->GetWorld()->IsLocked() && !Vector2Equals(new_pos, old_pos))
+	{
+		new_pos = old_pos;
+		
+		m_body->SetTransform(
+		{	GameScreen::player->last_safe_pos.x / settings::PPM,
+			GameScreen::player->last_safe_pos.y / settings::PPM }, 0);
+	}
 }
 
 

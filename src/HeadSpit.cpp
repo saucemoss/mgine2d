@@ -5,8 +5,7 @@
 
 HeadSpit::HeadSpit(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 10, 20 }, HSPIT)
 {
-	custom_pos = true;
-
+	sprite_offset_32 = { -10,-12 };
 	InitAnimations();
 	m_max_hp = 20;
 	m_current_hp = m_max_hp;
@@ -30,8 +29,7 @@ HeadSpit::~HeadSpit()
 
 void HeadSpit::Update(float dt)
 {
-	spritePosX = center_pos().x - 10.0f;
-	spritePosY = center_pos().y - 12.0f;
+
 	SwitchFrames(dt);
 
 	switch (state)
@@ -77,6 +75,7 @@ void HeadSpit::TakeDmg(int dmg)
 		m_current_hp -= dmg;
 		state = EnemyState::Hurting;
 		SetAnimation("HSPIT_DMG");
+		bleed_particles();
 	}
 }
 

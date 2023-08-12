@@ -32,7 +32,7 @@ void LightManager::SetupBoxes()
 	
 }
 
-void LightManager::UpdateLights()
+void LightManager::UpdateLights(float dt)
 {
 	//player light
 	//m_lights[0].Move(GameScreen::player->center_pos());
@@ -47,11 +47,14 @@ void LightManager::UpdateLights()
 		if (light.Dynamic)
 			light.Dirty = true;
 
+		if (light.flickering)
+			light.Dirty = true;
+
 			
 		if (light.Dirty)
 			dirtyLights = true;
 		
-		light.Update(m_light_walls);
+		light.Update(m_light_walls, dt);
 	}
 
 	// update the light mask
@@ -119,7 +122,7 @@ void LightManager::DrawLightMask()
 	}
 }
 
-void LightManager::SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color, bool is_dynamic)
+void LightManager::SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color, bool is_dynamic, bool on, bool flickering)
 {
 	m_lights.emplace_back(Vector2{ x,y });
 	if (is_color)
@@ -129,20 +132,22 @@ void LightManager::SetupLight(float x, float y, float in_radius, float out_radiu
 	m_lights.back().SetInRadius(in_radius);
 	m_lights.back().SetOutRadius(out_radius);
 	m_lights.back().Dynamic = is_dynamic;
+	m_lights.back().on = on;
+	m_lights.back().flickering = flickering;
 }
 
 LightInfo::LightInfo()
 {
 	ShadowMask = LoadRenderTexture(LevelManager::currentLdtkLevel->size.x, LevelManager::currentLdtkLevel->size.y);
 	GlowTexture = LoadRenderTexture(LevelManager::currentLdtkLevel->size.x, LevelManager::currentLdtkLevel->size.y);
-	UpdateLightMask();
+	UpdateLightMask(0.0f);
 }
 
 LightInfo::LightInfo(const Vector2& pos)
 {
 	ShadowMask = LoadRenderTexture(LevelManager::currentLdtkLevel->size.x, LevelManager::currentLdtkLevel->size.y);
 	GlowTexture = LoadRenderTexture(LevelManager::currentLdtkLevel->size.x, LevelManager::currentLdtkLevel->size.y);
-	UpdateLightMask();
+	UpdateLightMask(0.0f);
 	Position = pos;
 }
 
@@ -194,8 +199,32 @@ void LightInfo::ShadowEdge(const Vector2& sp, const Vector2& ep)
 	Shadows.push_back(polygon);
 }
 
-void LightInfo::UpdateLightMask()
+void LightInfo::UpdateLightMask(float dt)
 {
+	if (flickering)
+	{
+		flicker_counter -= dt;
+		if (flicker_counter <= 0.0f && on)
+		{
+			on = !on;
+			flicker_counter = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 0.08f));
+		}
+		else if (flicker_counter <= 0.0f && !on)
+		{
+			on = !on;
+			flicker_counter = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0f - 0.5f)));
+			float vol = 0.7f - Vector2DistanceSqr({ Position.x, Position.y }, GameScreen::player->pos()) * 0.00001f;
+			if (vol < 0.0f) vol = 0.0f;
+			SetSoundVolume(SoundManager::sounds["flicker"], vol);
+			SetSoundVolume(SoundManager::sounds["light_ambient"], vol);
+			if (!IsSoundPlaying(SoundManager::sounds["light_ambient"]))
+			{
+				PlaySound(SoundManager::sounds["light_ambient"]);
+			}
+			PlaySound(SoundManager::sounds["flicker"]);
+		}
+	}
+
 	BeginTextureMode(ShadowMask);
 
 	ClearBackground(WHITE);
@@ -204,7 +233,7 @@ void LightInfo::UpdateLightMask()
 	rlSetBlendFactors(GL_SRC_ALPHA, GL_SRC_ALPHA, GL_MIN);
 	rlSetBlendMode(BLEND_CUSTOM);
 
-	if (Valid)
+	if (Valid && on)
 		DrawLightGradient(Position.x, Position.y, InnerRadius, OuterRadius, ColorAlpha(WHITE, 0), WHITE);
 	rlDrawRenderBatchActive();
 	rlSetBlendMode(BLEND_ALPHA);
@@ -225,7 +254,7 @@ void LightInfo::UpdateLightMask()
 
 	BeginTextureMode(GlowTexture);
 	ClearBackground(BLANK);
-	if (Valid)
+	if (Valid && on)
 		DrawLightGradient(Position.x, Position.y, InnerRadius, OuterRadius, ColorAlpha(LightColor, 0.75f), ColorAlpha(LightColor, 0));
 	rlDrawRenderBatchActive();
 
@@ -244,7 +273,7 @@ void LightInfo::UpdateLightMask()
 	EndTextureMode();
 }
 
-void LightInfo::Update(std::vector<Rectangle*>& boxes)
+void LightInfo::Update(std::vector<Rectangle*>& boxes, float dt)
 {
 
 	if (!Dirty)
@@ -304,7 +333,7 @@ void LightInfo::Update(std::vector<Rectangle*>& boxes)
 	}
 
 	Valid = true;
-	UpdateLightMask();
+	UpdateLightMask(dt);
 }
 
 void LightInfo::DrawLightGradient(int centerX, int centerY, float innerRadius, float outterRadius, Color color1, Color color2)

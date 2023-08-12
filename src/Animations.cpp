@@ -22,6 +22,35 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("HSPIT_1", LoadTexture("res/enemies/headspit.png"));
 	m_Textures.emplace("NPC_S_GUY1", LoadTexture("res/NPCs/NPCSecurityGuy.png"));
 	m_Textures.emplace("NPC_S_GUY2", LoadTexture("res/NPCs/NPCSecutiry2.png"));
+	m_Textures.emplace("WCARM", LoadTexture("res/enemies/wcarm.png"));
+	m_Textures.emplace("CROSS", LoadTexture("res/particles/cross.png"));
+	m_Textures.emplace("TERMINAL", LoadTexture("res/level/terminal.png"));
+}
+
+void Animations::InitializeTerminalAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("TERMINAL");
+	animations.emplace("TERM_IDLE", *(new Animation(texture, 1, 2, 32, 0.08f)));
+	animations.emplace("TERM_PASS", *(new Animation(texture, 0, 15, 32, 0.06f)));
+}
+
+void Animations::InitializeWCArmAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("WCARM");
+	animations.emplace("WCARM_IDLE", *(new Animation(texture, 0, 3, 32, 0.08f)));
+	animations.emplace("WCARM_HURT", *(new Animation(texture, 1, 6, 32, 0.08f)));
+	animations.emplace("WCARM_CUT", *(new Animation(texture, 1, 1, 96, 0.04f)));
+	animations.emplace("WCARM_DEF", *(new Animation(texture, 5, 6, 96, 0.08f)));
+
+	Animation* WCARM_ATT = new Animation(texture, 1, 10, 224, 0.06f);
+	WCARM_ATT->SetCustomFrameTime(1, 0.08f);
+	WCARM_ATT->SetCustomFrameTime(2, 0.10f);
+	WCARM_ATT->SetCustomFrameTime(3, 0.12f);
+	WCARM_ATT->SetCustomFrameTime(4, 0.14f);
+	WCARM_ATT->SetCustomFrameTime(5, 0.18f);
+	animations.emplace("WCARM_ATT", *WCARM_ATT);
+	
+	
 }
 
 void Animations::InitializeNPCSec1Animations()
@@ -151,6 +180,8 @@ void Animations::InitializeDecorAnimations()
 	animations.emplace("DECOR_212", *(new Animation(texture, 9, 6, 32, 0.08f)));
 	animations.emplace("M_BLOCK", *(new Animation(texture, 11, 1, 32, 0.50f)));
 	animations.emplace("W_CRATE", *(new Animation(texture, 15, 5, 32, 0.50f)));
+
+	animations.emplace("DECOR_529", *(new Animation(texture, 16, 9, 32, 0.08f)));
 	
 }
 
@@ -190,6 +221,7 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_SHOOT", *(new Animation(texture, 11, 1, 32, 0.16f)));
 	animations.emplace("P_AXE_PICK", *(new Animation(texture, 13, 1, 32, 0.16f)));
 	
+	
 	Animation* P_AXE_THROW1 = new Animation(texture, 14, 16, 32, 0.09f);
 	P_AXE_THROW1->SetCustomFrameTime(1, 0.04f);
 	P_AXE_THROW1->SetCustomFrameTime(2, 0.04f);
@@ -215,6 +247,7 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_GROUND", *(new Animation(texture, 7, 1, 32, 0.08f)));
 	animations.emplace("P_FALL", *(new Animation(texture, 8, 1, 32, 0.08f)));
 	animations.emplace("P_HURT", *(new Animation(texture, 16, 1, 32, 0.15f)));
+	animations.emplace("P_RECLAIM", *(new Animation(texture, 17, 17, 32, 0.10f)));
 	animations.emplace("P_IDLE", *(new Animation(texture, 6, 5, 32, 0.20f)));
 	Animation* jump_anim = new Animation(texture, 9, 3, 32, 0.08f);
 	jump_anim->SetCustomFrameTime(1, 0.10f);

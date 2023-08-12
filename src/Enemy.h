@@ -16,7 +16,8 @@ enum class EnemyState
     Flying,
     Attacking,
     Hurting,
-    Dying
+    Dying,
+    Patrolling
 };
 
 
@@ -27,6 +28,7 @@ public:
     virtual void Die(int death_option) = 0;
     void CheckTouchGround();
     virtual void TakeDmg(int dmg) = 0;
+    void bleed_particles();
     void set_velocity_x(float vx);
     void set_velocity_y(float vy);
     void set_velocity_xy(float vx, float vy);
@@ -60,6 +62,11 @@ public:
     bool custom_pos = false;
     float spritePosX = 0.0f;
     float spritePosY = 0.0f;
+    //Custom sprite positions
+    Vector2 sprite_offset_32;
+    Vector2 sprite_offset_96;
+    Vector2 sprite_offset_224;
+
 
     //States
     EnemyState state;

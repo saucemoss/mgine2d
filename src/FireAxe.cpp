@@ -1,5 +1,7 @@
 #include "FireAxe.h"
 #include "LevelManager.h"
+#include "GameScreen.h"
+#include "Particles.h"
 
 FireAxe::FireAxe(const Rectangle& rect) :
 	Collidable(rect, b2_dynamicBody, FIREAXE)
@@ -48,10 +50,14 @@ void FireAxe::Draw(int l)
 
 void FireAxe::Update(float dt)
 {
-	//if (m_destroy)
-	//{
-	//	LevelManager::world->DestroyBody(m_body);
-	//}
+	time_to_live -= dt;
+	if (time_to_live <= 0.0f)
+	{
+		ParticleEmitter* p = new ParticleEmitter(pos());
+		GameScreen::Particles->Add(DefinedEmitter::dust, p);
+		p->EmitParticles();
+		m_destroy = true;
+	}
 }
 
 void FireAxe::InitAnimations()

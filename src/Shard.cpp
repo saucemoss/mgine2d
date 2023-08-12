@@ -47,3 +47,7 @@ void Shard::Update(float dt)
 	}
 }
 
+void Shard::explode(Vector2 force)
+{
+}
+

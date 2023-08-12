@@ -153,6 +153,7 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Acid.cpp" />
     <ClCompile Include="src\Particles.cpp" />
     <ClCompile Include="src\BioBomb.cpp" />
     <ClCompile Include="src\AnimatedDecor.cpp" />
@@ -185,10 +186,13 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\SoundManager.cpp" />
+    <ClCompile Include="src\Terminal.cpp" />
     <ClCompile Include="src\TitleScreen.cpp" />
+    <ClCompile Include="src\WhiteCoatArm.cpp" />
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Acid.h" />
     <ClInclude Include="src\Shaders.h" />
     <ClInclude Include="src\Particles.h" />
     <ClInclude Include="src\Shard.h" />
@@ -230,6 +234,8 @@
     <ClInclude Include="src\TitleScreen.h" />
     <ClInclude Include="src\Util.h" />
     <ClInclude Include="src\WoodCrate.h" />
+    <ClInclude Include="src\WhiteCoatArm.h" />
+    <ClInclude Include="src\Terminal.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />

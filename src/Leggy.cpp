@@ -11,6 +11,8 @@ Leggy::Leggy(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 14,
 	//Physics body cfg
 	//add more mass 
 
+	sprite_offset_96 = { -42 , -33 };
+
 	FixtureUserData* data = new FixtureUserData;
 	data->tag = ENEMY_GROUP;
 	m_fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(data);
@@ -98,6 +100,7 @@ void Leggy::TakeDmg(int dmg)
 		m_current_hp -= dmg;
 		state = EnemyState::Hurting;
 		SetAnimation("LEGGY_DMG");
+		bleed_particles();
 	}
 }
 

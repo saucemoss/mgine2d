@@ -11,6 +11,8 @@ FlyingInfected::FlyingInfected(const Rectangle& rectangle) :
 	InitAnimations();
 	state = EnemyState::Idle;
 
+	sprite_offset_96 = {- 42 , -33 };
+
 	//Physics body cfg
 	//add more mass 
 	FixtureUserData* data = new FixtureUserData;
@@ -22,13 +24,16 @@ FlyingInfected::FlyingInfected(const Rectangle& rectangle) :
 
 	//player agro sensor
 	m_agro_sensor = util::SimpleSensor(m_body, "fi_agro", 7.0f, 7.0f, 0.0f, 0.0f);
-	m_winghflap_sensor = util::SimpleSensor(m_body, "wingflap", 13.0f, 13.0f);
+	m_winghflap_sensor = util::SimpleSensor(m_body, "wingflap", 25.0f, 25.0f);
 	m_attack_sensor = util::SimpleSensor(m_body, "fi_att", 0.1f, 1.5f, 0.0f, 1.2f);
 	m_body->SetLinearDamping(linear_dumping);
+
+	my_wingflap_sound = LoadSound("res/sound/monster/wings_flap.wav");
 }
 
 FlyingInfected::~FlyingInfected()
 {
+	UnloadSound(my_wingflap_sound);
 	EnitityManager::Remove(this);
 }
 
@@ -39,9 +44,15 @@ void FlyingInfected::Update(float dt)
 	CheckTouchGround();
 	CheckAgroSensor();
 	
-	if (player_in_wingflap && !IsSoundPlaying(SoundManager::sounds["wing_flap"]) && (state != EnemyState::Dying))
+	if (state != EnemyState::Dying)
 	{
-		PlaySound(SoundManager::sounds["wing_flap"]);
+		float vol = 0.7f - Vector2DistanceSqr(pos(), GameScreen::player->pos()) * 0.00001f;
+		if (vol < 0.0f) vol = 0.0f;
+		SetSoundVolume(my_wingflap_sound, vol);
+		if (!IsSoundPlaying(my_wingflap_sound))
+		{
+			PlaySound(my_wingflap_sound);
+		}
 	}
 
 	if (state != EnemyState::Dying)
@@ -103,6 +114,7 @@ void FlyingInfected::TakeDmg(int dmg)
 	m_current_hp -= dmg;
 	state = EnemyState::Hurting;
 	SetAnimation("FLY_I_DMG");
+	bleed_particles();
 
 }
 

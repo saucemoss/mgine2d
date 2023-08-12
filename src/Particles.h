@@ -1,20 +1,27 @@
+#ifndef PARTICLES_H
+#define PARTICLES_H
+
 #include <raylib.h>
 #include <vector>
 #include <string>
+#include <iostream>
+#include "Animations.h"
+#include <raymath.h>
 
-enum ParticleShape 
+enum ParticleShape
 {
-    rectangle, circle, line, pixel
+    rectangle, circle, circle_lines, line, pixel, texture
 };
 
 enum DefinedEmitter
 {
-    dust, blood, steam, fog, acid_burst
+    dust, blood, steam, fog, acid_bursts, ambient_particles, ambient_particles_foreground
 };
 
 struct Particle {
     Vector2 position;
     Vector2 velocity;
+    Vector2 impulse;
     float lifetime;
     float rotation;
     float size;
@@ -22,6 +29,7 @@ struct Particle {
     float gravity;
     ParticleShape shape;
     bool fade;
+    bool clockwise_rot = GetRandomValue(0, 1) == 0 ? true : false;
 };
 
 class ParticleEmitter {
@@ -31,7 +39,7 @@ public:
     {
         m_emitter_life = 1.0f;
         m_forever = false;
-        m_shape = rectangle;
+        m_shape = ParticleShape::rectangle;
         m_size = 1.0f;
         m_gravity = 0.0f;
         m_color = { 255,255,255,255 };
@@ -42,9 +50,27 @@ public:
         m_fade = true;
         m_rotation = 0.0f;
         m_size_min, m_size_max = 0.0f;
+        m_spawn_radius = 0.0f;
+        m_rotation_speed = 0.0f;
+        m_rotation = false;
+        m_emittion_counter = 0.0f;
+        m_fade_in = false;
+        m_fade_in_out = false;
+        m_direction_vector = { 0,0 };
+        m_spawn_impulse = { 0,0 };
+        m_spawn_impulse_min = { 0,0 };
+        m_spawn_impulse_max = { 0,0 };
+    }
+    ~ParticleEmitter()
+    {
+        //UnloadTexture(textrue);
     }
 
     bool m_destroy = false;
+    void set_draw_level(int layer)
+    {
+        draw_layer_level = layer;
+    }
     void shape(ParticleShape shape)
     {
         m_shape = shape;
@@ -57,6 +83,15 @@ public:
     {
         m_size_min = size_min;
         m_size_max = size_max;
+    }
+    void spawn_impulse(Vector2 impulse)
+    {
+        m_spawn_impulse = impulse;
+    }
+    void spawn_impulse(Vector2 impulse_min, Vector2 impulse_max)
+    {
+        m_spawn_impulse_min = impulse_min;
+        m_spawn_impulse_max = impulse_max;
     }
     void gravity(float gravity)
     {
@@ -98,17 +133,57 @@ public:
     {
         m_rotation = rotation;
     }
+    void spawn_radius(float radius)
+    {
+        m_spawn_radius = radius;
+    }
+    void rotation_speed(float speed)
+    {
+        m_rotation_speed = speed;
+    }
+    void random_rotation(bool random_rotation)
+    {
+        m_rand_rotation = random_rotation;
+    }
+    void emittion_counter(float counter)
+    {
+        m_emittion_counter = counter;
+    }
+    void fade_in(bool fade_in)
+    {
+        m_fade_in = fade_in;
+    }
+    void fade_in_out(bool fade_in_out)
+    {
+        m_fade_in_out = fade_in_out;
+    }
+    void direction_vector(Vector2 vec)
+    {
+        m_direction_vector = vec;
+    }
+    void position(Vector2 pos)
+    {
+        m_position = pos;
+    }
+    void texture(Texture2D texture)
+    {
+        m_textrue = texture;
+    }
 
     void EmitParticles() {
         for (int i = 0; i < m_maxParticles; ++i) {
             Particle particle;
-            particle.position = m_position;
+            particle.position = position();
             particle.velocity = {
              static_cast<float>(GetRandomValue(-m_spread, m_spread)),
              static_cast<float>(GetRandomValue(-m_spread, m_spread))
             };
             particle.lifetime = m_lifetime;
             particle.rotation = m_rotation;
+            if (m_rand_rotation)
+            {
+                particle.rotation = GetRandomValue(0,360);
+            }
             particle.fade = m_fade;
             particle.gravity = m_gravity;
             particle.shape = m_shape;
@@ -119,13 +194,41 @@ public:
         }
     }
 
-    void UpdateParticles(float deltaTime) {
+    void UpdateParticles(float dt) {
+
+        if (m_emittion_counter != 0.0f)
+        {
+            m_emittion_clock += dt;
+            if (m_emittion_clock >= m_emittion_counter)
+            {
+                EmitParticles();
+                m_emittion_clock = 0.0f;
+            }
+        }
+
         for (int i = 0; i < m_particles.size(); ++i) {
             Particle& particle = m_particles[i];
-            particle.position.x += particle.velocity.x * m_speed * deltaTime;
-            particle.position.y += particle.velocity.y * m_speed * deltaTime;
-            particle.lifetime -= deltaTime;
-            particle.velocity.y += particle.gravity * deltaTime;
+            particle.position.x += particle.velocity.x * m_speed * dt;
+            particle.position.y += particle.velocity.y * m_speed * dt;
+            particle.velocity.y += particle.gravity * dt;
+
+            if (m_direction_vector.x != 0.0f)
+            {
+                particle.position.x += m_direction_vector.x;
+            }
+            if (m_direction_vector.y != 0.0f)
+            {
+                particle.position.y += m_direction_vector.y;
+            }
+
+            particle.lifetime -= dt;
+            if (m_rotation_speed != 0.0f)
+            {
+                particle.clockwise_rot ? particle.rotation += m_rotation_speed * dt * 1000
+                                       : particle.rotation -= m_rotation_speed * dt * 1000;
+            }
+
+
 
             // Remove dead particles
             if (particle.lifetime <= 0) {
@@ -135,14 +238,31 @@ public:
         }
     }
 
-    void DrawParticles() {
+    void DrawParticles(Vector2 cam_pos) {
         for (const auto& particle : m_particles) 
         {
             Color color;
-            if (particle.fade)
+            float alpha = particle.color.a;
+
+            if (m_fade_in_out)
             {
-                float alpha = particle.lifetime / m_lifetime;
-                color = { particle.color.r, particle.color.g, particle.color.b, static_cast<unsigned char>(alpha * 255) };
+                if (particle.lifetime < m_lifetime / 2) {
+                    alpha = particle.lifetime / (m_lifetime / 2);
+                }
+                else {
+                    alpha = 1.0f - (particle.lifetime - m_lifetime / 2) / (m_lifetime / 2);
+                }
+                color = { particle.color.r, particle.color.g, particle.color.b, static_cast<unsigned char>(alpha * particle.color.a) };
+            }
+            else if (m_fade_in)
+            {
+                alpha = particle.lifetime * -1 / m_lifetime;  
+                color = { particle.color.r, particle.color.g, particle.color.b, static_cast<unsigned char>(alpha * particle.color.a) };
+            }
+            else if (particle.fade)
+            {
+                alpha = particle.lifetime / m_lifetime;
+                color = { particle.color.r, particle.color.g, particle.color.b, static_cast<unsigned char>(alpha * particle.color.a) };
             }
             else
             {
@@ -151,17 +271,27 @@ public:
             
             switch (particle.shape)
             {
-            case pixel:
+            case ParticleShape::pixel:
                 DrawPixelV(particle.position, color);
                 break;
-            case circle:
+            case ParticleShape::circle:
                 DrawCircleV(particle.position, particle.size / 2, color);
                 break;
-            case rectangle:
+            case ParticleShape::circle_lines:
+                DrawPolyLinesEx(particle.position, 10, particle.size / 2, particle.rotation, 0.8f, color);
+                break;
+            case ParticleShape::rectangle:
                 DrawRectanglePro(Rectangle{ particle.position.x, particle.position.y, particle.size, particle.size },
                     Vector2{ particle.size / 2, particle.size / 2 }, particle.rotation, color);
                 break;
-            case line:
+            case ParticleShape::line:
+                break;
+            case ParticleShape::texture:
+      
+                Vector2 parallaxed = Vector2Multiply(cam_pos, { 0.55f,0.55f });
+                DrawTexturePro(m_textrue, { 0,0, (float)m_textrue.width, (float)m_textrue.height },
+                    { particle.position.x+parallaxed.x, particle.position.y + parallaxed.y, particle.size, particle.size },
+                    Vector2{ particle.size / 2, particle.size / 2 }, particle.rotation, color);
                 break;
             }
             
@@ -169,7 +299,9 @@ public:
     }
     float m_emitter_life;
     bool m_forever = false;
+    int draw_layer_level = 1;
 private:
+    Texture2D m_textrue;
     ParticleShape m_shape;
     float m_size, m_size_min, m_size_max;
     float m_gravity = 0.0f;
@@ -180,7 +312,19 @@ private:
     float m_speed;
     float m_spread;
     float m_rotation;
+    float m_rotation_speed;
+    bool m_rand_rotation;
     bool m_fade = true;
+    float m_spawn_radius;
+    float m_emittion_counter;
+    float m_emittion_clock;
+    bool m_fade_in;
+    bool m_fade_in_out;
+    Vector2 m_direction_vector;
+    Vector2 m_spawn_impulse;
+    Vector2 m_spawn_impulse_min;
+    Vector2 m_spawn_impulse_max;
+    
 
     float size()
     {
@@ -190,12 +334,26 @@ private:
         }
         else
         {
-            float temp = float(rand());
-            return m_size_min + static_cast <float> (temp) / (static_cast <float> (RAND_MAX / (m_size_max - m_size_min)));
+            return m_size_min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_size_max - m_size_min)));
         }
     }
-    
-    
+
+    Vector2 position()
+    {
+        if (m_spawn_radius == 0.0f)
+        {
+            return m_position;
+        }
+        else
+        {
+            float temp = float(rand());
+            float posX = -m_spawn_radius + static_cast <float> (temp) / (static_cast <float> (RAND_MAX / (m_spawn_radius + m_spawn_radius)));
+            temp = float(rand());
+            float posY = -m_spawn_radius + static_cast <float> (temp) / (static_cast <float> (RAND_MAX / (m_spawn_radius + m_spawn_radius)));
+            return { m_position.x + posX, m_position.y + posY };
+        }
+    }
+
     std::vector<Particle> m_particles;
 };
 
@@ -214,15 +372,17 @@ public:
         {
             if (!emitters[i]->m_forever && emitters[i]->m_emitter_life <= 0.0f)
             {
+                delete emitters[i];
                 Remove(emitters[i]);
             }
         }
     }
-    static void Draw(int draw_layer)
+    static void Draw(int draw_layer, Vector2 cam_pos)
     {
         for (ParticleEmitter* e : emitters)
         {
-            e->DrawParticles();
+            if(e->draw_layer_level = draw_layer)
+            e->DrawParticles(cam_pos);
         }
 
     }
@@ -237,25 +397,37 @@ public:
             emitters.erase(it);
     }
 
+    static void UnloadEmitters()
+    {
+        std::cout << emitters.size() << std::endl;
+        for (int i = 0; i < emitters.size(); i++)
+        {
+            emitters[i]->set_forever(false);
+        }
+    }
+
     static void Add(DefinedEmitter emmiter, ParticleEmitter* ptr)
     {
         switch (emmiter)
         {
         case dust:
-            ptr->shape(rectangle);
+            ptr->shape(ParticleShape::rectangle);
             ptr->size(2.0f, 4.0f);
-            ptr->speed(6.0f);
-            ptr->spread(5.0f);
+            ptr->speed(5.0f);
+            ptr->spread(4.0f);
             ptr->color(WHITE);
-            ptr->howmany(5);
-            ptr->gravity(8.0f);
-            ptr->particle_lifetime(1.0f);
-            ptr->emmiter_lifetime(1.0f);
+            ptr->howmany(3);
+            ptr->gravity(7.0f);
+            ptr->particle_lifetime(0.8f);
+            ptr->emmiter_lifetime(0.8f);
+            ptr->spawn_radius(2.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(5.0f);
             ptr->fade(true);
             Add(ptr);
             break;
         case blood:
-            ptr->shape(rectangle);
+            ptr->shape(ParticleShape::rectangle);
             ptr->size(1.0f, 3.0f);
             ptr->speed(5.0f);
             ptr->spread(10.0f);
@@ -265,6 +437,60 @@ public:
             ptr->particle_lifetime(0.8f);
             ptr->emmiter_lifetime(0.8f);
             ptr->fade(true);
+            ptr->spawn_radius(4.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(5.0f);
+            Add(ptr);
+            break;
+        case ambient_particles:
+            ptr->shape(ParticleShape::rectangle);
+            ptr->size(2.0f, 4.0f);
+            ptr->speed(2.0f);
+            ptr->spread(8.0f);
+            ptr->color({ 170,255,255,35 });
+            ptr->howmany(5);
+            ptr->gravity(1.0f);
+            ptr->set_forever(true);
+            ptr->particle_lifetime(7.0f);
+            //ptr->emmiter_lifetime(0.8f);
+            ptr->fade_in_out(true);
+            ptr->spawn_radius(200.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(0.05f);
+            ptr->emittion_counter(0.5f);
+            ptr->direction_vector({ -0.4f, -0.2f });
+            Add(ptr);
+            break;
+        case ambient_particles_foreground:
+            ptr->shape(ParticleShape::texture);
+            ptr->texture(*TextureLoader::GetTexture("CROSS"));
+            ptr->size(10.0f, 60.0f);
+            ptr->speed(0.1f);
+            ptr->spread(3.0f);
+            ptr->color({ 120,200,200,8 });
+            ptr->howmany(50);
+            ptr->gravity(1.1f);
+            ptr->set_forever(true);
+            ptr->particle_lifetime(10.0f);
+            ptr->fade_in_out(true);
+            ptr->spawn_radius(2000.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(0.005f);
+            ptr->emittion_counter(0.5f);
+            ptr->direction_vector({ -0.1f, -0.1f });
+            Add(ptr);
+            break;
+        case acid_bursts:
+            ptr->shape(ParticleShape::circle); 
+            ptr->size(0.1f, 4.0f);
+            ptr->speed(2.0f);
+            ptr->color({ 0,200,40,13 });
+            ptr->howmany(6);
+            ptr->gravity(3.0f);
+            ptr->set_forever(true);
+            ptr->particle_lifetime(1.5f);
+            ptr->spawn_radius(8.0f);
+            ptr->emittion_counter(0.3f);
             Add(ptr);
             break;
         }
@@ -273,5 +499,7 @@ public:
 
     static std::vector<ParticleEmitter*> emitters;
 
+
 };
 
+#endif

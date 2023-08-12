@@ -49,7 +49,7 @@ void NPCSecurityGuy::Update(float dt)
 																	CurrentFrame().width * -1,
 																	CurrentFrame().height };
 		Rectangle source = { spritePosX,spritePosY,settings::tileSize,settings::tileSize };
-		GameScreen::shaders->Apply("outline", *sprite, cframe, source, { 0,0 }, 0.0f);
+		GameScreen::shaders->ApplyOutline(*sprite, cframe, source, { 0,0 }, 0.0f);
 	}
 
 	switch (state)

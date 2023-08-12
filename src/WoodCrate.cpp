@@ -1,7 +1,7 @@
 #include "WoodCrate.h"
 #include "Shard.h"
 #include "SoundManager.h"
-#include "Particles.h"
+
 
 WoodCrate::WoodCrate(const Rectangle& rect)
 	:
@@ -24,7 +24,7 @@ WoodCrate::~WoodCrate()
 void WoodCrate::Draw(int l)
 {
 	auto spritePosX = pos().x;
-	auto spritePosY = pos().y;
+	auto spritePosY = pos().y - 2;
 	float angle = m_body->GetAngle() * 180 / PI;
 
 	DrawTexturePro(*sprite,
@@ -45,7 +45,8 @@ void WoodCrate::Update(float dt)
 	}
 	else if(!m_destroy)
 	{
-		crate_shards = new Shards(sprite, CurrentFrame(), center_pos(), 10, 2.0f);
+		crate_shards = new Shards(sprite, CurrentFrame(), pos(), 7, 1.5f, 50.0f);
+		
 		m_destroy = true;
 		PlaySound(SoundManager::sounds["crate_break"]);
 	}

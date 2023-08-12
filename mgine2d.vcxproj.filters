@@ -228,6 +228,15 @@
     <ClCompile Include="src\Shaders.cpp">
       <Filter>Pliki źródłowe\Systems\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="src\WhiteCoatArm.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acid.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Terminal.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -352,6 +361,15 @@
     </ClInclude>
     <ClInclude Include="src\Shaders.h">
       <Filter>Pliki nagłówkowe\Systems\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WhiteCoatArm.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Acid.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Terminal.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

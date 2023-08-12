@@ -11,6 +11,7 @@
 #include "FireAxe.h"
 #include "ContactListener.h"
 #include "LightManager.h"
+#include "Particles.h"
 
 
 
@@ -67,9 +68,24 @@ public:
     Texture2D paralaxedBackgroundSpriteAtlas;
     RenderTexture2D paralaxBackgroundRenderTexture;
     Texture2D paralaxedBackgroundRenderedLevelTexture;
+    
+    
+    //perlin noise test
+    Texture2D perlin;
+    Texture2D perlin2;
+    float perlin_time_count = 0.0f;
+
 
     //Layer draw
     void DrawForeGround();
+    void DrawPerlin();
+    float layer_scroll = 0.0f;
+    Vector2 perlinPos1;
+    Vector2 perlinPos2;
+
+    //Level Particles
+    ParticleEmitter* level_ambient_particles;
+    ParticleEmitter* level_particles_foreground;
     
     //Object containers
     static std::vector<std::unique_ptr<Collidable>> solid_tiles;

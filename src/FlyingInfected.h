@@ -28,22 +28,20 @@ public:
     virtual void Die(int death_option) override;
     void CheckAgroSensor();
     virtual void TakeDmg(int dmg) override;
-
-
     virtual void InitAnimations() override;
 
+    //custom sound
+    Sound my_wingflap_sound;
+
     //Movement Control
-    
     bool player_in_wingflap = false;
     float speed = 4.0f;
     float linear_dumping = 2.0f;
     b2Fixture* m_winghflap_sensor;
 
-
     //HP
     int m_max_hp = 150;
     int m_current_hp = m_max_hp;
-
 
     //States
     virtual void UpdateIdleState(float dt);

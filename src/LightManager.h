@@ -20,6 +20,9 @@ public:
 	bool HasColor = false;
 	bool Dynamic = false;
 	Color LightColor = WHITE;
+	bool on;
+	bool flickering;
+	float flicker_counter = 0.0f;
 
 	LightInfo();
 
@@ -37,9 +40,9 @@ public:
 
 	void ShadowEdge(const Vector2& sp, const Vector2& ep);
 
-	void UpdateLightMask();
+	void UpdateLightMask(float dt);
 
-	void Update(std::vector<Rectangle*>& boxes);
+	void Update(std::vector<Rectangle*>& boxes,  float dt);
 
 	void DrawLightGradient(int centerX, int centerY, float innerRadius, float outterRadius, Color color1, Color color2);
 
@@ -63,11 +66,11 @@ public:
 	RenderTexture LightMask;
 	bool showLines = false;
 
-	void SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color, bool is_dynamic);
+	void SetupLight(float x, float y, float in_radius, float out_radius, Color c, bool is_color, bool is_dynamic, bool on, bool flickering);
 
 	void SetupBoxes();
 
-	void UpdateLights();
+	void UpdateLights(float dt);
 
 	void DrawLightMask();
 

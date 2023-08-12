@@ -9,7 +9,7 @@
 #include "Dialogue.h"
 
 
-
+Shaders* GameScreen::shaders;
 std::vector<Entity*> EnitityManager::EntityList;
 Camera2D GameScreen::camera;
 Camera2D GameScreen::player_focused_cam;
@@ -19,7 +19,6 @@ SoundManager* GameScreen::SoundMgr;
 Player* GameScreen::player;
 bool GameScreen::debug = false;
 ParticlesManager* GameScreen::Particles;
-Shaders* GameScreen::shaders;
 float GameScreen::shake;
 float GameScreen::trauma;
 
@@ -30,14 +29,14 @@ GameScreen::GameScreen()
 {
 	HideCursor();
 	srand(static_cast <unsigned> (time(0)));
+	shaders = new Shaders();
 	LevelMgr = new LevelManager();
 	SoundMgr = new SoundManager();
 	player = new Player();
 	Particles = new ParticlesManager();
-	shaders = new Shaders();
+	
 	
 	//Camera init
-
 	player_focused_cam.target = player->pos();
 	player_focused_cam.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
 	player_focused_cam.zoom = settings::zoom;
@@ -47,7 +46,10 @@ GameScreen::GameScreen()
 	camera.rotation = 0.0f;
 	camera.zoom = settings::zoom;
 
-
+	//vignette setup
+	Image radialGradient = GenImageGradientRadial(settings::screenHeight*2, settings::screenHeight*2, 0.0f, Fade(BLACK,0.0f), BLACK);
+	vignette = LoadTextureFromImage(radialGradient);
+	UnloadImage(radialGradient);
 }
 
 GameScreen::~GameScreen()
@@ -57,11 +59,11 @@ GameScreen::~GameScreen()
 
 void GameScreen::UpdateCamera(float dt)
 {
-	
+	float y_offset = 32.0f;
 	// Camera stuff
 	// 
 	// Camera zoom controls
-	player_focused_cam.target = { player->pos().x,player->pos().y - 32 };
+	player_focused_cam.target = { player->pos().x,player->pos().y - y_offset };
 	camera.zoom += ((float)GetMouseWheelMove() * 0.05f);
 
 	if (camera.zoom > 30.0f) camera.zoom = 30.0f;
@@ -75,11 +77,12 @@ void GameScreen::UpdateCamera(float dt)
 	//}
 
 	static float minSpeed = 1.0f;
-	static float minEffectLength = 5.0f;
-	static float fractionSpeed = 3.0f;
+	static float minEffectLength = 4.0f;
+	static float fractionSpeed = 4.0f;
+
 
 	camera.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
-	Vector2 diff = Vector2Subtract({ player->pos().x,player->pos().y - 32 }, camera.target);
+	Vector2 diff = Vector2Subtract({ player->pos().x,player->pos().y - y_offset }, camera.target);
 	float length = Vector2Length(diff);
 
 	if (length > minEffectLength)
@@ -148,29 +151,37 @@ Screens GameScreen::Update(float dt)
 		debug = !debug;
 	}
 	
-	UpdateCamera(dt);
 	player->Update(dt);
+	UpdateCamera(dt);
 	LevelMgr->Update(dt);
 	EnitityManager::Update(dt);
 	DialogueManager::UpdateDialogues(dt);
 	Particles->Update(dt);
-
+	shaders->ApplyPerlin();
 	return Screens::NONE;
 }
 
 void GameScreen::Draw()
 {
+	Vector2 c_position = { (camera.offset.x / camera.zoom - camera.target.x) , (camera.offset.y / camera.zoom - camera.target.y) };
 	BeginMode2D(trauma > 0.0f ? shake_cam : camera);				
 	
 					// THE HOLY DRAW ORDER: //
 	LevelMgr->Draw();					// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
 	EnitityManager::Draw(0);			// Entities/Objects behind player
+	shaders->DrawPerlin();				// Perlin noise mask
+	shaders->DrawOutlines();			// Outline shader
 	player->Draw(0);					// Player		
 	EnitityManager::Draw(1);			// Entities/Objects in front of player
-	Particles->Draw(1);					// Particles
+	Particles->Draw(1, c_position);		// Particles
 	LevelMgr->lights->DrawLightMask();	// Darkness and lights
 	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
-	shaders->Draw();					// Shaders
+	Particles->Draw(2, c_position);		// Particles foreground
+	
+	EndMode2D();						// Vignette
+	DrawVignette();						// Vignette
+	BeginMode2D(trauma > 0.0f ? shake_cam : camera); // Vignette
+	 
 	player->DrawUI();					// Player UI
 	DialogueManager::DrawDialogues();	// Dialogue Boxes
 
@@ -197,8 +208,8 @@ void GameScreen::Draw()
 	}
 
 	EndMode2D();
-
-	//DrawText(std::to_string(player->current_hp).c_str(), 40, 40, 40, GREEN);
+	std::string hp = "HP: " + std::to_string(player->current_hp) + " / " + std::to_string(player->m_max_hp);
+	DrawText(hp.c_str(), 40, 40, 40, GREEN);
 	DrawFPS(5, 5);
 	//DEBUG:
 	if (debug)
@@ -300,6 +311,14 @@ void GameScreen::add_trauma(float intensity)
 		trauma = 1.0f;
 	}
 	
+}
+
+void GameScreen::DrawVignette()
+{
+	DrawTexturePro(vignette, 
+		{ 0,0, (float)vignette.width,(float)vignette.height }, 
+		{ 0,0, settings::screenWidth, settings::screenHeight},
+		{ 0,0 }, 0.0f, Fade(WHITE, 0.3f));
 }
 
 

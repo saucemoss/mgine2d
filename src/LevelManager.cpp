@@ -27,6 +27,9 @@
 #include "HeadSpit.h"
 #include "NPCSecurityGuy.h"
 #include "NPCSecurityGuy2.h"
+#include "WhiteCoatArm.h"
+#include "Acid.h"
+#include "Terminal.h"
 
 
 b2World* LevelManager::world = nullptr;
@@ -45,7 +48,7 @@ void LevelManager::RemoveEntityFromLevel(Entity& e)
 
 LevelManager::LevelManager()
 {
-	
+
 	ldtk::Project* p = new ldtk::Project();
 	p->loadFromFile("res\\level\\TestLevel.ldtk");
 	ldtkProject = p;
@@ -79,8 +82,16 @@ void LevelManager::LoadLevel(std::string level_name)
 	//Set to new current level
 	currentLdtkLevel = &ldtkWorld->getLevel(level_name);
 	levelSize = currentLdtkLevel->size;
+
 	lights = new LightManager();
+
 	m_darkness_strength = currentLdtkLevel->getField<float>("DarknessLevel").value();
+
+	level_ambient_particles = new ParticleEmitter(Vector2{ (float)levelSize.x / 2, (float)levelSize.y / 2 });
+	ParticlesManager::Add(DefinedEmitter::ambient_particles, level_ambient_particles);
+	level_particles_foreground = new ParticleEmitter(Vector2{ (float)levelSize.x / 2, (float)levelSize.y / 2 });
+	ParticlesManager::Add(DefinedEmitter::ambient_particles_foreground, level_particles_foreground);
+
 
 	if (world == nullptr)
 	{
@@ -131,8 +142,13 @@ void LevelManager::LoadLevel(std::string level_name)
 	//Decoration Texture
 	decorationSpriteAtlas = LoadTexture("res//level//mothman.png");
 	decorationRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+	//
+	//perlin
+	int max = std::max(levelSize.x, levelSize.y);
+	GameScreen::shaders->RenderPerlinTexture = LoadRenderTexture(max, max);
+	GameScreen::shaders->PerlinTexture = GameScreen::shaders->RenderPerlinTexture.texture;
+	//SetTextureFilter(GameScreen::shaders->PerlinTexture, 3);
 
-	
 	//Draw render texture logic and objects setup
 	
 	//Static background draw
@@ -178,26 +194,9 @@ void LevelManager::LoadLevel(std::string level_name)
 				if (layer.getName() == "LabSolids")
 				{
 					Rectangle rec = { tile.getPosition().x, tile.getPosition().y, tile_size, tile_size };
-					
-					//if ((tile.tileId < 8 && tile.tileId > -1 ) || tile.tileId == 15 || tile.tileId == 16 || tile.tileId == 38 || tile.tileId == 39)
-					//{
-					//	Rectangle rec = { tile.getPosition().x, tile.getPosition().y + 4, tile_size, tile_size - 4 };
-					//	solid_tiles.push_back(std::make_unique<SolidTile>(rec, true));
-					//}
-					//else
-					//{
-					//	solid_tiles.push_back(std::make_unique<SolidTile>(rec));
-					//}
 					DrawTextureRec(laboratorySolidsSpriteAtlas, source_rect, target_pos, WHITE);
 				}
-				if (layer.getName() == "Platforms")
-				{
-					Rectangle rec = {(float)tile.getPosition().x ,
-									 (float)tile.getPosition().y ,
-									 tile_size , tile_size };
-					//solid_tiles.push_back(std::make_unique<SolidTile>(rec));
-					DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
-				}
+
 				if (layer.getName() == "Slopes")
 				{
 					Rectangle rec = { (float)tile.getPosition().x ,
@@ -235,8 +234,6 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			for (auto&& tile : layer.allTiles())
 			{
-
-
 				auto source_pos = tile.getTextureRect();
 				auto tile_size = float(layer.getTileset().tile_size);
 
@@ -246,7 +243,6 @@ void LevelManager::LoadLevel(std::string level_name)
 					(tile.flipX ? -tile_size : tile_size),
 					(tile.flipY ? -tile_size : tile_size)
 				};
-
 				Vector2 target_pos = {
 					(float)tile.getPosition().x,
 					(float)tile.getPosition().y,
@@ -270,6 +266,30 @@ void LevelManager::LoadLevel(std::string level_name)
 
 			}
 		}
+		if (layer.getName() == "Platforms")
+		{
+			for (auto&& tile : layer.allTiles())
+			{
+				auto source_pos = tile.getTextureRect();
+				auto tile_size = float(layer.getTileset().tile_size);
+
+				Rectangle source_rect = {
+					float(source_pos.x),
+					float(source_pos.y),
+					(tile.flipX ? -tile_size : tile_size),
+					(tile.flipY ? -tile_size : tile_size)
+				};
+				Rectangle rec = { (float)tile.getPosition().x ,
+								 (float)tile.getPosition().y ,
+								 tile_size , tile_size };
+				Vector2 target_pos = {
+								(float)tile.getPosition().x,
+								(float)tile.getPosition().y,
+				};
+				DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
+			}
+		}
+
 	}
 
 	EndTextureMode();
@@ -378,10 +398,12 @@ void LevelManager::LoadLevel(std::string level_name)
 			bool is_color = entity.getField<bool>("isColor").value();
 			bool is_dynamic = entity.getField<bool>("isDynamic").value();
 			auto c = entity.getField<ldtk::Color>("Color").value();
+			bool on = entity.getField<bool>("On").value();
+			bool flickering = entity.getField<bool>("Flickering").value();
 			Color color = { c.r, c.g, c.b, c.a };
 
-			lights->SetupLight(rect.x + rect.width * 0.25f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic);
-			lights->SetupLight(rect.x + rect.width * 0.75f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic);
+			lights->SetupLight(rect.x + rect.width * 0.25f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic, on, flickering);
+			lights->SetupLight(rect.x + rect.width * 0.75f, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic, on, flickering);
 		}
 		if (entity.getName() == "Light32")
 		{
@@ -390,9 +412,11 @@ void LevelManager::LoadLevel(std::string level_name)
 			bool is_color = entity.getField<bool>("isColor").value();
 			bool is_dynamic = entity.getField<bool>("isDynamic").value();
 			auto c = entity.getField<ldtk::Color>("Color").value();
+			bool on = entity.getField<bool>("On").value();
+			bool flickering = entity.getField<bool>("Flickering").value();
 			Color color = { c.r, c.g, c.b, c.a };
 
-			lights->SetupLight(rect.x + rect.width / 2, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic);
+			lights->SetupLight(rect.x + rect.width / 2, rect.y + rect.height / 2, in_radius, out_radius, color, is_color, is_dynamic, on, flickering);
 		}
 		if (entity.getName() == "MovingBlock")
 		{
@@ -405,6 +429,18 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "WoodCrate")
 		{
 			level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
+		}
+		if (entity.getName() == "Terminal")
+		{
+			level_entities_safe.push_back(std::make_unique<Terminal>(rect));
+		}
+		if (entity.getName() == "Acid")
+		{
+			Rectangle r = { (float)entity.getPosition().x,
+					(float)entity.getPosition().y + 12,
+					(float)entity.getSize().x ,
+					(float)entity.getSize().y };
+			level_entities_safe.push_back(std::make_unique<Acid>(r));
 		}
 		if (entity.getName() == "FireAxe")
 		{
@@ -420,7 +456,12 @@ void LevelManager::LoadLevel(std::string level_name)
 		}
 		if (entity.getName() == "InfectedHazmat")
 		{
-			level_entities_safe.push_back(std::make_unique<InfectedHazmat>(rect));
+			level_entities_safe.push_back(std::make_unique<InfectedHazmat>(rect, entity.getArrayField<ldtk::IntPoint>("Path")));
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
+		if (entity.getName() == "WCArm")
+		{
+			level_entities_safe.push_back(std::make_unique<WhiteCoatArm>(rect));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
 		if (entity.getName() == "Ribbs")
@@ -472,7 +513,7 @@ void LevelManager::LoadLevel(std::string level_name)
 
 void LevelManager::UnloadLevel()
 {
-
+	GameScreen::Particles->UnloadEmitters();
 	if (world != nullptr)
 	{
 		// if we had an old world then delete it and recreate
@@ -485,8 +526,13 @@ void LevelManager::UnloadLevel()
 		destruction_listener = nullptr;
 		delete world;
 		world = nullptr;
-	}
 
+	}
+	
+	level_ambient_particles->set_forever(false);
+	level_ambient_particles = nullptr;
+	level_particles_foreground->set_forever(false);
+	level_particles_foreground = nullptr;
 
 	UnloadTexture(laboratorySolidsRenderedLevelTexture);
 	UnloadTexture(paralaxedBackgroundRenderedLevelTexture);
@@ -496,6 +542,8 @@ void LevelManager::UnloadLevel()
 	UnloadTexture(decorationSpriteAtlas);
 	UnloadTexture(paralaxedBackgroundSpriteAtlas);
 	UnloadTexture(paralaxedForegroundSpriteAtlas);
+	UnloadTexture(GameScreen::shaders->PerlinTexture);
+	UnloadRenderTexture(GameScreen::shaders->RenderPerlinTexture);
 	UnloadRenderTexture(paralaxBackgroundRenderTexture);
 	UnloadRenderTexture(paralaxedForegroundRenderTexture);
 	UnloadRenderTexture(laboratorySolidsRenderTexture);
@@ -513,6 +561,9 @@ void LevelManager::UnloadLevel()
 
 	level_entities_safe.clear();
 	solid_tiles.clear();
+
+	StopSound(SoundManager::sounds["light_ambient"]);
+	
 }
 
 void LevelManager::Update(float dt)
@@ -523,15 +574,9 @@ void LevelManager::Update(float dt)
 	const int32 positionIterations = 2;
 	world->Step(timeStep, velocityIterations, positionIterations);
 
+	lights->UpdateLights(dt);
 
-	if (next_level != "")
-	{
-		LoadLevel(next_level);
-		next_level = "";
-	}
-	
-	lights->UpdateLights();
-
+	level_ambient_particles->position(GameScreen::player->center_pos());
 
 	for (auto& e : level_entities_safe)
 	{
@@ -539,8 +584,12 @@ void LevelManager::Update(float dt)
 		EnitityManager::Add(e.get());
 		e->queue_entity_add = false;
 	}
-	
-	
+	if (next_level != "")
+	{
+		LoadLevel(next_level);
+		next_level = "";
+	}
+
 }
 
 void LevelManager::SolidTilesToBigBoxes()
@@ -679,13 +728,14 @@ void LevelManager::Draw()
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  }, 
 		{ 0,0 }, 0, WHITE);
 	ClearBackground(BLACK);
+
 	//Draw decorations
 	DrawTexturePro(decorationRenderedLevelTexture,
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 		{ 0,0 }, 0, WHITE);
 	ClearBackground(BLACK);
-	
+
 
 }
 

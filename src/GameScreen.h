@@ -28,14 +28,15 @@ public:
 
     static bool debug;
     void Draw() override;
-
     void DebugShapes();
-
     static void add_trauma(float intensity);
+
+    Texture2D vignette;
+    void DrawVignette();
 private:
     static float shake;
     static float trauma;
-    float max_cam_rotation = 0.5f;
-    float max_cam_x_offset = 5.0f;
-    float max_cam_y_offset = 5.0f;
+    float max_cam_rotation = 0.2f;
+    float max_cam_x_offset = 8.0f;
+    float max_cam_y_offset = 8.0f;
 };

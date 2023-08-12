@@ -3,22 +3,17 @@
 #include "GameScreen.h"
 #include "Util.h"
 
-InfectedHazmat::InfectedHazmat(const Rectangle& rectangle) :
-	Enemy({ rectangle.x,rectangle.y,12,26 }, INFECTED_H)
+InfectedHazmat::InfectedHazmat(const Rectangle& rectangle, const ldtk::ArrayField<ldtk::IntPoint> path_points) :
+	Enemy({ rectangle.x,rectangle.y,12,26 }, INFECTED_H),
+	m_path_points(path_points)
 {
-	
+	if (m_path_points.size() > 0) m_next_point = m_path_points.at(0).value();
 	InitAnimations();
 	state = EnemyState::Idle;
 	m_max_hp = 100;
 	m_current_hp = m_max_hp;
-	custom_pos = true;
-
-
-	// Add mappings for debug purposes
-	StatesStrMap[EnemyState::Idle] = "Idle";
-	StatesStrMap[EnemyState::Running] = "Running";
-	StatesStrMap[EnemyState::Attacking] = "Attacking";
-
+	sprite_offset_96 = { -42,-37 };
+	sprite_offset_32 = { -10 ,-6 };
 
 	//Physics body cfg
 	//add more mass 
@@ -57,11 +52,9 @@ InfectedHazmat::~InfectedHazmat()
 void InfectedHazmat::Update(float dt)
 {
 	SwitchFrames(dt);
-	spritePosX = CurrentFrame().width == 96 ? spritePosX = center_pos().x - 42 : (int)center_pos().x - 10;
-	spritePosY = CurrentFrame().width == 96 ? spritePosY = center_pos().y - 37 : (int)center_pos().y - 6;
 
 	CheckTouchGround();
-	CheckAgroSensor();
+	//CheckAgroSensor();
 
 	//std::cout << m_rectangle.x << std::endl;
 
@@ -81,6 +74,9 @@ void InfectedHazmat::Update(float dt)
 		break;
 	case EnemyState::Dying:
 		UpdateDyingState(dt);
+		break;
+	case EnemyState::Patrolling:
+		UpdatePatrollingState(dt);
 		break;
 	}
 
@@ -129,6 +125,7 @@ void InfectedHazmat::TakeDmg(int dmg)
 	m_current_hp -= dmg;
 	state = EnemyState::Hurting;
 	SetAnimation("IH_DMG");
+	bleed_particles();
 	
 }
 
@@ -140,11 +137,37 @@ void InfectedHazmat::InitAnimations()
 
 void InfectedHazmat::UpdateIdleState(float dt)
 {
+
 	if (player_in_agro)
 	{
+		CheckAgroSensor();
 		state = EnemyState::Running;
 		SetAnimation("IH_RUN");
 	}
+
+	m_look_around_counter -= dt;
+	if (m_look_around_counter <= 0.0f)
+	{
+		looking_right = !looking_right;
+		m_look_around_counter = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0f - 0.5f)));
+	}
+
+	m_idle_time_counter -= dt;
+	if (m_idle_time_counter <= 0.0f && m_path_points.size() > 0)
+	{
+		m_idle_time_counter = 2.0f;
+		if (m_path_step_counter < m_path_points.size() - 1)
+		{
+			m_path_step_counter++;
+		}
+		else
+		{
+			m_path_step_counter = 0;
+		}
+		state = EnemyState::Patrolling;
+		SetAnimation("IH_RUN");
+	}
+
 }
 
 void InfectedHazmat::UpdateRunningState(float dt)
@@ -195,7 +218,7 @@ void InfectedHazmat::SetAttacking()
 void InfectedHazmat::UpdateAttackingState(float dt)
 {
 
-	if (!left_player_touch && !right_player_touch)
+	if ((!left_player_touch && !right_player_touch) || !player_in_agro)
 	{
 		SetAnimation("IH_IDLE");
 		state = EnemyState::Idle;
@@ -243,4 +266,59 @@ void InfectedHazmat::UpdateDyingState(float dt)
 		//	LevelManager::world->DestroyBody(m_body);
 	}
 
+}
+
+void InfectedHazmat::UpdatePatrollingState(float dt)
+{
+
+	float patroll_speed = 2.0f;
+	m_next_point = m_path_points.at(m_path_step_counter).value();
+	int x = center_pos().x;
+	int y = center_pos().y;
+	int px = m_next_point.x * settings::tileSize;
+	int py = m_next_point.y * settings::tileSize;
+	m_body->SetLinearVelocity({ 0, 0 });
+	if (px > x)
+	{
+		looking_right = true;
+		m_body->SetLinearVelocity({ patroll_speed, m_body->GetLinearVelocity().y });
+	}
+	if (px < x)
+	{
+		looking_right = false;
+		m_body->SetLinearVelocity({ -patroll_speed, m_body->GetLinearVelocity().y });
+	}
+
+	if (player_in_agro)
+	{
+		CheckAgroSensor();
+		state = EnemyState::Running;
+		SetAnimation("IH_RUN");
+	}
+
+
+	if ((int)px == (int)x)
+	{
+		state = EnemyState::Idle;
+		SetAnimation("IH_IDLE");
+	}
+	
+
+	if (left_player_touch && player_in_dmg_zone)
+	{
+		SetAttacking();
+	}
+	else if (left_player_touch)
+	{
+		looking_right = false;
+	}
+
+	if (right_player_touch && player_in_dmg_zone)
+	{
+		SetAttacking();
+	}
+	else if (right_player_touch)
+	{
+		looking_right = true;
+	}
 }

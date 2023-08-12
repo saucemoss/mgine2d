@@ -53,6 +53,8 @@ class Animations
 public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
+	void InitializeTerminalAnimations();
+	void InitializeWCArmAnimations();
 	void InitializeNPCSec1Animations();
 	void InitializeNPCSec2Animations();
 	void InitializeRibbsAnimations();

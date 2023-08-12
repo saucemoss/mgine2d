@@ -11,6 +11,8 @@ Ribbs::Ribbs(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 14,
 	m_current_hp = m_max_hp;
 	//Physics body cfg
 	//add more mass 
+	sprite_offset_96 = { -42 , -34 };
+	sprite_offset_32 = { -10 ,-2 };
 
 	FixtureUserData* data = new FixtureUserData;
 	data->tag = ENEMY_GROUP;
@@ -87,7 +89,7 @@ void Ribbs::Die(int death_option)
 {
 
 	SetAnimation("RIBBS_DEAD");
-	PlaySound(SoundManager::sounds["hurt12"]);
+	PlaySound(SoundManager::sounds["hurt4"]);
 	PlaySound(SoundManager::sounds["slime2short"]);
 	state = EnemyState::Dying;
 }
@@ -97,17 +99,22 @@ void Ribbs::TakeDmg(int dmg)
 
 	if (state != EnemyState::Dying && dmg_counter >= 0.85f)
 	{
-		std::string dmgs[] = { "hit2","hit3","hit4" };
-		SoundManager::PlayRandSounds(dmgs, 3);
 		m_current_hp -= dmg;
 		taking_dmg = true;
 		dmg_counter = 0.0f;
-		state = EnemyState::Hurting;
-		SetAnimation("RIBBS_DMG");
-		
+		std::string dmgs[] = { "hit2","hit3","hit4" };
+		SoundManager::PlayRandSounds(dmgs, 3);
+		bleed_particles();
 		if (m_current_hp <= 0)
 		{
+
 			Die(1);
+		}
+		else
+		{
+			state = EnemyState::Hurting;
+			SetAnimation("RIBBS_DMG");
+			PlaySound(SoundManager::sounds["hurt3"]);
 		}
 	}
 

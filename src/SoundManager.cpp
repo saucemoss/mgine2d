@@ -93,6 +93,8 @@ void SoundManager::LoadSounds()
 	sounds.emplace("elevator", LoadSound("res/sound/collected/elevator.wav"));
 	sounds.emplace("elevator_stop", LoadSound("res/sound/collected/elevator_stop.wav"));
 	sounds.emplace("door_close", LoadSound("res/sound/collected/door_close.wav"));
+	sounds.emplace("light_ambient", LoadSound("res/sound/collected/lights_noise-01.wav"));
+	sounds.emplace("flicker", LoadSound("res/sound/collected/lights_noise-02.wav"));
 
 
 	sounds.emplace("step1", LoadSound("res/sound/steps/stepstone01.wav"));

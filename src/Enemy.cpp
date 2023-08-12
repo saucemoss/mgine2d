@@ -27,6 +27,13 @@ void Enemy::CheckTouchGround()
 	}
 }
 
+void Enemy::bleed_particles()
+{
+	ParticleEmitter* p = new ParticleEmitter(pos());
+	GameScreen::Particles->Add(DefinedEmitter::blood, p);
+	p->EmitParticles();
+}
+
 void Enemy::set_velocity_x(float vx)
 {
 	m_body->SetLinearVelocity({
@@ -54,17 +61,22 @@ void Enemy::Draw(int l)
 																CurrentFrame().width * -1,
 																CurrentFrame().height };
 	
-	if (!custom_pos)
+	switch ((int)CurrentFrame().width)
 	{
-		spritePosX = center_pos().x - 10;
-		spritePosY = center_pos().y - 1;
+	case 32:
+		spritePosX = (int)(center_pos().x + sprite_offset_32.x);
+		spritePosY = (int)(center_pos().y + sprite_offset_32.y);
+		break;
+	case 96:
+		spritePosX = (int)(center_pos().x + sprite_offset_96.x);
+		spritePosY = (int)(center_pos().y + sprite_offset_96.y);
+		break;
+	case 224:
+		spritePosX = (int)(center_pos().x + sprite_offset_224.x);
+		spritePosY = (int)(center_pos().y + sprite_offset_224.y);
+		break;
 	}
 
-	if (CurrentFrame().width == 96 && !custom_pos)
-	{
-		spritePosX = center_pos().x - 42;
-		spritePosY = center_pos().y - 33;
-	}
 
 	Color c = WHITE;
 	if (taking_dmg)

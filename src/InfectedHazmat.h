@@ -12,8 +12,14 @@
 class InfectedHazmat : public Enemy
 {
 public:
-    InfectedHazmat(const Rectangle& rectangle);
+    InfectedHazmat(const Rectangle& rectangle, const ldtk::ArrayField<ldtk::IntPoint> path_points);
     ~InfectedHazmat();
+
+    const ldtk::ArrayField<ldtk::IntPoint> m_path_points;
+    ldtk::IntPoint m_next_point;
+    int m_path_step_counter = 0;
+    float m_look_around_counter = 0.0f;
+    float m_idle_time_counter = 2.0f;
 
     void CheckAgroSensor();
     void SetAttacking();
@@ -36,6 +42,8 @@ public:
     virtual void UpdateHurtingState(float dt);
 
     virtual void UpdateDyingState(float dt);
+
+    void UpdatePatrollingState(float dt);
 
 };
 
