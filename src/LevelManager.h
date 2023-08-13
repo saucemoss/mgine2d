@@ -56,6 +56,9 @@ public:
     Texture2D decorationSpriteAtlas;
     RenderTexture2D decorationRenderTexture;
     Texture2D decorationRenderedLevelTexture;
+    //decors in front of player
+    RenderTexture2D decorationRenderTextureFront;
+    Texture2D decorationRenderedLevelTextureFront;
     //solids
     Texture2D laboratorySolidsSpriteAtlas;
     RenderTexture2D laboratorySolidsRenderTexture;
@@ -78,7 +81,7 @@ public:
 
     //Layer draw
     void DrawForeGround();
-    void DrawPerlin();
+    void DrawInFrontOfPlayer();
     float layer_scroll = 0.0f;
     Vector2 perlinPos1;
     Vector2 perlinPos2;

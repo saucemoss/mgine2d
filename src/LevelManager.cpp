@@ -147,7 +147,10 @@ void LevelManager::LoadLevel(std::string level_name)
 	int max = std::max(levelSize.x, levelSize.y);
 	GameScreen::shaders->RenderPerlinTexture = LoadRenderTexture(max, max);
 	GameScreen::shaders->PerlinTexture = GameScreen::shaders->RenderPerlinTexture.texture;
-	//SetTextureFilter(GameScreen::shaders->PerlinTexture, 3);
+
+	//Level elements in front of player
+	decorationRenderTextureFront = LoadRenderTexture(levelSize.x, levelSize.y);
+
 
 	//Draw render texture logic and objects setup
 	
@@ -294,6 +297,39 @@ void LevelManager::LoadLevel(std::string level_name)
 
 	EndTextureMode();
 	decorationRenderedLevelTexture = decorationRenderTexture.texture;
+
+	//FrontPlayerDecorElements
+	BeginTextureMode(decorationRenderTextureFront);
+	for (auto&& layer : currentLdtkLevel->allLayers())
+	{
+		auto& tileset = layer.getTileset();
+		if (layer.getName() == "FrontPlayerDecorElements")
+		{
+			for (auto&& tile : layer.allTiles())
+			{
+				auto source_pos = tile.getTextureRect();
+				auto tile_size = float(layer.getTileset().tile_size);
+
+				Rectangle source_rect = {
+					float(source_pos.x),
+					float(source_pos.y),
+					(tile.flipX ? -tile_size : tile_size),
+					(tile.flipY ? -tile_size : tile_size)
+				};
+				Rectangle rec = { (float)tile.getPosition().x ,
+								 (float)tile.getPosition().y ,
+								 tile_size , tile_size };
+				Vector2 target_pos = {
+								(float)tile.getPosition().x,
+								(float)tile.getPosition().y,
+				};
+				DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
+			}
+		}
+
+	}
+	EndTextureMode();
+	decorationRenderedLevelTextureFront = decorationRenderTextureFront.texture;
 
 
 	//Paralax Layers Draw
@@ -474,11 +510,6 @@ void LevelManager::LoadLevel(std::string level_name)
 			level_entities_safe.push_back(std::make_unique<Leggy>(rect));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
-		if (entity.getName() == "Footb")
-		{
-			level_entities_safe.push_back(std::make_unique<Football>(rect));
-			level_entities_safe.back().get()->m_draw_layers = 1;
-		}
 		if (entity.getName() == "HeadSpit")
 		{
 			level_entities_safe.push_back(std::make_unique<HeadSpit>(rect));
@@ -503,6 +534,15 @@ void LevelManager::LoadLevel(std::string level_name)
 			ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
 			level_entities_safe.push_back(std::make_unique<LevelPortal>(rect, target_lvl, portal_out));
 			
+		}
+		if (entity.getName() == "Footb")
+		{
+			Rectangle r = { (float)entity.getPosition().x + (float)entity.getSize().x / 2,
+					(float)entity.getPosition().y - 4,
+					(float)entity.getSize().x ,
+					(float)entity.getSize().y };
+			level_entities_safe.push_back(std::make_unique<Football>(r));
+			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
 	}
 	
@@ -542,8 +582,10 @@ void LevelManager::UnloadLevel()
 	UnloadTexture(decorationSpriteAtlas);
 	UnloadTexture(paralaxedBackgroundSpriteAtlas);
 	UnloadTexture(paralaxedForegroundSpriteAtlas);
+	UnloadTexture(decorationRenderedLevelTextureFront);
 	UnloadTexture(GameScreen::shaders->PerlinTexture);
 	UnloadRenderTexture(GameScreen::shaders->RenderPerlinTexture);
+	UnloadRenderTexture(decorationRenderTextureFront);
 	UnloadRenderTexture(paralaxBackgroundRenderTexture);
 	UnloadRenderTexture(paralaxedForegroundRenderTexture);
 	UnloadRenderTexture(laboratorySolidsRenderTexture);
@@ -691,6 +733,15 @@ void LevelManager::DrawForeGround()
 	DrawTexturePro(paralaxedForegroundRenderedLevelTexture,
 		{ 0, 0, (float)paralaxedForegroundRenderedLevelTexture.width, (float)-paralaxedForegroundRenderedLevelTexture.height },//source
 		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y }, //dest
+		{ 0,0 }, 0, WHITE);
+}
+
+void LevelManager::DrawInFrontOfPlayer()
+{
+	ClearBackground(BLANK);
+	DrawTexturePro(decorationRenderedLevelTextureFront,
+		{ 0, 0, (float)decorationRenderedLevelTextureFront.width, (float)-decorationRenderedLevelTextureFront.height },
+		{ 0, 0, (float)levelSize.x ,(float)levelSize.y },
 		{ 0,0 }, 0, WHITE);
 }
 

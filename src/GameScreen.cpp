@@ -173,6 +173,7 @@ void GameScreen::Draw()
 	shaders->DrawOutlines();			// Outline shader
 	player->Draw(0);					// Player		
 	EnitityManager::Draw(1);			// Entities/Objects in front of player
+	LevelMgr->DrawInFrontOfPlayer();	// Decoration Level elements in front of player
 	Particles->Draw(1, c_position);		// Particles
 	LevelMgr->lights->DrawLightMask();	// Darkness and lights
 	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
