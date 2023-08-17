@@ -206,16 +206,17 @@ void Ribbs::UpdateDyingState(float dt)
 	if (AnimationEnded())
 	{
 		m_destroy = true;
-		if (!LevelManager::world->IsLocked())
+		if (!spawned_leggy)
 		{
 			Rectangle r = { center_pos().x,center_pos().y, 13,30 };
-			//LevelManager::world->DestroyBody(m_body);
 			LevelManager::level_entities_safe.push_back(std::make_unique<Leggy>(r));
-			LevelManager::level_entities_safe.back().get()->m_draw_layers = 1;
 			Leggy* l = reinterpret_cast<Leggy*>(LevelManager::level_entities_safe.back().get());
+			l->m_draw_layers = 1;;
 			l->state = EnemyState::Spawning;
 			l->SetAnimation("LEGGY_STAND");
+			spawned_leggy = true;
 		}
+
 			
 	}
 }

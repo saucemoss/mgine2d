@@ -20,6 +20,8 @@ public:
 	void ResetShaders();
     void DrawOutlines();
 	void DrawPerlin();
+	void Pixelize();
+
 
 	RenderTexture2D RenderOutlineShaderTexture;
 	Texture2D OutlineShaderTexture;
@@ -42,5 +44,6 @@ public:
 	int offsetLoc;
 	int timeLoc;
 
+	Shader pixelizer;
 
 };

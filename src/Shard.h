@@ -41,15 +41,18 @@ public:
 
 		for (Rectangle r : recs)
 		{
-			Rectangle pos = { center_pos.x, center_pos.y, rect.width / shard_number, rect.height / shard_number };
+			float rand_spot = -4.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 4.0f));
+			Rectangle pos = { center_pos.x + rand_spot, center_pos.y, rect.width / shard_number, rect.height / shard_number };
 			LevelManager::level_entities_safe.push_back(std::make_unique<Shard>(sprite, 
 				r, pos, time_to_live));
 			Collidable* c = dynamic_cast<Shard*>(LevelManager::level_entities_safe.back().get());
-
+			c->m_fixture->SetDensity(40.0f);
+			c->m_body->ResetMassData();
 			float randx = -max_force + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (max_force)));
 			float randy = 0.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (-max_force)));
 
 			const b2Vec2 impulse = { randx, randy };
+			
 			c->m_body->ApplyLinearImpulseToCenter(impulse, true);
 			//c->m_body->SetEnabled(false);
 		}

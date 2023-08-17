@@ -1,15 +1,14 @@
 #include "Shaders.h"
 #include "Settings.h"
+#include "GameScreen.h"
 
 Shaders::Shaders()
 {
-
+	//outline
 	shdrOutline = LoadShader(0, TextFormat("res/shaders/glsl%i/outline2.fs", GLSL_VERSION));
-	// Get shader locations
 	int outlineSizeLoc = GetShaderLocation(shdrOutline, "outlineSize");
 	int outlineColorLoc = GetShaderLocation(shdrOutline, "outlineColor");
 	int textureSizeLoc = GetShaderLocation(shdrOutline, "textureSize");
-	// Set shader values (they can be changed later)
 	SetShaderValue(shdrOutline, outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
 	SetShaderValue(shdrOutline, outlineColorLoc, outlineColor, SHADER_UNIFORM_VEC4);
 	SetShaderValue(shdrOutline, textureSizeLoc, textureSize, SHADER_UNIFORM_VEC2);
@@ -17,7 +16,7 @@ Shaders::Shaders()
 	RenderOutlineShaderTexture = LoadRenderTexture(settings::screenWidth, settings::screenHeight);
 	OutlineShaderTexture = RenderOutlineShaderTexture.texture;
 
-
+	//perlin
 	perlinShader = LoadShader(0, TextFormat("res/shaders/glsl%i/perlin.fs", GLSL_VERSION));
 	scaleLoc = GetShaderLocation(perlinShader, "scale");
 	offsetLoc = GetShaderLocation(perlinShader, "offset");
@@ -26,6 +25,9 @@ Shaders::Shaders()
 	SetShaderValue(perlinShader, scaleLoc, &scale, SHADER_UNIFORM_FLOAT);
 	SetShaderValue(perlinShader, offsetLoc, offset, SHADER_UNIFORM_VEC2);
 	
+	//pixelizer
+	pixelizer = LoadShader(0, TextFormat("resources/shaders/glsl%i/pixelizer.fs", GLSL_VERSION));
+
 }
 
 
@@ -82,4 +84,14 @@ void Shaders::DrawPerlin()
 		{ 0, 0, (float)PerlinTexture.width, -(float)PerlinTexture.height },
 		{ 0, 0, (float)PerlinTexture.width, (float)PerlinTexture.height },
 		{ 0, 0 }, 0.0f, Fade(WHITE, 0.4f));
+}
+
+void Shaders::Pixelize()
+{
+	BeginShaderMode(pixelizer);
+	DrawTexturePro(GameScreen::Particles->ParticlesTexture,
+		{ 0, 0, (float)GameScreen::Particles->ParticlesTexture.width, -(float)GameScreen::Particles->ParticlesTexture.height },
+		{ 0, 0, (float)GameScreen::Particles->ParticlesTexture.width, (float)GameScreen::Particles->ParticlesTexture.height },
+		{ 0, 0 }, 0.0f, WHITE);
+	EndShaderMode();
 }

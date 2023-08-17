@@ -373,6 +373,7 @@ void Player::UpdateIdleState(float dt)
 	{
 		SetAnimation("P_RECLAIM");
 		state = PlayerState::AxeReclaim;
+		PlaySound(SoundManager::sounds["creepy_whistle"]);
 	}
 
 	if ((IsKeyDown(KEY_Q) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) && m_has_axe)
@@ -476,6 +477,7 @@ void Player::UpdateRunningState(float dt)
 	{
 		SetAnimation("P_RECLAIM");
 		state = PlayerState::AxeReclaim;
+		PlaySound(SoundManager::sounds["creepy_whistle"]);
 	}
 
 }
@@ -861,12 +863,14 @@ void Player::UpdateAxeReclaimState(float dt)
 		m_has_axe = true;
 		PlayFromFrame(14, "P_RECLAIM");
 		PlaySound(SoundManager::sounds["axe_pickup"]);
+		//StopSound(SoundManager::sounds["creepy_whistle"]);
 		
 	}
 	else if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)) && AnimationEnded())
 	{
 		m_has_axe = true;
 		PlaySound(SoundManager::sounds["axe_pickup"]);
+		//StopSound(SoundManager::sounds["creepy_whistle"]);
 		SetAnimation("P_IDLE");
 		if (button_pressed_counter >= 1.71f)
 		{
@@ -882,16 +886,17 @@ void Player::UpdateAxeReclaimState(float dt)
 		p->EmitParticles();
 		state = PlayerState::Idle;
 		SetAnimation("P_IDLE");
+		//StopSound(SoundManager::sounds["creepy_whistle"]);
 	}
 }
 
 void Player::UpdateSafePos(float dt)
 {
 	safe_pos_counter -= dt;
-	if (state != PlayerState::Hurting && !taking_dmg && safe_pos_counter <=0.0f && is_touching_floor)
+	if (state != PlayerState::Hurting && !taking_dmg && safe_pos_counter <=0.0f && is_touching_floor && is_standing_on_solid)
 	{
 		last_safe_pos = pos();
-		safe_pos_counter = 4.0f;
+		safe_pos_counter = 3.0f;
 	}
 
 	if (!m_body->GetWorld()->IsLocked() && !Vector2Equals(new_pos, old_pos))

@@ -23,6 +23,12 @@ void ElevatorCallSwitch::Update(float dt)
 {
 	SwitchFrames(dt);
 
+	if (player_in_sensor && (state != ECallSwitchState::PRESSED && !ElevatorAtSwitch()))
+	{
+		Rectangle source = { center_pos().x,center_pos().y,settings::tileSize,settings::tileSize};
+		GameScreen::shaders->ApplyOutline(*sprite, CurrentFrame(), source, {0,0}, 0.0f);
+	}
+
 	switch (state)
 	{
 	case ECallSwitchState::IDLE:
@@ -42,7 +48,6 @@ void ElevatorCallSwitch::Update(float dt)
 		{
 			SetAnimation("ELEV_SW_IDLE");
 			state = ECallSwitchState::IDLE;
-
 		}
 		break;
 	}

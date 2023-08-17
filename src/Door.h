@@ -9,7 +9,8 @@ enum class DoorState
     Open,
     Closed,
     Opening,
-    Closing
+    Closing,
+    Locked,
 };
 
 
@@ -23,6 +24,12 @@ public:
     bool m_is_right = true;
     bool m_is_active = true;
     bool player_in_sensor = false;
+    bool locked = false;
+    bool denied_played = false;
+    int terminal_unlocks;
+
+    ldtk::ArrayField<ldtk::EntityRef> refs;
+
     b2Fixture* sensor;
     Sound my_engine_sound;
 

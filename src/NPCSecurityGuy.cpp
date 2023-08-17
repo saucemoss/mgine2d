@@ -52,6 +52,7 @@ void NPCSecurityGuy::Update(float dt)
 		GameScreen::shaders->ApplyOutline(*sprite, cframe, source, { 0,0 }, 0.0f);
 	}
 
+
 	switch (state)
 	{
 	case Idling:
@@ -62,7 +63,7 @@ void NPCSecurityGuy::Update(float dt)
 		}
 		if (player_in_sensor)
 		{
-			if (DialogueManager::DialogBoxExhausted())
+			if (DialogueManager::DialogueExhausted(6))
 			{
 				state = TalkingOption2;
 				SetAnimation("SEC1_TALK");
@@ -86,7 +87,7 @@ void NPCSecurityGuy::Update(float dt)
 			SetAnimation("SEC1_IDLE");
 			DialogueManager::EndDialogue();
 		}
-		else if (!DialogueManager::DialogBoxExhausted())
+		else if (!DialogueManager::DialogueExhausted(6))
 		{
 			DialogueManager::StartDialogue(1, center_pos());
 		}
@@ -101,15 +102,15 @@ void NPCSecurityGuy::Update(float dt)
 		if (!player_in_sensor)
 		{
 			state = Idling;
-			SetAnimation("SEC1_IDLE");
-			dialogue7_exhausted = false;
+			SetAnimation("SEC1_IDLE"); 
 			DialogueManager::EndDialogue();
+			DialogueManager::ResetDialogue(7);
 		}
-		else if (!dialogue7_exhausted)
+		else if (!DialogueManager::DialogueExhausted(7))
 		{
 			DialogueManager::StartDialogue(7, center_pos());
-			dialogue7_exhausted = true;
 		}
+
 		break;
 
 	case Running:

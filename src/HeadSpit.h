@@ -7,6 +7,7 @@ public:
 	HeadSpit(const Rectangle& rectangle);
 	~HeadSpit();
 	bool shot = false;
+	float attack_counter;
 
 	// Inherited via Enemy
 	virtual void Update(float dt) override;

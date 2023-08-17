@@ -12,10 +12,10 @@ enum DialogueState
 	Writing, Idle, Exhausted
 };
 
-class Dialogue
+class DialogueLine
 {
 public:
-	Dialogue(int id, std::string text, int next_id)
+	DialogueLine(int id, std::string text, int next_id)
 		:
 		id(id), text(text), next_id(next_id)
 	{
@@ -48,13 +48,10 @@ class DialogueManager
 {
 public:
 	static DialogueState state;
-	static std::unordered_map<int, Dialogue> DialogueMap;
+	static std::unordered_map<int, DialogueLine> DialogueMap;
+	static std::vector<int> used_lines;
 	static void InitDialogues();
 	static std::vector<std::unique_ptr<DialogueBox>> DialogueBoxes;
-	static bool DialogBoxExhausted()
-	{
-		return state == Exhausted;
-	}
 
 	static void DrawDialogues()
 	{
@@ -71,12 +68,11 @@ public:
 		}
 	}
 
-
 	static void EndDialogue()
 	{
-		state = Exhausted;
 		DialogueBoxes.clear();
 		GameScreen::player->state = PlayerState::Idle;
+		state = Exhausted;
 	}
 	static void StartDialogue(int i, Vector2 pos)
 	{
@@ -87,6 +83,18 @@ public:
 			DialogueBoxes.push_back(std::make_unique<DialogueBox>(Vector2{ pos.x - 32.0f, pos.y - 40.0f }, Vector2{ 90.0f, 30.0f }, i));
 		}
 		
+	}
+
+	static bool DialogueExhausted(int d)
+	{
+		return std::find(used_lines.begin(), used_lines.end(), d) != used_lines.end();
+	}
+	
+	static void ResetDialogue(int d)
+	{
+		std::vector<int>::iterator it = std::find(used_lines.begin(), used_lines.end(), d);
+		if (it != used_lines.end())
+			used_lines.erase(it);
 	}
 };
 

@@ -24,7 +24,7 @@ MovingBlock::~MovingBlock()
 void MovingBlock::Draw(int l)
 {
 	auto spritePosX = center_pos().x;
-	auto spritePosY = center_pos().y;
+	auto spritePosY = center_pos().y - 4.0f;
 
 	DrawTexturePro(*sprite,
 		CurrentFrame(),
@@ -41,7 +41,7 @@ void MovingBlock::Update(float dt)
 	int x = center_pos().x;
 	int y = center_pos().y;
 	int px = m_next_point.x * settings::tileSize;
-	int py = m_next_point.y * settings::tileSize;
+	int py = m_next_point.y * settings::tileSize + 4.0f;
 	m_body->SetLinearVelocity({ 0, 0 });
 	if (px > x)
 	{
@@ -73,13 +73,6 @@ void MovingBlock::Update(float dt)
 		}
 	}
 
-	m_rectangle =
-	{
-		pos().x - m_rectangle.width / 2,
-		pos().y - m_rectangle.height / 2,
-		m_rectangle.width,
-		m_rectangle.height
-	};
 
 }
 

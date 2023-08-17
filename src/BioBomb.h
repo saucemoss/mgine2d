@@ -8,7 +8,11 @@ class BioBomb : public Entity, public Collidable, public Animated
 public:
 	BioBomb(const Rectangle& rect);
 	~BioBomb();
-	
+
+	Vector2 target;
+
+	bool axed = false;
+	float time_to_live;
 	// Inherited via Entity
 	virtual void Draw(int l) override;
 	virtual void Update(float dt) override;

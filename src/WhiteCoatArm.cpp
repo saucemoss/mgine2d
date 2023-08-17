@@ -56,9 +56,6 @@ WhiteCoatArm::~WhiteCoatArm()
 void WhiteCoatArm::Update(float dt)
 {
 	SwitchFrames(dt);
-
-
-
 	CheckTouchGround();
 	CheckAgroSensor();
 
@@ -86,21 +83,7 @@ void WhiteCoatArm::Update(float dt)
 void WhiteCoatArm::Die(int death_option)
 {
 
-	//switch (death_option)
-	//{
-	//case 1:
-	//	SetAnimation("IH_DEATH");
-	//	PlaySound(SoundManager::sounds["hurt12"]);
-	//	PlaySound(SoundManager::sounds["slime2short"]);
-	//	break;
-	//case 2:
-	//	solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
-	//	PlaySound(SoundManager::sounds["hurt9"]);
-	//	PlaySound(SoundManager::sounds["splat5"]);
-	//	PlaySound(SoundManager::sounds["splat1"]);
-	//	PlaySound(SoundManager::sounds["slime1"]);
-	//	break;
-	//}
+	SetAnimation("WCARM_DEAD");
 	state = EnemyState::Dying;
 	PlaySound(SoundManager::sounds["hurt7"]);
 }

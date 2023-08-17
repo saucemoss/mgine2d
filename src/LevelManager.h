@@ -73,22 +73,20 @@ public:
     Texture2D paralaxedBackgroundRenderedLevelTexture;
     
     
-    //perlin noise test
+    //perlin noise 
     Texture2D perlin;
-    Texture2D perlin2;
-    float perlin_time_count = 0.0f;
+    bool level_fog_on = false;
 
 
     //Layer draw
     void DrawForeGround();
     void DrawInFrontOfPlayer();
     float layer_scroll = 0.0f;
-    Vector2 perlinPos1;
-    Vector2 perlinPos2;
 
     //Level Particles
     ParticleEmitter* level_ambient_particles;
     ParticleEmitter* level_particles_foreground;
+    bool level_particles_on;
     
     //Object containers
     static std::vector<std::unique_ptr<Collidable>> solid_tiles;

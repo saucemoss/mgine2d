@@ -37,7 +37,7 @@ void Terminal::Update(float dt)
 {
 	SwitchFrames(dt);
 
-	if (player_in_sensor)
+	if (player_in_sensor && state != TerminalState::Pass)
 	{
 		auto spritePosX = center_pos().x ;
 		auto spritePosY = center_pos().y ;
@@ -53,9 +53,15 @@ void Terminal::Update(float dt)
 			SetAnimation("TERM_PASS");
 			state = TerminalState::Pass;
 			PlaySound(SoundManager::sounds["call_sw"]);
+			PlaySound(SoundManager::sounds["pc_work"]);
 		}
 		break;
 	case TerminalState::Pass:
+		if (AnimationEnded())
+		{
+			FreezeFrame("TERM_PASS", 14);
+			StopSound(SoundManager::sounds["pc_work"]);
+		}
 		break;
 	}
 

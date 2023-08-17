@@ -47,6 +47,7 @@ public:
 
     //Movement Control
     bool is_touching_floor = false;
+    bool is_standing_on_solid = false;
     bool left_wall_touch = false;
     bool right_wall_touch = false;
     bool looking_right = true;

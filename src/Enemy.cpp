@@ -5,7 +5,11 @@
 Enemy::Enemy(const Rectangle& rectangle, ColliderTag tag) :
 	Collidable({ rectangle.x,rectangle.y,rectangle.width,rectangle.height}, b2_dynamicBody, tag)
 {
-	EnitityManager::Add(this);
+	if (!queue_entity_add)
+	{
+		EnitityManager::Add(this);
+	}
+
 	state = EnemyState::Idle;
 
 	// Add mappings for debug purposes
@@ -83,7 +87,7 @@ void Enemy::Draw(int l)
 	{
 		c = int(dmg_counter*9) % 2 == 0 ? RED : WHITE;
 	}
-	if (state == EnemyState::Hurting)
+	if (state == EnemyState::Hurting || state == EnemyState::Dying)
 	{
 		c = RED;
 	}

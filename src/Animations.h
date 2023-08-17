@@ -53,6 +53,9 @@ class Animations
 public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
+	void InitializeBossGlassAnimations();
+	void InitializeGateAnimations();
+	void InitializeAxePickupAnimations();
 	void InitializeTerminalAnimations();
 	void InitializeWCArmAnimations();
 	void InitializeNPCSec1Animations();

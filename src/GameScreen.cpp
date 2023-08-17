@@ -21,6 +21,7 @@ bool GameScreen::debug = false;
 ParticlesManager* GameScreen::Particles;
 float GameScreen::shake;
 float GameScreen::trauma;
+bool GameScreen::lock_camera;
 
 
 
@@ -80,40 +81,49 @@ void GameScreen::UpdateCamera(float dt)
 	static float minEffectLength = 4.0f;
 	static float fractionSpeed = 4.0f;
 
+	if (!lock_camera)
+	{
 
-	camera.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
-	Vector2 diff = Vector2Subtract({ player->pos().x,player->pos().y - y_offset }, camera.target);
-	float length = Vector2Length(diff);
+		camera.offset = { settings::screenWidth / 2.0f, settings::screenHeight / 2.0f };
+		Vector2 diff = Vector2Subtract({ player->pos().x,player->pos().y - y_offset }, camera.target);
+		float length = Vector2Length(diff);
 
-	if (length > minEffectLength)
-	{
-		float speed = fmaxf(fractionSpeed * length, minSpeed);
-		camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed * dt / length));
-	}
+		if (length > minEffectLength)
+		{
+			float speed = fmaxf(fractionSpeed * length, minSpeed);
+			camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed * dt / length));
+		}
 
-	auto levelSize = LevelMgr->currentLdtkLevel->size;
-	float minX = 0.0f, minY = 0.0f, maxX = levelSize.x , maxY = levelSize.y ;
-	Vector2 max = GetWorldToScreen2D({ maxX, maxY }, camera);
-	Vector2 min = GetWorldToScreen2D({ minX, minY }, camera);
-	if (max.x < settings::screenWidth)
-	{
-		camera.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
-		player_focused_cam.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
+		auto levelSize = LevelMgr->currentLdtkLevel->size;
+		float minX = 0.0f, minY = 0.0f, maxX = levelSize.x, maxY = levelSize.y;
+		Vector2 max = GetWorldToScreen2D({ maxX, maxY }, camera);
+		Vector2 min = GetWorldToScreen2D({ minX, minY }, camera);
+		if (max.x < settings::screenWidth)
+		{
+			camera.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
+			player_focused_cam.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
+		}
+		if (max.y < settings::screenHeight)
+		{
+			camera.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
+			player_focused_cam.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
+		}
+		if (min.x > 0)
+		{
+			camera.offset.x = settings::screenWidth / 2 - min.x;
+			player_focused_cam.offset.x = settings::screenWidth / 2 - min.x;
+		}
+		if (min.y > 0)
+		{
+			camera.offset.y = settings::screenHeight / 2 - min.y;
+			player_focused_cam.offset.y = settings::screenHeight / 2 - min.y;
+		}
 	}
-	if (max.y < settings::screenHeight)
+	else
 	{
-		camera.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
-		player_focused_cam.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
-	}
-	if (min.x > 0)
-	{
-		camera.offset.x = settings::screenWidth / 2 - min.x;
-		player_focused_cam.offset.x = settings::screenWidth / 2 - min.x;
-	}
-	if (min.y > 0)
-	{
-		camera.offset.y = settings::screenHeight / 2 - min.y;
-		player_focused_cam.offset.y = settings::screenHeight / 2 - min.y;
+		camera.target = { (float)LevelMgr->currentLdtkLevel->size.x / 2, (float)LevelMgr->currentLdtkLevel->size.y / 2 };
+		camera.offset.y = settings::screenHeight / 2;
+		camera.offset.x = settings::screenWidth / 2;
 	}
 
 	//Camera shake
@@ -157,7 +167,11 @@ Screens GameScreen::Update(float dt)
 	EnitityManager::Update(dt);
 	DialogueManager::UpdateDialogues(dt);
 	Particles->Update(dt);
-	shaders->ApplyPerlin();
+	if (LevelMgr->level_fog_on)shaders->ApplyPerlin();
+
+	Vector2 c_position = { (camera.offset.x / camera.zoom - camera.target.x) , (camera.offset.y / camera.zoom - camera.target.y) };
+	Particles->Draw(1, c_position);					// Particles
+	Particles->Draw(2, c_position);					// Particles
 	return Screens::NONE;
 }
 
@@ -166,35 +180,33 @@ void GameScreen::Draw()
 	Vector2 c_position = { (camera.offset.x / camera.zoom - camera.target.x) , (camera.offset.y / camera.zoom - camera.target.y) };
 	BeginMode2D(trauma > 0.0f ? shake_cam : camera);				
 	
-					// THE HOLY DRAW ORDER: //
-	LevelMgr->Draw();					// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
-	EnitityManager::Draw(0);			// Entities/Objects behind player
-	shaders->DrawPerlin();				// Perlin noise mask
-	shaders->DrawOutlines();			// Outline shader
-	player->Draw(0);					// Player		
-	EnitityManager::Draw(1);			// Entities/Objects in front of player
-	LevelMgr->DrawInFrontOfPlayer();	// Decoration Level elements in front of player
-	Particles->Draw(1, c_position);		// Particles
-	LevelMgr->lights->DrawLightMask();	// Darkness and lights
-	LevelMgr->DrawForeGround();			// Paralaxed foreground Level layer
-	Particles->Draw(2, c_position);		// Particles foreground
-	
-	EndMode2D();						// Vignette
-	DrawVignette();						// Vignette
-	BeginMode2D(trauma > 0.0f ? shake_cam : camera); // Vignette
+	////////////////////////////////////////////////// THE HOLY DRAW ORDER: //////////////////////////////////////////////////////
+
+	LevelMgr->Draw();								// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
+	EnitityManager::Draw(0);						// Entities/Objects behind player
+	if(LevelMgr->level_fog_on)shaders->DrawPerlin();// Perlin noise mask
+	shaders->DrawOutlines();						// Outline shader
+	player->Draw(0);								// Player		
+	EnitityManager::Draw(1);						// Entities/Objects in front of player
+	LevelMgr->DrawInFrontOfPlayer();				// Decoration Level elements in front of player
+	LevelMgr->lights->DrawLightMask();				// Darkness and lights
+	LevelMgr->DrawForeGround();						// Paralaxed foreground Level layer
+	shaders->Pixelize();							// Pixelised particles
+
+	EndMode2D();									// Vignette
+	DrawVignette();									// Vignette
+	BeginMode2D(trauma > 0.0f ? shake_cam : camera);// Vignette
 	 
-	player->DrawUI();					// Player UI
-	DialogueManager::DrawDialogues();	// Dialogue Boxes
+	player->DrawUI();								// Player UI
+	DialogueManager::DrawDialogues();				// Dialogue Boxes
 
 
-	//DEBUG:
+	//DEBUG 2D CAM:
 	if (debug)
 	{
 		////player states
 		//std::string stateStr = "" + player->StatesStrMap[player->state];
 		//DrawText(stateStr.c_str(), player->center_pos().x, player->center_pos().y -50, 20, BLACK);
-
-		
 		//DrawText(std::to_string(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)).c_str(), player->center_pos().x, player->center_pos().y - 50, 20, BLACK);
 		////player animations
 		//std::string animStr = "Anim: " + player->animations->m_CurrentActiveAnimation + " :: " +
@@ -202,13 +214,12 @@ void GameScreen::Draw()
 		//DrawText(animStr.c_str(), player->x, player->y-70, 20, BLACK);
 		//player contacts
 		//DrawText(player->contact_debug_str.c_str(), player->pos().x, player->pos().y - 100, 1, GREEN);
-
-
-
 		DebugShapes();
 	}
 
-	EndMode2D();
+	EndMode2D();									// END 2D Cam mode
+
+	
 	std::string hp = "HP: " + std::to_string(player->current_hp) + " / " + std::to_string(player->m_max_hp);
 	DrawText(hp.c_str(), 40, 40, 40, GREEN);
 	DrawFPS(5, 5);

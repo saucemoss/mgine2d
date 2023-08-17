@@ -18,7 +18,8 @@ HeadSpit::HeadSpit(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.
 	m_fixture->SetDensity(5000.0f);
 	m_body->ResetMassData();
 	//player agro sensor
-	util::SimpleSensor(m_body, "hspit_att", 6.0f, 2.0f, -3.0, 0.0);
+	util::SimpleCircleSensor(m_body, "hspit_att", 150.0f, 0.0f, 0.0f);
+
 
 }
 
@@ -83,8 +84,12 @@ void HeadSpit::UpdateIdleState(float dt)
 {
 	if (player_in_dmg_zone)
 	{
-		PlayFromFrame(2, "HSPIT_ATT");
-		state = EnemyState::Attacking;
+		attack_counter -= dt;
+		if (attack_counter <= 0.0f)
+		{
+			SetAnimation("HSPIT_ATT");
+			state = EnemyState::Attacking;
+		}
 	}
 
 }
@@ -92,23 +97,34 @@ void HeadSpit::UpdateIdleState(float dt)
 
 void HeadSpit::UpdateAttackingState(float dt)
 {
+	if (animation->GetCurrentFrameNum() == 0 && shot)
+	{
+		shot = false;
+		SetAnimation("HSPIT_IDLE");
+		state = EnemyState::Idle;
+		attack_counter = 1.0f;
+	}
+
 	if (!player_in_dmg_zone && AnimationEnded())
 	{
 		SetAnimation("HSPIT_IDLE");
 		state = EnemyState::Idle;
 		shot = false;
 	}
-	else if (animation->GetCurrentFrameNum() >= 6 &&
-		player_in_dmg_zone && shot == false)
+	else if (animation->GetCurrentFrameNum() >= 3 &&
+		player_in_dmg_zone && !shot)
 	{
 		shot = true;
 		PlaySound(SoundManager::sounds["splat4"]);
-		//GameScreen::player->take_dmg(10);
-		Rectangle rect = Rectangle{ center_pos().x , center_pos().y - 1.0f , 16, 16 };
+
+		Rectangle rect = Rectangle{ center_pos().x , center_pos().y - 8.0f , 16, 16 };
 		LevelManager::level_entities_safe.push_back(std::make_unique<BioBomb>(rect));
 		BioBomb* bomb = reinterpret_cast<BioBomb*>(LevelManager::level_entities_safe.back().get());
-		bomb->m_body->ApplyAngularImpulse((looking_right ? 30.5f : -30.5f), true);
-		bomb->m_body->ApplyLinearImpulseToCenter({ -100.0f, -100.0f }, true);
+
+		ParticleEmitter* p = new ParticleEmitter({pos().x + 4.0f, pos().y - 10.0f});
+		GameScreen::Particles->Add(DefinedEmitter::acid_head_burst, p);
+		p->EmitParticles();
+
 	}
 }
 

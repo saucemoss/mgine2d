@@ -6,7 +6,7 @@ class Ribbs : public Enemy
 public:
 	Ribbs(const Rectangle& rectangle);
 	~Ribbs();
-
+	bool spawned_leggy = false;
 
 	// Inherited via Enemy
 	virtual void Update(float dt) override;

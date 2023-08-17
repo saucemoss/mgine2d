@@ -2,7 +2,7 @@
 #include <string>
 #include <raylib.h>
 #include <box2d.h>
-
+#include "Settings.h"
 
 
 namespace util
@@ -22,6 +22,21 @@ namespace util
 	{
 		b2PolygonShape shape;
 		shape.SetAsBox(width, height, b2Vec2(pos_x, pos_y), 0);
+		FixtureUserData* sesnor_name = new FixtureUserData;
+		sesnor_name->name = name;
+		b2FixtureDef fDef;
+		fDef.isSensor = true;
+		fDef.shape = &shape;
+		fDef.userData.pointer = reinterpret_cast<uintptr_t>(sesnor_name);
+		return body->CreateFixture(&fDef);
+	}
+
+	static b2Fixture* SimpleCircleSensor(b2Body* body, std::string name, float radius, float pos_x = 0.0f, float pos_y = 0.0f)
+	{
+		b2CircleShape shape;
+
+		shape.m_radius = radius / settings::PPM;
+		shape.m_p.Set(pos_x, pos_y);
 		FixtureUserData* sesnor_name = new FixtureUserData;
 		sesnor_name->name = name;
 		b2FixtureDef fDef;

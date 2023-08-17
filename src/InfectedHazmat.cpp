@@ -273,9 +273,9 @@ void InfectedHazmat::UpdatePatrollingState(float dt)
 
 	float patroll_speed = 2.0f;
 	m_next_point = m_path_points.at(m_path_step_counter).value();
-	int x = center_pos().x;
+	int x = pos().x;
 	int y = center_pos().y;
-	int px = m_next_point.x * settings::tileSize;
+	int px = m_next_point.x * settings::tileSize + settings::tileSize/2;
 	int py = m_next_point.y * settings::tileSize;
 	m_body->SetLinearVelocity({ 0, 0 });
 	if (px > x)

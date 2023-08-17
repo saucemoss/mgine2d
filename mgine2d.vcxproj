@@ -154,6 +154,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Acid.cpp" />
+    <ClCompile Include="src\AxePickup.cpp" />
+    <ClCompile Include="src\BossGlass.cpp" />
+    <ClCompile Include="src\Gate.cpp" />
     <ClCompile Include="src\Particles.cpp" />
     <ClCompile Include="src\BioBomb.cpp" />
     <ClCompile Include="src\AnimatedDecor.cpp" />
@@ -192,6 +195,9 @@
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BossGlass.h" />
+    <ClInclude Include="src\Gate.h" />
+    <ClInclude Include="src\AxePickup.h" />
     <ClInclude Include="src\Acid.h" />
     <ClInclude Include="src\Shaders.h" />
     <ClInclude Include="src\Particles.h" />

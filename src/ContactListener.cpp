@@ -13,6 +13,10 @@
 #include "WoodCrate.h"
 #include "WhiteCoatArm.h"
 #include "Terminal.h"
+#include "AxePickup.h"
+#include "Gate.h"
+#include "BioBomb.h"
+#include "BossGlass.h"
 
 std::map<ColliderTag, std::string> ContactListener::ColStrMap;
 
@@ -40,6 +44,10 @@ ContactListener::ContactListener()
 	ColStrMap[ColliderTag::SHARD] = "SHARD";
 	ColStrMap[ColliderTag::ACID] = "ACID";
 	ColStrMap[ColliderTag::TERMNIAL] = "TERMNIAL";
+	ColStrMap[ColliderTag::AXEPICKUP] = "AXEPICKUP";
+	ColStrMap[ColliderTag::GATE] = "GATE";
+	ColStrMap[ColliderTag::BIOBOMB] = "BIOBOMB";
+	ColStrMap[ColliderTag::BOSSGLASS] = "BOSSGLASS";
 }
 
 void ContactListener::BeginContact(b2Contact* contact)
@@ -119,6 +127,36 @@ void ContactListener::BeginContact(b2Contact* contact)
 				}
 				GameScreen::add_trauma(0.6f);
 			}
+			if (other == "GATE")
+			{
+				Gate* g = static_cast<Gate*>(other_c);
+				g->TakeDmg(1);
+				ParticleEmitter* p = new ParticleEmitter(g->pos());
+				GameScreen::Particles->Add(DefinedEmitter::dust, p);
+
+				for (int i = 0; i < 5; i++)
+				{
+					p->EmitParticles();
+				}
+				GameScreen::add_trauma(0.6f);
+			}
+			if (other == "BIOBOMB")
+			{
+				BioBomb* bb = static_cast<BioBomb*>(other_c);
+				bb->axed = true;
+				ParticleEmitter* p = new ParticleEmitter(bb->pos());
+				GameScreen::Particles->Add(DefinedEmitter::dust, p);
+
+				for (int i = 0; i < 5; i++)
+				{
+					p->EmitParticles();
+				}
+				GameScreen::add_trauma(0.6f);
+				PlaySound(SoundManager::sounds["hit7"]);
+				PlaySound(SoundManager::sounds["splat8"]);
+				PlaySound(SoundManager::sounds["swish9"]);
+
+			}
 			if (!other_fixture->IsSensor())
 			{
 				other_c->m_body->ApplyLinearImpulseToCenter((GameScreen::player->looking_right ? b2Vec2{ 200.f, 0.0f } : b2Vec2{ -200.0f, 0.0f }), true);
@@ -132,6 +170,11 @@ void ContactListener::BeginContact(b2Contact* contact)
 			{
 				player_floor_contacts++;
 			}
+		}
+
+		if (other == "SOLID" && subject == "p_feet")
+		{
+			GameScreen::player->is_standing_on_solid = true;
 		}
 
 
@@ -179,9 +222,20 @@ void ContactListener::BeginContact(b2Contact* contact)
 			GameScreen::player->new_pos = GameScreen::player->last_safe_pos;
 		}
 
-		if (other == "TERMNIAL")
+		if (other == "BOSSGLASS")
+		{
+			BossGlass* bg = static_cast<BossGlass*>(other_c);
+			bg->player_entered_sensor = true;
+		}
+
+		if (other == "TERMNIAL" && subject == "PLAYER")
 		{
 			Terminal* t = static_cast<Terminal*>(other_c);
+			t->player_in_sensor = true;
+		}
+		if (other == "AXEPICKUP" && subject == "PLAYER")
+		{
+			AxePickup* t = static_cast<AxePickup*>(other_c);
 			t->player_in_sensor = true;
 		}
 
@@ -720,6 +774,11 @@ void ContactListener::EndContact(b2Contact* contact)
 			}
 		}
 
+		if (other == "SOLID" && subject == "p_feet")
+		{
+			GameScreen::player->is_standing_on_solid = false;
+		}
+
 		if (other == "SOLID" || other == "M_BLOCK")
 		{
 			if (subject == "p_l_s")
@@ -731,9 +790,14 @@ void ContactListener::EndContact(b2Contact* contact)
 				player_right_wall_contacts--;
 			}
 		}
-		if (other == "TERMNIAL")
+		if (other == "TERMNIAL" && subject == "PLAYER")
 		{
 			Terminal* t = static_cast<Terminal*>(other_c);
+			t->player_in_sensor = false;
+		}
+		if (other == "AXEPICKUP" && subject == "PLAYER")
+		{
+			AxePickup* t = static_cast<AxePickup*>(other_c);
 			t->player_in_sensor = false;
 		}
 
@@ -1493,6 +1557,21 @@ bool ContactFilter::ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB)
 	{
 		return false;
 	}
+
+	if (c1->m_colliderTag == BIOBOMB)
+	{
+		other = nameB;
+		subject = nameA;
+		other_c = c2;
+	}
+	else if (c2->m_colliderTag == BIOBOMB)
+	{
+		other = nameA;
+		subject = nameB;
+		other_c = c1;
+	}
+
+
 
 	return true;
 

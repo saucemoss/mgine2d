@@ -16,9 +16,6 @@
     <Filter Include="Pliki źródłowe\Entities">
       <UniqueIdentifier>{8f3cd5e3-883f-4ea4-9c9a-0e53a7e3c567}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\World">
-      <UniqueIdentifier>{10197f1a-7ef9-4436-8930-9267399ffdec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pliki źródłowe\Systems">
       <UniqueIdentifier>{7c1f8e00-4ecc-4fd2-a9e1-2c32d11fbfe9}</UniqueIdentifier>
     </Filter>
@@ -237,6 +234,15 @@
     <ClCompile Include="src\Terminal.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\AxePickup.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gate.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BossGlass.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -369,6 +375,15 @@
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
     <ClInclude Include="src\Terminal.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AxePickup.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gate.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BossGlass.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>

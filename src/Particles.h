@@ -8,6 +8,7 @@
 #include "Animations.h"
 #include <raymath.h>
 
+
 enum ParticleShape
 {
     rectangle, circle, circle_lines, line, pixel, texture
@@ -15,7 +16,7 @@ enum ParticleShape
 
 enum DefinedEmitter
 {
-    dust, blood, steam, fog, acid_bursts, ambient_particles, ambient_particles_foreground
+    dust, blood, steam, fog, acid_bursts, acid_head_burst, acid_projectile, ambient_particles, acid_explosion, ambient_particles_foreground, glass_explosion
 };
 
 struct Particle {
@@ -361,6 +362,10 @@ class ParticlesManager
 {
 public:
     ParticlesManager();
+
+    static RenderTexture2D particlesRenderT;
+    static Texture2D ParticlesTexture;
+
     static void Update(float dt)
     {
         for (ParticleEmitter* e : emitters)
@@ -379,11 +384,18 @@ public:
     }
     static void Draw(int draw_layer, Vector2 cam_pos)
     {
+        BeginTextureMode(particlesRenderT);
+        ClearBackground(BLANK);
         for (ParticleEmitter* e : emitters)
         {
-            if(e->draw_layer_level = draw_layer)
-            e->DrawParticles(cam_pos);
+            if (e->draw_layer_level = draw_layer)
+            {
+                e->DrawParticles(cam_pos);
+
+            }
         }
+        EndTextureMode();
+        ParticlesTexture = particlesRenderT.texture;
 
     }
     static void Add(ParticleEmitter* e)
@@ -447,8 +459,8 @@ public:
             ptr->size(2.0f, 4.0f);
             ptr->speed(2.0f);
             ptr->spread(8.0f);
-            ptr->color({ 170,255,255,35 });
-            ptr->howmany(5);
+            ptr->color({ 170,255,255,60 });
+            ptr->howmany(25);
             ptr->gravity(1.0f);
             ptr->set_forever(true);
             ptr->particle_lifetime(7.0f);
@@ -467,13 +479,13 @@ public:
             ptr->size(10.0f, 60.0f);
             ptr->speed(0.1f);
             ptr->spread(3.0f);
-            ptr->color({ 120,200,200,8 });
-            ptr->howmany(50);
+            ptr->color({ 120,200,200,60 });
+            ptr->howmany(5);
             ptr->gravity(1.1f);
             ptr->set_forever(true);
             ptr->particle_lifetime(10.0f);
             ptr->fade_in_out(true);
-            ptr->spawn_radius(2000.0f);
+            ptr->spawn_radius(500.0f);
             ptr->random_rotation(true);
             ptr->rotation_speed(0.005f);
             ptr->emittion_counter(0.5f);
@@ -481,10 +493,10 @@ public:
             Add(ptr);
             break;
         case acid_bursts:
-            ptr->shape(ParticleShape::circle); 
-            ptr->size(0.1f, 4.0f);
+            ptr->shape(ParticleShape::circle_lines); 
+            ptr->size(1.0f, 5.0f);
             ptr->speed(2.0f);
-            ptr->color({ 0,200,40,13 });
+            ptr->color({ 0,200,40,80 });
             ptr->howmany(6);
             ptr->gravity(3.0f);
             ptr->set_forever(true);
@@ -493,13 +505,72 @@ public:
             ptr->emittion_counter(0.3f);
             Add(ptr);
             break;
+        case acid_head_burst:
+            ptr->shape(ParticleShape::circle);
+            ptr->speed(5.0f);
+            ptr->spread(3.0f);
+            ptr->gravity(4.0f);
+            ptr->particle_lifetime(1.8f);
+            ptr->emmiter_lifetime(1.8f);
+            ptr->size(1.0f, 5.0f);
+            ptr->color({ 0,200,40,255 });
+            ptr->howmany(30);
+            ptr->spawn_radius(4.0f);
+            Add(ptr);
+            break;
+        case acid_projectile:
+            ptr->shape(ParticleShape::circle);
+            ptr->speed(5.0f);
+            ptr->spread(3.0f);
+            ptr->gravity(4.0f);
+            ptr->particle_lifetime(1.8f);
+            ptr->emmiter_lifetime(1.8f);
+            ptr->size(1.0f, 5.0f);
+            ptr->color({ 0,200,40,255 });
+            ptr->howmany(3);
+            ptr->spawn_radius(4.0f);
+            Add(ptr);
+            break;
+        case acid_explosion:
+            ptr->shape(ParticleShape::circle);
+            ptr->speed(8.0f);
+            ptr->spread(6.0f);
+            ptr->gravity(3.0f);
+            ptr->particle_lifetime(2.2f);
+            ptr->emmiter_lifetime(2.2f);
+            ptr->size(2.0f, 6.0f);
+            ptr->color({ 0,200,40,255 });
+            ptr->howmany(50);
+            ptr->spawn_radius(6.0f);
+            Add(ptr);
+            break;
+        case glass_explosion:
+            ptr->shape(ParticleShape::texture);
+            ptr->texture(*TextureLoader::GetTexture("GLASS"));
+            ptr->speed(8.0f);
+            ptr->spread(6.0f);
+            ptr->gravity(5.0f);
+            ptr->particle_lifetime(2.2f);
+            ptr->emmiter_lifetime(2.2f);
+            ptr->size(2.0f, 16.0f);
+            ptr->color(Fade(WHITE, 0.8f));
+            ptr->howmany(500);
+            ptr->spawn_radius(64.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(0.1f);
+            Add(ptr);
+            break;
         }
 
     }
 
+    static void UpdateTextureSize(int x, int y)
+    {
+        UnloadRenderTexture(particlesRenderT);
+        particlesRenderT = LoadRenderTexture(x, y);
+    }
+
     static std::vector<ParticleEmitter*> emitters;
-
-
 };
 
 #endif

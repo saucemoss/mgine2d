@@ -30,6 +30,9 @@
 #include "WhiteCoatArm.h"
 #include "Acid.h"
 #include "Terminal.h"
+#include "AxePickup.h"
+#include "Gate.h"
+#include "BossGlass.h"
 
 
 b2World* LevelManager::world = nullptr;
@@ -87,10 +90,20 @@ void LevelManager::LoadLevel(std::string level_name)
 
 	m_darkness_strength = currentLdtkLevel->getField<float>("DarknessLevel").value();
 
-	level_ambient_particles = new ParticleEmitter(Vector2{ (float)levelSize.x / 2, (float)levelSize.y / 2 });
-	ParticlesManager::Add(DefinedEmitter::ambient_particles, level_ambient_particles);
-	level_particles_foreground = new ParticleEmitter(Vector2{ (float)levelSize.x / 2, (float)levelSize.y / 2 });
-	ParticlesManager::Add(DefinedEmitter::ambient_particles_foreground, level_particles_foreground);
+	//Level ambient particles
+	ParticlesManager::UpdateTextureSize(currentLdtkLevel->size.x, currentLdtkLevel->size.y);
+	level_particles_on = currentLdtkLevel->getField<bool>("Particles").value();
+	if (level_particles_on)
+	{
+		level_ambient_particles = new ParticleEmitter(Vector2{ (float)levelSize.x / 2, (float)levelSize.y / 2 });
+		ParticlesManager::Add(DefinedEmitter::ambient_particles, level_ambient_particles);
+		level_particles_foreground = new ParticleEmitter(Vector2{ (float)levelSize.x / 2, (float)levelSize.y / 2 });
+		ParticlesManager::Add(DefinedEmitter::ambient_particles_foreground, level_particles_foreground);
+	}
+	//Level fog
+	level_fog_on = currentLdtkLevel->getField<bool>("Fog").value();
+
+	GameScreen::lock_camera = currentLdtkLevel->getField<bool>("LockCamera").value();
 
 
 	if (world == nullptr)
@@ -144,9 +157,13 @@ void LevelManager::LoadLevel(std::string level_name)
 	decorationRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
 	//
 	//perlin
-	int max = std::max(levelSize.x, levelSize.y);
-	GameScreen::shaders->RenderPerlinTexture = LoadRenderTexture(max, max);
-	GameScreen::shaders->PerlinTexture = GameScreen::shaders->RenderPerlinTexture.texture;
+	if (level_fog_on)
+	{
+		int max = std::max(levelSize.x, levelSize.y);
+		GameScreen::shaders->RenderPerlinTexture = LoadRenderTexture(max, max);
+		GameScreen::shaders->PerlinTexture = GameScreen::shaders->RenderPerlinTexture.texture;
+	}
+
 
 	//Level elements in front of player
 	decorationRenderTextureFront = LoadRenderTexture(levelSize.x, levelSize.y);
@@ -299,7 +316,12 @@ void LevelManager::LoadLevel(std::string level_name)
 	decorationRenderedLevelTexture = decorationRenderTexture.texture;
 
 	//FrontPlayerDecorElements
+	Shader darken_shader = LoadShader(0, TextFormat("res/shaders/glsl%i/darken.fs", GLSL_VERSION));
+	int darknessFactorLoc = GetShaderLocation(darken_shader, "darknessFactor");
+	float darkness_factor = 0.6f;
+	SetShaderValue(darken_shader, darknessFactorLoc, &darkness_factor, SHADER_UNIFORM_FLOAT);
 	BeginTextureMode(decorationRenderTextureFront);
+	BeginShaderMode(darken_shader);
 	for (auto&& layer : currentLdtkLevel->allLayers())
 	{
 		auto& tileset = layer.getTileset();
@@ -326,11 +348,11 @@ void LevelManager::LoadLevel(std::string level_name)
 				DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
 			}
 		}
-
 	}
+	EndShaderMode();
 	EndTextureMode();
 	decorationRenderedLevelTextureFront = decorationRenderTextureFront.texture;
-
+	UnloadShader(darken_shader);
 
 	//Paralax Layers Draw
 	BeginTextureMode(paralaxedForegroundRenderTexture);
@@ -404,13 +426,18 @@ void LevelManager::LoadLevel(std::string level_name)
 
 		if (entity.getName() == "Door")
 		{
-			Rectangle r = { (float)entity.getPosition().x,
+			Rectangle r = { (float)entity.getPosition().x + 8.0f,
 					(float)entity.getPosition().y -4,
 					(float)entity.getSize().x ,
 					(float)entity.getSize().y +8};
-			bool is_right = entity.getField<bool>("Right").value();
+
 			level_entities_safe.push_back(std::make_unique<Door>(r, true));
-			level_entities_safe.back().get()->m_draw_layers = 0;
+
+			Door* door = static_cast<Door*>(level_entities_safe.back().get());
+
+			door->locked = entity.getField<bool>("Locked").value();
+			door->m_draw_layers = 0;
+			door->refs = entity.getArrayField<ldtk::EntityRef>("references");
 		}
 		if (entity.getName() == "Elevator")
 		{
@@ -466,9 +493,18 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
 		}
+		if (entity.getName() == "Gate")
+		{
+			level_entities_safe.push_back(std::make_unique<Gate>(rect));
+		}
 		if (entity.getName() == "Terminal")
 		{
 			level_entities_safe.push_back(std::make_unique<Terminal>(rect));
+			level_entities_safe.back().get()->m_ldtkID = entity.iid;
+		}
+		if (entity.getName() == "AxePickup")
+		{
+			level_entities_safe.push_back(std::make_unique<AxePickup>(rect));
 		}
 		if (entity.getName() == "Acid")
 		{
@@ -477,6 +513,10 @@ void LevelManager::LoadLevel(std::string level_name)
 					(float)entity.getSize().x ,
 					(float)entity.getSize().y };
 			level_entities_safe.push_back(std::make_unique<Acid>(r));
+		}
+		if (entity.getName() == "BossGlass")
+		{
+			level_entities_safe.push_back(std::make_unique<BossGlass>(rect));
 		}
 		if (entity.getName() == "FireAxe")
 		{
@@ -568,11 +608,14 @@ void LevelManager::UnloadLevel()
 		world = nullptr;
 
 	}
-	
-	level_ambient_particles->set_forever(false);
-	level_ambient_particles = nullptr;
-	level_particles_foreground->set_forever(false);
-	level_particles_foreground = nullptr;
+	if (level_particles_on)
+	{
+		level_ambient_particles->set_forever(false);
+		level_ambient_particles = nullptr;
+		level_particles_foreground->set_forever(false);
+		level_particles_foreground = nullptr;
+	}
+
 
 	UnloadTexture(laboratorySolidsRenderedLevelTexture);
 	UnloadTexture(paralaxedBackgroundRenderedLevelTexture);
@@ -617,8 +660,7 @@ void LevelManager::Update(float dt)
 	world->Step(timeStep, velocityIterations, positionIterations);
 
 	lights->UpdateLights(dt);
-
-	level_ambient_particles->position(GameScreen::player->center_pos());
+	if(level_particles_on) level_ambient_particles->position(GameScreen::player->center_pos());
 
 	for (auto& e : level_entities_safe)
 	{
@@ -738,7 +780,6 @@ void LevelManager::DrawForeGround()
 
 void LevelManager::DrawInFrontOfPlayer()
 {
-	ClearBackground(BLANK);
 	DrawTexturePro(decorationRenderedLevelTextureFront,
 		{ 0, 0, (float)decorationRenderedLevelTextureFront.width, (float)-decorationRenderedLevelTextureFront.height },
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y },
@@ -757,7 +798,7 @@ void LevelManager::Draw()
 	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
 	Vector2 parallaxed_far = Vector2Multiply(c_position, { 0.02f,0.02f });
 
-	ClearBackground(BLACK);
+
 	////Draw static background
 	if (currentLdtkLevel->hasBgImage())
 	{
@@ -766,26 +807,26 @@ void LevelManager::Draw()
 			{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 			{ 0,0 }, 0, WHITE);
 	}
-	ClearBackground(BLACK);
+
 	//Draw paralaxed background elements
 	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
 		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
 		{ parallaxed_far.x ,parallaxed_far.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
 		{ 0,0 }, 0, WHITE);
-	ClearBackground(BLACK);
+
 	//Draw level solids
 	DrawTexturePro(laboratorySolidsRenderedLevelTexture,
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  }, 
 		{ 0,0 }, 0, WHITE);
-	ClearBackground(BLACK);
+
 
 	//Draw decorations
 	DrawTexturePro(decorationRenderedLevelTexture,
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 		{ 0,0 }, 0, WHITE);
-	ClearBackground(BLACK);
+
 
 
 }

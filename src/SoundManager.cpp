@@ -85,7 +85,6 @@ void SoundManager::LoadSounds()
 	sounds.emplace("background_wind", LoadSound("res/sound/collected/background_wind.wav"));
 	sounds.emplace("call_sw", LoadSound("res/sound/collected/call_sw.wav"));
 	sounds.emplace("Engine", LoadSound("res/sound/collected/Engine.wav"));
-	//sounds.emplace("jump", LoadSound("res/sound/collected/jump.wav"));
 	sounds.emplace("jump", LoadSound("res/sound/collected/jump2.wav"));
 	sounds.emplace("land", LoadSound("res/sound/collected/land.wav"));
 	sounds.emplace("grunt", LoadSound("res/sound/collected/grunt.wav"));
@@ -95,6 +94,24 @@ void SoundManager::LoadSounds()
 	sounds.emplace("door_close", LoadSound("res/sound/collected/door_close.wav"));
 	sounds.emplace("light_ambient", LoadSound("res/sound/collected/lights_noise-01.wav"));
 	sounds.emplace("flicker", LoadSound("res/sound/collected/lights_noise-02.wav"));
+	sounds.emplace("glass_shatter", LoadSound("res/sound/collected/glass_shatter.wav"));
+	sounds.emplace("metal_hit", LoadSound("res/sound/collected/metal_hit.wav"));
+	sounds.emplace("metal_fall", LoadSound("res/sound/collected/metal_fall.wav"));
+	sounds.emplace("ambient_hum", LoadSound("res/sound/collected/ambient_hum.wav"));
+	sounds.emplace("denied", LoadSound("res/sound/collected/denied.wav"));
+	sounds.emplace("pc_work", LoadSound("res/sound/collected/pc_work.wav"));
+	sounds.emplace("beep-01", LoadSound("res/sound/collected/beep-01.wav"));
+	sounds.emplace("beep-02", LoadSound("res/sound/collected/beep-02.wav"));
+	sounds.emplace("beep-03", LoadSound("res/sound/collected/beep-03.wav"));
+	sounds.emplace("beep-04", LoadSound("res/sound/collected/beep-04.wav"));
+	sounds.emplace("beep-05", LoadSound("res/sound/collected/beep-05.wav"));
+	sounds.emplace("creepy_whistle", LoadSound("res/sound/collected/creepy_whistle.wav"));
+
+	//glass
+	sounds.emplace("glass_shatter", LoadSound("res/sound/collected/glass_shatter.wav"));
+	sounds.emplace("glass_thud", LoadSound("res/sound/collected/glass_thud.wav"));
+	sounds.emplace("glass_thud2", LoadSound("res/sound/collected/glass_thud2.wav"));
+	sounds.emplace("glass_explosion", LoadSound("res/sound/collected/glass_explosion.wav"));
 
 
 	sounds.emplace("step1", LoadSound("res/sound/steps/stepstone01.wav"));

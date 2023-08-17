@@ -52,7 +52,13 @@ Elevator::~Elevator()
 void Elevator::Update(float dt)
 {
 	SwitchFrames(dt);
-	
+
+	if (player_in_sensor && (state != ElevatorState::GOING_DOWN && state != ElevatorState::GOING_UP && state != ElevatorState::GOING_TO_SW))
+	{
+		Rectangle source = { center_pos().x,center_pos().y,settings::tileSize,settings::tileSize };
+		GameScreen::shaders->ApplyOutline(*sprite, CurrentFrame(), source, { 0,0 }, 0.0f);
+	}
+
 	int lastLevel = (m_levels.back().value() - m_levels[0].value());
 	
 	switch (state)

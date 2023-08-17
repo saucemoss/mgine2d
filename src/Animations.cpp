@@ -24,7 +24,36 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("NPC_S_GUY2", LoadTexture("res/NPCs/NPCSecutiry2.png"));
 	m_Textures.emplace("WCARM", LoadTexture("res/enemies/wcarm.png"));
 	m_Textures.emplace("CROSS", LoadTexture("res/particles/cross.png"));
+	m_Textures.emplace("GLASS", LoadTexture("res/particles/glass.png"));
 	m_Textures.emplace("TERMINAL", LoadTexture("res/level/terminal.png"));
+	m_Textures.emplace("GATE", LoadTexture("res/level/gate.png"));
+	m_Textures.emplace("B_GLASS", LoadTexture("res/level/BossGlass.png"));
+}
+
+void Animations::InitializeBossGlassAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("B_GLASS");
+
+	Animation* SHATTER = new Animation(texture, 0, 10, 192, 0.08f);
+	SHATTER->SetCustomFrameTime(1, 1.00f);
+	SHATTER->SetCustomFrameTime(4, 1.00f);
+	SHATTER->SetCustomFrameTime(6, 1.00f);
+	SHATTER->SetCustomFrameTime(9, 1.00f);
+	animations.emplace("SHATTER", *SHATTER);
+
+}
+
+void Animations::InitializeGateAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("GATE");
+	animations.emplace("GATE", *(new Animation(texture, 0, 4, 96, 0.12f)));
+}
+
+void Animations::InitializeAxePickupAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("DECOR_ANIM");
+	animations.emplace("USED", *(new Animation(texture, 17, 1, 32, 0.12f)));
+	animations.emplace("UNUSED", *(new Animation(texture, 18, 1, 32, 0.12f)));
 }
 
 void Animations::InitializeTerminalAnimations()
@@ -39,6 +68,7 @@ void Animations::InitializeWCArmAnimations()
 	Texture2D* texture = TextureLoader::GetTexture("WCARM");
 	animations.emplace("WCARM_IDLE", *(new Animation(texture, 0, 3, 32, 0.08f)));
 	animations.emplace("WCARM_HURT", *(new Animation(texture, 1, 6, 32, 0.08f)));
+	animations.emplace("WCARM_DEAD", *(new Animation(texture, 2, 9, 32, 0.09f)));
 	animations.emplace("WCARM_CUT", *(new Animation(texture, 1, 1, 96, 0.04f)));
 	animations.emplace("WCARM_DEF", *(new Animation(texture, 5, 6, 96, 0.08f)));
 
@@ -190,6 +220,7 @@ void Animations::InitializeDoorAnimations()
 	Texture2D* texture = TextureLoader::GetTexture("DOOR");
 	animations.emplace("D_OPEN", *(new Animation(texture, 0, 7, 40, 0.06f)));
 	animations.emplace("D_CLOSE", *(new Animation(texture, 1, 7, 40, 0.06f)));
+	animations.emplace("D_LOCKED", *(new Animation(texture, 2, 1, 40, 0.06f)));
 	
 }
 
@@ -201,7 +232,7 @@ void Animations::InitializeHeadSpitAnimations()
 	animations.emplace("HSPIT_PROJ", *(new Animation(texture, 3, 5, 32, 0.12f)));
 	animations.emplace("HSPIT_IDLE", *(new Animation(texture, 4, 4, 32, 0.12f)));
 	animations.emplace("HSPIT_DEAD", *(new Animation(texture, 5, 5, 32, 0.08f)));
-	animations.emplace("HSPIT_ATT", *(new Animation(texture, 6, 9, 32, 0.06f)));
+	animations.emplace("HSPIT_ATT", *(new Animation(texture, 6, 9, 32, 0.08f)));
 	animations.emplace("HSPIT_DMG", *(new Animation(texture, 3, 1, 32, 0.18f)));
 }
 

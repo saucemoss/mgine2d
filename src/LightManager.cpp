@@ -213,15 +213,18 @@ void LightInfo::UpdateLightMask(float dt)
 		{
 			on = !on;
 			flicker_counter = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0f - 0.5f)));
-			float vol = 0.7f - Vector2DistanceSqr({ Position.x, Position.y }, GameScreen::player->pos()) * 0.00001f;
-			if (vol < 0.0f) vol = 0.0f;
-			SetSoundVolume(SoundManager::sounds["flicker"], vol);
-			SetSoundVolume(SoundManager::sounds["light_ambient"], vol);
-			if (!IsSoundPlaying(SoundManager::sounds["light_ambient"]))
+			if (GameScreen::player != nullptr)
 			{
-				PlaySound(SoundManager::sounds["light_ambient"]);
+				float vol = 0.7f - Vector2DistanceSqr({ Position.x, Position.y }, GameScreen::player->pos()) * 0.00001f;
+				if (vol < 0.0f) vol = 0.0f;
+				SetSoundVolume(SoundManager::sounds["flicker"], vol);
+				SetSoundVolume(SoundManager::sounds["light_ambient"], vol);
+				if (!IsSoundPlaying(SoundManager::sounds["light_ambient"]))
+				{
+					PlaySound(SoundManager::sounds["light_ambient"]);
+				}
+				PlaySound(SoundManager::sounds["flicker"]);
 			}
-			PlaySound(SoundManager::sounds["flicker"]);
 		}
 	}
 
