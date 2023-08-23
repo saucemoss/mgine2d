@@ -1,9 +1,10 @@
 #include "Enemy.h"
 #include "GameScreen.h"
+#include "FrogBoss.h"
 
 
-Enemy::Enemy(const Rectangle& rectangle, ColliderTag tag) :
-	Collidable({ rectangle.x,rectangle.y,rectangle.width,rectangle.height}, b2_dynamicBody, tag)
+Enemy::Enemy(const Rectangle& rectangle, ColliderTag tag, b2BodyType body_type) :
+	Collidable({ rectangle.x,rectangle.y,rectangle.width,rectangle.height}, body_type, tag)
 {
 	if (!queue_entity_add)
 	{
@@ -75,6 +76,10 @@ void Enemy::Draw(int l)
 		spritePosX = (int)(center_pos().x + sprite_offset_96.x);
 		spritePosY = (int)(center_pos().y + sprite_offset_96.y);
 		break;
+	case 192:
+		spritePosX = (int)(center_pos().x + sprite_offset_192.x);
+		spritePosY = (int)(center_pos().y + sprite_offset_192.y);
+		break;
 	case 224:
 		spritePosX = (int)(center_pos().x + sprite_offset_224.x);
 		spritePosY = (int)(center_pos().y + sprite_offset_224.y);
@@ -96,13 +101,21 @@ void Enemy::Draw(int l)
 		cframe,
 		Rectangle{ spritePosX,spritePosY,CurrentFrame().width,CurrentFrame().height },
 		{ 0,0 },
-		0.0f,
+		sprite_rotation,
 		c);
 
 	if (GameScreen::debug)
 	{
 		DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
-		std::string stateStr = "" + StatesStrMap[state];
-		DrawText(stateStr.c_str(), center_pos().x, center_pos().y -50, 10, BLACK);
+		//std::string stateStr = "" + StatesStrMap[state];
+		//DrawText(stateStr.c_str(), center_pos().x, center_pos().y -50, 10, BLACK);
+		
+		//frog boss debug
+		//FrogBoss* fb = static_cast<FrogBoss*>(this);
+		//if (fb != nullptr)
+		//{
+		//	std::string stateStr = fb->StatesStrMap[fb->boss_state];
+		//	DrawText(stateStr.c_str(), center_pos().x, center_pos().y - 50, 10, RED);
+		//}
 	}
 }

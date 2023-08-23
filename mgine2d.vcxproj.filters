@@ -243,6 +243,33 @@
     <ClCompile Include="src\BossGlass.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Switch.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FrogBoss.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BossHook.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NewGameScreen.cpp">
+      <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContinueScreen.cpp">
+      <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ScreensManager.cpp">
+      <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuScreen.cpp">
+      <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OptionsScreen.cpp">
+      <Filter>Pliki źródłowe\Systems\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MediPod.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -326,9 +353,6 @@
     <ClInclude Include="src\FlyingInfected.h">
       <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
     </ClInclude>
-    <ClInclude Include="src\Interactable.h">
-      <Filter>Pliki nagłówkowe\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="src\LightManager.h">
       <Filter>Pliki nagłówkowe\Systems\Lights</Filter>
     </ClInclude>
@@ -384,6 +408,36 @@
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
     <ClInclude Include="src\BossGlass.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Switch.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FrogBoss.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BossHook.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MenuScreen.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NewGameScreen.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ContinueScreen.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nlohmann\json.hpp">
+      <Filter>Pliki nagłówkowe\Systems\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nlohmann\json_fwd.hpp">
+      <Filter>Pliki nagłówkowe\Systems\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OptionsScreen.h">
+      <Filter>Pliki nagłówkowe\Systems\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MediPod.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 #include "SoundManager.h"
 #include "GameScreen.h"
 
-Leggy::Leggy(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 14, 30 }, LEGGY)
+Leggy::Leggy(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 14, 30 }, LEGGY, b2_dynamicBody)
 {
 
 	InitAnimations();

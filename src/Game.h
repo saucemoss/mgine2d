@@ -7,8 +7,8 @@ public:
 	Game(const Game& other) = delete;
 	Game& operator=(const Game& other) = delete;
 	~Game() noexcept;
-	bool GameShouldClose() const;
 	void Tick();
+	static bool exit_window;
 
 private:
 	void Update();

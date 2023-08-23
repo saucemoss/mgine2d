@@ -29,6 +29,12 @@ void ElevatorCallSwitch::Update(float dt)
 		GameScreen::shaders->ApplyOutline(*sprite, CurrentFrame(), source, {0,0}, 0.0f);
 	}
 
+	if (ElevatorUnpowered())
+	{
+		state = ECallSwitchState::UNPOWERED;
+	}
+
+
 	switch (state)
 	{
 	case ECallSwitchState::IDLE:
@@ -44,14 +50,35 @@ void ElevatorCallSwitch::Update(float dt)
 		break;
 	case ECallSwitchState::PRESSED:
 
-		if (ElevatorAtSwitch())
+		if (ElevatorAtSwitch() || ElevatorUnpowered())
 		{
 			SetAnimation("ELEV_SW_IDLE");
 			state = ECallSwitchState::IDLE;
 		}
 		break;
+	case ECallSwitchState::UNPOWERED:
+		FreezeFrame("ELEV_SW_PRESSED",4);
+		if (!ElevatorUnpowered())
+		{
+			SetAnimation("ELEV_SW_IDLE");
+			state = ECallSwitchState::IDLE;
+		}
+		break;
+
 	}
 
+}
+
+bool ElevatorCallSwitch::ElevatorUnpowered()
+{
+	for (Entity* e : EnitityManager::EntityList)
+	{
+		if (e->m_ldtkID == m_elevator_reference)
+		{
+			Elevator* elevator = dynamic_cast<Elevator*>(e);
+			return !elevator->powered;
+		}
+	}
 }
 
 
@@ -81,6 +108,7 @@ void ElevatorCallSwitch::CallElevator()
 		if (e->m_ldtkID == m_elevator_reference)
 		{
 			Elevator* elevator = dynamic_cast<Elevator*>(e);
+			if(elevator->powered)
 			elevator->MoveToSwitch(m_body->GetPosition().y * settings::PPM);
 		}
 	}
@@ -105,10 +133,6 @@ void ElevatorCallSwitch::InitAnimations()
 	sprite = TextureLoader::GetTexture("DECOR_ANIM");
 	animations->InitializeElevatorAnimations();
 	SetAnimation("ELEV_SW_IDLE");
-}
-
-void ElevatorCallSwitch::Interract()
-{
 }
 
 

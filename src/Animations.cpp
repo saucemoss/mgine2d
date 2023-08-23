@@ -24,10 +24,50 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("NPC_S_GUY2", LoadTexture("res/NPCs/NPCSecutiry2.png"));
 	m_Textures.emplace("WCARM", LoadTexture("res/enemies/wcarm.png"));
 	m_Textures.emplace("CROSS", LoadTexture("res/particles/cross.png"));
+	m_Textures.emplace("DUST_TEST", LoadTexture("res/particles/dust_test.png"));
 	m_Textures.emplace("GLASS", LoadTexture("res/particles/glass.png"));
 	m_Textures.emplace("TERMINAL", LoadTexture("res/level/terminal.png"));
 	m_Textures.emplace("GATE", LoadTexture("res/level/gate.png"));
 	m_Textures.emplace("B_GLASS", LoadTexture("res/level/BossGlass.png"));
+	m_Textures.emplace("SWITCH", LoadTexture("res/level/switch.png"));
+	m_Textures.emplace("BOSS1", LoadTexture("res/enemies/boss1_sheet.png"));
+	m_Textures.emplace("MPOD", LoadTexture("res/level/medipod.png"));
+}
+
+void Animations::InitializeMediPodAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("MPOD");
+	animations.emplace("MPOD_CLOSE", *(new Animation(texture, 0, 7, 64, 0.06f)));
+	animations.emplace("MPOD_OPEN", *(new Animation(texture, 1, 7, 64, 0.06f)));
+	animations.emplace("MPOD_SAVE", *(new Animation(texture, 2, 9, 64, 0.07f)));
+
+
+}
+
+void Animations::InitializeBoss1Animations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("BOSS1");
+	animations.emplace("FB_ROAR", *(new Animation(texture, 0, 14, 96, 0.08f)));
+	animations.emplace("FB_RUN", *(new Animation(texture, 1, 4, 96, 0.08f)));
+	animations.emplace("FB_ANT", *(new Animation(texture, 2, 6, 96, 0.12f)));
+
+	Animation* FB_ATT1 = new Animation(texture, 3, 5, 96, 0.08f);
+	FB_ATT1->SetCustomFrameTime(1, 0.12f);
+	animations.emplace("FB_ATT1", *FB_ATT1);
+
+	animations.emplace("FB_SPAWN", *(new Animation(texture, 4, 5, 96, 0.12f)));
+	animations.emplace("FB_POUND", *(new Animation(texture, 5, 11, 96, 0.12f)));
+	animations.emplace("FB_SH_ANT", *(new Animation(texture, 6, 6, 96, 0.12f)));
+	animations.emplace("FB_SHOOT", *(new Animation(texture, 8, 13, 96, 0.12f)));
+	animations.emplace("FB_SW_ANT", *(new Animation(texture, 9, 11, 96, 0.08f)));
+	animations.emplace("FB_SW_ATT", *(new Animation(texture, 10, 6, 96, 0.08f)));
+
+}
+
+void Animations::InitializeSwitchAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("SWITCH");
+	animations.emplace("SWITCH", *(new Animation(texture, 0, 2, 32, 0.08f)));
 }
 
 void Animations::InitializeBossGlassAnimations()

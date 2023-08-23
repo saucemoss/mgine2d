@@ -18,13 +18,18 @@
 class LevelManager
 {
 public:
-    LevelManager();
+    LevelManager(bool is_new_game, int save_file_num);
     ~LevelManager();
     void LoadLevel(std::string level_name);
+    void SaveLevel();
+    void LoadSavedLevel();
     void UnloadLevel();
     void Draw();
     void Update(float dt);
     static void RemoveEntityFromLevel(Entity& e);
+
+    //saving system
+    int save_file_num;
 
     //lighting stuff
     static float m_darkness_strength;

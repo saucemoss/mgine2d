@@ -1,3 +1,4 @@
+#include "nlohmann/json.hpp"
 #include "Player.h"
 #include "Settings.h"
 #include "Animations.h"
@@ -13,13 +14,12 @@
 #include "FireAxe.h"
 #include "BioBomb.h"
 
-
-
+using json = nlohmann::json;
 FireAxe* Player::axe = nullptr;
 
-Player::Player()
+Player::Player(Vector2 pos)
 	:
-	Collidable({ 250,170,12,20 }, b2_dynamicBody, PLAYER) // lvl6
+	Collidable({ pos.x,pos.y,12,20 }, b2_dynamicBody, PLAYER) // lvl6
 	
 {
 	NewBody();
@@ -133,6 +133,9 @@ void Player::Update(float dt)
 	case PlayerState::AxeReclaim:
 		UpdateAxeReclaimState(dt);
 		break;
+	case PlayerState::MediPodSave:
+		UpdateMediPodSaveState(dt);
+		break;
 	}
 }
 
@@ -239,6 +242,10 @@ void Player::take_dmg(int dmg)
 
 void Player::Draw(int l)
 {
+	if (!visible)
+	{
+		return;
+	}
 
 	Rectangle cframe = looking_right ? CurrentFrame() : Rectangle{  CurrentFrame().x,
 																	CurrentFrame().y,
@@ -625,11 +632,25 @@ void Player::UpdateDyingState(float dt)
 		taking_dmg = false;
 		current_hp = m_max_hp;
 		state = PlayerState::Idle;
-		Vector2 newPos{ 250,170 };
-		GameScreen::camera.target = newPos;
-		GameScreen::LevelMgr->new_player_pos = newPos;
-		m_body->SetTransform({ newPos.x / settings::PPM, newPos.y / settings::PPM }, 0);
-		GameScreen::LevelMgr->next_level = "Level_0";
+
+		std::ifstream loadFile("save_slot_" + std::to_string(GameScreen::LevelMgr->save_file_num + 1) + ".json");
+		json save_data;
+		if (loadFile.is_open())
+		{
+			loadFile >> save_data;
+			loadFile.close();
+		}
+
+		// Update the current level and player position
+		float posX = save_data["player"]["position"][0];
+		float posY = save_data["player"]["position"][1];
+		Vector2 new_player_pos = { posX - 16.0f, posY - 16.0f };
+
+		
+		GameScreen::camera.target = new_player_pos;
+		GameScreen::LevelMgr->new_player_pos = new_player_pos;
+		m_body->SetTransform({ new_player_pos.x / settings::PPM, new_player_pos.y / settings::PPM }, 0);
+		GameScreen::LevelMgr->next_level = save_data["player"]["currentLevel"];
 	}
 
 }
@@ -888,6 +909,11 @@ void Player::UpdateAxeReclaimState(float dt)
 		SetAnimation("P_IDLE");
 		//StopSound(SoundManager::sounds["creepy_whistle"]);
 	}
+}
+
+void Player::UpdateMediPodSaveState(float dt)
+{
+	visible = false;
 }
 
 void Player::UpdateSafePos(float dt)

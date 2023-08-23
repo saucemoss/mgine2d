@@ -1,3 +1,5 @@
+#include "nlohmann/json.hpp"
+#include <fstream>
 #include "LevelManager.h"
 #include "Collidable.h"
 #include "Door.h"
@@ -33,7 +35,8 @@
 #include "AxePickup.h"
 #include "Gate.h"
 #include "BossGlass.h"
-
+#include "Switch.h"
+#include "MediPod.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
@@ -42,18 +45,19 @@ float LevelManager::m_darkness_strength;
 std::vector<std::unique_ptr<Entity>> LevelManager::level_entities_safe;
 std::vector<Entity*> LevelManager::queue_entities;
 std::vector<std::unique_ptr<Collidable>> LevelManager::solid_tiles;
-
+using json = nlohmann::json;
 
 void LevelManager::RemoveEntityFromLevel(Entity& e)
 {
 	e.m_destroy = true;
 }
 
-LevelManager::LevelManager()
+LevelManager::LevelManager(bool is_new_game, int in_save_file_num)
 {
+	save_file_num = in_save_file_num;
 
 	ldtk::Project* p = new ldtk::Project();
-	p->loadFromFile("res\\level\\TestLevel.ldtk");
+	p->loadFromFile("res\\level\\GameLevels.ldtk");
 	ldtkProject = p;
 
 	laboratorySolidsSpriteAtlas = LoadTexture("res\\level\\lab4.png");
@@ -66,7 +70,30 @@ LevelManager::LevelManager()
 	world->SetDestructionListener(destruction_listener);
 	world->SetContactFilter(contact_filter);
 	Collidable::world = world;
-	LoadLevel("Level_0");
+
+	if (is_new_game)
+	{
+		LoadLevel("Level_0");
+		new_player_pos = { 250, 170 };
+	}
+	else
+	{
+		// Load JSON data from the selected slot
+		std::ifstream loadFile("save_slot_" + std::to_string(save_file_num + 1) + ".json");
+		json save_data;
+		if (loadFile.is_open())
+		{
+			loadFile >> save_data;
+			loadFile.close();
+		}
+
+		std::string saved_level = save_data["player"]["currentLevel"];
+		LoadLevel(saved_level);
+
+		float posX = save_data["player"]["position"][0];
+		float posY = save_data["player"]["position"][1];
+		new_player_pos = { posX - 16.0f, posY - 16.0f };
+	}
 
 }
 
@@ -128,10 +155,11 @@ void LevelManager::LoadLevel(std::string level_name)
 
 	}
 
+	SaveLevel();
 
 	lights->m_lights.emplace_back();
 
-	lights->SetupBoxes();
+	lights->SetupBoxes(); 
 
 	//Textures setup:
 	// 
@@ -236,6 +264,7 @@ void LevelManager::LoadLevel(std::string level_name)
 					}
 					DrawTextureRec(decorationSpriteAtlas, source_rect, target_pos, WHITE);
 				}
+				
 			}
 		}
 	}
@@ -446,8 +475,10 @@ void LevelManager::LoadLevel(std::string level_name)
 					(float)entity.getSize().x ,
 					(float)entity.getSize().y };
 			level_entities_safe.push_back(std::make_unique<Elevator>(r, entity.getArrayField<int>("Levels"), entity));
-			level_entities_safe.back().get()->m_draw_layers = 1;
-			level_entities_safe.back().get()->m_ldtkID = entity.iid;;
+			Elevator* e = static_cast<Elevator*>(level_entities_safe.back().get());
+			e->m_draw_layers = 1;
+			e->m_ldtkID = entity.iid;
+			e->powered = entity.getField<bool>("Powered").value();
 		}
 		if (entity.getName() == "ElevatorCallSwitch")
 		{
@@ -493,6 +524,10 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			level_entities_safe.push_back(std::make_unique<WoodCrate>(rect));
 		}
+		if (entity.getName() == "MediPod")
+		{
+			level_entities_safe.push_back(std::make_unique<MediPod>(rect));
+		}
 		if (entity.getName() == "Gate")
 		{
 			level_entities_safe.push_back(std::make_unique<Gate>(rect));
@@ -501,6 +536,13 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			level_entities_safe.push_back(std::make_unique<Terminal>(rect));
 			level_entities_safe.back().get()->m_ldtkID = entity.iid;
+		}
+		if (entity.getName() == "Switch")
+		{
+			level_entities_safe.push_back(std::make_unique<Switch>(rect));
+			Switch* sw = static_cast<Switch*>(level_entities_safe.back().get());
+			sw->m_ldtkID = entity.iid;
+			sw->m_elevator_reference = entity.getField<ldtk::EntityRef>("reference").value().entity_iid;
 		}
 		if (entity.getName() == "AxePickup")
 		{
@@ -552,8 +594,11 @@ void LevelManager::LoadLevel(std::string level_name)
 		}
 		if (entity.getName() == "HeadSpit")
 		{
+
 			level_entities_safe.push_back(std::make_unique<HeadSpit>(rect));
-			level_entities_safe.back().get()->m_draw_layers = 1;
+			HeadSpit* hs = static_cast<HeadSpit*>(level_entities_safe.back().get());
+			hs->upsidedown = entity.getField<bool>("upsidedown").value();
+			hs->m_draw_layers = 1;
 		}
 		if (entity.getName() == "FlyingInfected")
 		{
@@ -588,6 +633,136 @@ void LevelManager::LoadLevel(std::string level_name)
 	
 	//Light walls
 	lights->SetupBoxes();
+
+
+	LoadSavedLevel();
+
+}
+
+void LevelManager::SaveLevel()
+{
+	if (GameScreen::player != nullptr)
+	{
+		std::ifstream loadFile("save_slot_" + std::to_string(save_file_num + 1) + ".json");
+		json save_data;
+		if (loadFile.is_open())
+		{
+			loadFile >> save_data;
+			loadFile.close();
+		}
+
+		// Update the current level and player position
+		//save_data["player"]["currentLevel"] = currentLdtkLevel->name;
+		//save_data["player"]["position"] = { new_player_pos.x,  new_player_pos.y };
+
+		save_data["level_data"][currentLdtkLevel->name]["visited"] = true;
+
+		//Used Dialogue Lines
+		json usedLinesArray = json::array();
+		for (int line : DialogueManager::used_lines) {
+			usedLinesArray.push_back(line);
+		}
+		save_data["dialogue_used_lines"] = usedLinesArray;
+
+		// Save the updated JSON data back to the file
+		std::ofstream outputFile("save_slot_" + std::to_string(save_file_num + 1) + ".json");
+		if (outputFile.is_open()) {
+			outputFile << save_data;
+			outputFile.close();
+			std::cout << "Data saved successfully." << std::endl;
+		}
+		else {
+			std::cerr << "Failed to open file for writing." << std::endl;
+		}
+	}
+}
+
+void LevelManager::LoadSavedLevel()
+{
+	std::ifstream loadFile("save_slot_" + std::to_string(save_file_num + 1) + ".json");
+	json save_data;
+	if (loadFile.is_open())
+	{
+		loadFile >> save_data;
+		loadFile.close();
+	}
+
+	float posX = save_data["player"]["position"][0];
+	float posY = save_data["player"]["position"][1];
+	new_player_pos = { posX - 16.0f, posY - 16.0f };
+
+
+	//Load Dialogues
+	json usedLinesArray = save_data["dialogue_used_lines"];
+	// Convert the JSON array values to integers and populate used_lines vector
+	DialogueManager::used_lines.clear(); // Clear existing data
+	for (const auto& value : usedLinesArray) {
+		DialogueManager::used_lines.push_back(value);
+	}
+
+	//Load Level Objects
+	json levelData = save_data["level_data"];
+	// Iterate through each level in the level_data object
+	for (json::iterator it = levelData.begin(); it != levelData.end(); ++it) {
+		std::string levelName = it.key(); // Get the level name
+
+		if (currentLdtkLevel->name == levelName)
+		{
+			// Access the current level object
+			json levelObject = it.value();
+			// Check if "terminals" key exists in the current level object
+			if (levelObject.find("terminals") != levelObject.end()) {
+				// Access the terminals object for the current level
+				json terminalsObject = levelObject["terminals"];
+
+				// Iterate through each terminal in the terminals object
+				for (json::iterator termIt = terminalsObject.begin(); termIt != terminalsObject.end(); ++termIt) {
+					std::string terminalID = termIt.key(); // Get the terminal ID
+					bool terminalValue = termIt.value();   // Get the terminal value (true/false)
+
+					// Print the terminal ID and value
+					std::cout << "Level: " << levelName << ", Terminal ID: " << terminalID
+						<< ", ON: " << (terminalValue ? "true" : "false") << std::endl;
+
+					for (auto& e : level_entities_safe)
+					{
+						if (e.get()->m_ldtkID.str() == terminalID)
+						{
+							Terminal* t = static_cast<Terminal*>(e.get());
+							t->state = terminalValue ? TerminalState::Pass : TerminalState::Idle;
+						}
+					}
+				}
+			}
+
+			// Check if "switches" key exists in the current level object
+			if (levelObject.find("switches") != levelObject.end()) {
+				// Access the terminals object for the current level
+				json switchesObject = levelObject["switches"];
+
+				// Iterate through each terminal in the terminals object
+				for (json::iterator switchIt = switchesObject.begin(); switchIt != switchesObject.end(); ++switchIt) {
+					std::string swtichID = switchIt.key(); // Get the terminal ID
+					bool switchValue = switchIt.value();   // Get the terminal value (true/false)
+
+					// Print the terminal ID and value
+					std::cout << "Level: " << levelName << ", Switch ID: " << swtichID
+						<< ", ON: " << (switchValue ? "true" : "false") << std::endl;
+
+					for (auto& e : level_entities_safe)
+					{
+						if (e.get()->m_ldtkID.str() == swtichID)
+						{
+							Switch* t = static_cast<Switch*>(e.get());
+							t->state = switchValue ? SwitchState::On : SwitchState::Off;
+						}
+					}
+				}
+			}
+		}
+
+		
+	}
 
 }
 

@@ -17,6 +17,10 @@
 #include "Gate.h"
 #include "BioBomb.h"
 #include "BossGlass.h"
+#include "Switch.h"
+#include "FrogBoss.h"
+#include "BossHook.h"
+#include "MediPod.h"
 
 std::map<ColliderTag, std::string> ContactListener::ColStrMap;
 
@@ -48,6 +52,10 @@ ContactListener::ContactListener()
 	ColStrMap[ColliderTag::GATE] = "GATE";
 	ColStrMap[ColliderTag::BIOBOMB] = "BIOBOMB";
 	ColStrMap[ColliderTag::BOSSGLASS] = "BOSSGLASS";
+	ColStrMap[ColliderTag::SWITCH] = "SWITCH";
+	ColStrMap[ColliderTag::FBOSS] = "FBOSS";
+	ColStrMap[ColliderTag::BOSSHOOK] = "BOSSHOOK";
+	ColStrMap[ColliderTag::MPOD] = "MPOD";
 }
 
 void ContactListener::BeginContact(b2Contact* contact)
@@ -153,7 +161,6 @@ void ContactListener::BeginContact(b2Contact* contact)
 				}
 				GameScreen::add_trauma(0.6f);
 				PlaySound(SoundManager::sounds["hit7"]);
-				PlaySound(SoundManager::sounds["splat8"]);
 				PlaySound(SoundManager::sounds["swish9"]);
 
 			}
@@ -261,7 +268,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 
 		if (e != nullptr)
 		{
-			if (subject == "INFECTED_H" && other == "p_axe_att" && !(e->state == EnemyState::Hurting))
+			if (subject == "INFECTED_H" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
@@ -323,7 +330,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 
 		if (e != nullptr)
 		{
-			if (subject == "WCARM" && other == "p_axe_att" && e->state != EnemyState::Hurting)
+			if (subject == "WCARM" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
@@ -348,8 +355,95 @@ void ContactListener::BeginContact(b2Contact* contact)
 			}
 		}
 	}
+	//frog boss fboss
+	{
+		std::string other = "";
+		std::string subject = "";
+		FrogBoss* e = nullptr;
+		if (c1->m_colliderTag == FBOSS)
+		{
+			e = static_cast<FrogBoss*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == FBOSS)
+		{
+			e = static_cast<FrogBoss*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (e != nullptr)
+		{
+			if ((subject == "FBOSS" || subject == "fb_stand_body"|| subject == "fb_run_body") && other == "p_axe_att")
+			{
+				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.6f);
+			}
 
+			if (subject == "fboss_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts++;
+			}
 
+			if (other == "PLAYER")
+			{
+				if (subject == "fb_run_att")
+				{
+					e->player_in_dmg_zone = true;
+				}
+				if (subject == "fb_close_att")
+				{
+					e->player_in_dmg_zone = true;
+				}
+				if (subject == "fboss_feet")
+				{
+					e->player_in_dmg_zone = true;
+				}
+				if (subject == "fb_swirl_att")
+				{
+					e->player_in_dmg_zone = true;
+				}
+			}
+
+			if (subject == "fb_run_att" && other == "SOLID")
+			{
+				if (!e->changed_sides)
+				{
+					e->looking_right = !e->looking_right;
+					e->changed_sides = true;
+				}
+			}
+			
+		}
+	}
+
+	//frog boss hook
+	{
+		std::string other = "";
+		std::string subject = "";
+		BossHook* e = nullptr;
+		if (c1->m_colliderTag == BOSSHOOK)
+		{
+			e = static_cast<BossHook*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == BOSSHOOK)
+		{
+			e = static_cast<BossHook*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (e != nullptr)
+		{
+			if (subject == "BOSSHOOK" && other == "PLAYER")
+			{
+				e->player_hit = true;
+				GameScreen::add_trauma(0.6f);
+			}
+
+		}
+	}
 	//ribbs 
 	{
 		std::string other = "";
@@ -371,7 +465,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 
 		if (e != nullptr)
 		{
-			if (subject == "RIBBS" && other == "p_axe_att" && e->state != EnemyState::Hurting)
+			if (subject == "RIBBS" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
@@ -418,7 +512,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 
 		if (e != nullptr)
 		{
-			if (subject == "FOOTB" && other == "p_axe_att" && e->state != EnemyState::Hurting)
+			if (subject == "FOOTB" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
@@ -455,7 +549,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 
 		if (e != nullptr)
 		{
-			if (subject == "HSPIT" && other == "p_axe_att" && e->state != EnemyState::Hurting)
+			if (subject == "HSPIT" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
@@ -492,7 +586,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 
 		if (e != nullptr)
 		{
-			if (subject == "LEGGY" && other == "p_axe_att" && e->state != EnemyState::Hurting)
+			if (subject == "LEGGY" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
@@ -560,7 +654,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 					e->ground_contacts++;
 				}
 			}
-			if (subject == "FLYING_INF" && other == "p_axe_att" && !(e->state == EnemyState::Hurting))
+			if (subject == "FLYING_INF" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
@@ -662,6 +756,28 @@ void ContactListener::BeginContact(b2Contact* contact)
 			e->player_in_sensor = true;
 		}
 	}
+	//MediPod
+	{
+		std::string other = "";
+		std::string subject = "";
+		MediPod* e = nullptr;
+		if (c1->m_colliderTag == MPOD)
+		{
+			e = static_cast<MediPod*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == MPOD)
+		{
+			e = static_cast<MediPod*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "MPOD")
+		{
+			e->player_in_sensor = true;
+		}
+	}
 	//NPC
 	{
 		std::string other = "";
@@ -713,6 +829,11 @@ void ContactListener::BeginContact(b2Contact* contact)
 		if(subject=="FIREAXE" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
 		{
 			PlaySound(SoundManager::sounds["axe_solid_hit"]);
+		}
+		if (subject == "FIREAXE" && other == "SWITCH")
+		{
+			Switch* sw = static_cast<Switch*>(other_c);
+			sw->axed = true;
 		}
 	}
 }
@@ -802,6 +923,60 @@ void ContactListener::EndContact(b2Contact* contact)
 		}
 
 	}
+
+	//frog boss fboss
+	{
+		std::string other = "";
+		std::string subject = "";
+		FrogBoss* e = nullptr;
+		if (c1->m_colliderTag == FBOSS)
+		{
+			e = static_cast<FrogBoss*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == FBOSS)
+		{
+			e = static_cast<FrogBoss*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+
+
+		if (e != nullptr)
+		{
+
+			if (subject == "fboss_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts--;
+			}
+
+			if (other == "PLAYER")
+			{
+				if (subject == "fb_run_att")
+				{
+					e->player_in_dmg_zone = false;
+				}
+				if (subject == "fb_close_att")
+				{
+					e->player_in_dmg_zone = false;
+				}
+				if (subject == "fboss_feet")
+				{
+					e->player_in_dmg_zone = false;
+				}
+				if (subject == "fb_swirl_att")
+				{
+					e->player_in_dmg_zone = false;
+				}
+			}
+			//if (subject == "fb_run_att" && other == "SOLID")
+			//{
+			//	e->wall_contacts--;
+			//}
+		}
+	}
+
 	#pragma region infected hazmat 
 		std::string other = "";
 		std::string subject = "";
@@ -1169,6 +1344,28 @@ void ContactListener::EndContact(b2Contact* contact)
 			e->player_in_sensor = false;
 		}
 	}
+	//MediPod
+	{
+		std::string other = "";
+		std::string subject = "";
+		MediPod* e = nullptr;
+		if (c1->m_colliderTag == MPOD)
+		{
+			e = static_cast<MediPod*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == MPOD)
+		{
+			e = static_cast<MediPod*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "MPOD")
+		{
+			e->player_in_sensor = false;
+		}
+	}
 	//NPC
 	{
 		std::string other = "";
@@ -1242,6 +1439,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 			other = nameA;
 		}
 
+
 		if (other == "FIREAXE"  &&
 			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
 		{
@@ -1261,6 +1459,33 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 					p->EmitParticles();
 
 				}
+			}
+		}
+	}
+
+	//GATE
+	{
+		std::string other = "";
+		Gate* e = nullptr;
+		if (c1->m_colliderTag == GATE)
+		{
+			e = static_cast<Gate*>(c1);
+			other = nameB;
+		}
+		else if (c2->m_colliderTag == GATE)
+		{
+			e = static_cast<Gate*>(c2);
+			other = nameA;
+		}
+
+		if (other == "FIREAXE" && contact->IsTouching() &&
+			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
+		{
+			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
+			if (dmg_impulse > 20)
+			{
+				e->TakeDmg(dmg_impulse);
+				GameScreen::add_trauma(0.6f);
 			}
 		}
 	}
@@ -1401,7 +1626,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 		}
 	}
 
-	// footb 
+	// head spit 
 	{
 		std::string other = "";
 		HeadSpit* e = nullptr;
@@ -1458,6 +1683,36 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 
 		}
 	}
+
+	// fboss 
+	{
+		std::string other = "";
+		FrogBoss* e = nullptr;
+		if (c1->m_colliderTag == FBOSS)
+		{
+			e = static_cast<FrogBoss*>(c1);
+			other = nameB;
+		}
+		else if (c2->m_colliderTag == FBOSS)
+		{
+			e = static_cast<FrogBoss*>(c2);
+			other = nameA;
+		}
+
+		if (other == "FIREAXE" && contact->IsTouching() &&
+			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
+		{
+
+			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
+			if (dmg_impulse > 20)
+			{
+				e->TakeDmg(dmg_impulse * 1.5f);
+				GameScreen::add_trauma(0.6f);
+			}
+
+		}
+	}
+	
 }
 
 

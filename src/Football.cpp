@@ -2,7 +2,7 @@
 #include "SoundManager.h"
 #include "GameScreen.h"
 
-Football::Football(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 10, 20 }, FOOTB)
+Football::Football(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 10, 20 }, FOOTB, b2_dynamicBody)
 {
 
 	sprite_offset_32 = { -10,-11 };

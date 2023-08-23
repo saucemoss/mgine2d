@@ -19,6 +19,9 @@ void DialogueManager::InitDialogues()
 	//Axe pickup statnion
 	DialogueMap.emplace(8, DialogueLine(8, "\n       Break in case\n       of emergency.", 0));
 	DialogueMap.emplace(9, DialogueLine(9, "\n       RT to Attack", 0));
+
+	//Medipod save
+	DialogueMap.emplace(10, DialogueLine(10, "\n       Saved.", 0));
 }
 
 void DialogueBox::DrawDialogue()

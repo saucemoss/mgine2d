@@ -3,7 +3,7 @@
 #include "GameScreen.h"
 #include "Leggy.h"
 
-Ribbs::Ribbs(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 14, 30 }, RIBBS)
+Ribbs::Ribbs(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 14, 30 }, RIBBS, b2_dynamicBody)
 {
 
 	InitAnimations();

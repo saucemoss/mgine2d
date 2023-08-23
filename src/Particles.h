@@ -347,10 +347,8 @@ private:
         }
         else
         {
-            float temp = float(rand());
-            float posX = -m_spawn_radius + static_cast <float> (temp) / (static_cast <float> (RAND_MAX / (m_spawn_radius + m_spawn_radius)));
-            temp = float(rand());
-            float posY = -m_spawn_radius + static_cast <float> (temp) / (static_cast <float> (RAND_MAX / (m_spawn_radius + m_spawn_radius)));
+            float posX = -m_spawn_radius + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_spawn_radius + m_spawn_radius)));
+            float posY = -m_spawn_radius + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_spawn_radius + m_spawn_radius)));
             return { m_position.x + posX, m_position.y + posY };
         }
     }
@@ -475,12 +473,12 @@ public:
             break;
         case ambient_particles_foreground:
             ptr->shape(ParticleShape::texture);
-            ptr->texture(*TextureLoader::GetTexture("CROSS"));
-            ptr->size(10.0f, 60.0f);
+            ptr->texture(*TextureLoader::GetTexture("DUST_TEST"));
+            ptr->size(10.0f, 150.0f);
             ptr->speed(0.1f);
             ptr->spread(3.0f);
             ptr->color({ 120,200,200,60 });
-            ptr->howmany(5);
+            ptr->howmany(8);
             ptr->gravity(1.1f);
             ptr->set_forever(true);
             ptr->particle_lifetime(10.0f);
@@ -554,7 +552,7 @@ public:
             ptr->emmiter_lifetime(2.2f);
             ptr->size(2.0f, 16.0f);
             ptr->color(Fade(WHITE, 0.8f));
-            ptr->howmany(500);
+            ptr->howmany(800);
             ptr->spawn_radius(64.0f);
             ptr->random_rotation(true);
             ptr->rotation_speed(0.1f);

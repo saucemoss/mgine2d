@@ -53,6 +53,9 @@ class Animations
 public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
+	void InitializeMediPodAnimations();
+	void InitializeBoss1Animations();
+	void InitializeSwitchAnimations();
 	void InitializeBossGlassAnimations();
 	void InitializeGateAnimations();
 	void InitializeAxePickupAnimations();

@@ -153,10 +153,18 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\MediPod.cpp" />
+    <ClCompile Include="src\MenuScreen.cpp" />
+    <ClCompile Include="src\OptionsScreen.cpp" />
+    <ClCompile Include="src\ScreensManager.cpp" />
     <ClCompile Include="src\Acid.cpp" />
     <ClCompile Include="src\AxePickup.cpp" />
     <ClCompile Include="src\BossGlass.cpp" />
+    <ClCompile Include="src\BossHook.cpp" />
+    <ClCompile Include="src\ContinueScreen.cpp" />
+    <ClCompile Include="src\FrogBoss.cpp" />
     <ClCompile Include="src\Gate.cpp" />
+    <ClCompile Include="src\NewGameScreen.cpp" />
     <ClCompile Include="src\Particles.cpp" />
     <ClCompile Include="src\BioBomb.cpp" />
     <ClCompile Include="src\AnimatedDecor.cpp" />
@@ -189,16 +197,26 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\SoundManager.cpp" />
+    <ClCompile Include="src\Switch.cpp" />
     <ClCompile Include="src\Terminal.cpp" />
     <ClCompile Include="src\TitleScreen.cpp" />
     <ClCompile Include="src\WhiteCoatArm.cpp" />
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MediPod.h" />
+    <ClInclude Include="src\OptionsScreen.h" />
+    <ClInclude Include="src\ContinueScreen.h" />
+    <ClInclude Include="src\NewGameScreen.h" />
+    <ClInclude Include="src\MenuScreen.h" />
+    <ClInclude Include="src\BossHook.h" />
+    <ClInclude Include="src\FrogBoss.h" />
     <ClInclude Include="src\BossGlass.h" />
     <ClInclude Include="src\Gate.h" />
     <ClInclude Include="src\AxePickup.h" />
     <ClInclude Include="src\Acid.h" />
+    <ClInclude Include="src\nlohmann\json.hpp" />
+    <ClInclude Include="src\nlohmann\json_fwd.hpp" />
     <ClInclude Include="src\Shaders.h" />
     <ClInclude Include="src\Particles.h" />
     <ClInclude Include="src\Shard.h" />
@@ -216,7 +234,6 @@
     <ClInclude Include="src\FireAxe.h" />
     <ClInclude Include="src\FlyingInfected.h" />
     <ClInclude Include="src\InfectedHazmat.h" />
-    <ClInclude Include="src\Interactable.h" />
     <ClInclude Include="src\Platform.h" />
     <ClInclude Include="src\MovingBlock.h" />
     <ClInclude Include="src\Collidable.h" />
@@ -242,6 +259,7 @@
     <ClInclude Include="src\WoodCrate.h" />
     <ClInclude Include="src\WhiteCoatArm.h" />
     <ClInclude Include="src\Terminal.h" />
+    <ClInclude Include="src\Switch.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />

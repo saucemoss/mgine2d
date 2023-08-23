@@ -7,6 +7,8 @@ public:
 	HeadSpit(const Rectangle& rectangle);
 	~HeadSpit();
 	bool shot = false;
+	bool upsidedown = false;
+	bool up_switched = false;
 	float attack_counter;
 
 	// Inherited via Enemy

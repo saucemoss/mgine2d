@@ -31,12 +31,13 @@ namespace util
 		return body->CreateFixture(&fDef);
 	}
 
+
+
 	static b2Fixture* SimpleCircleSensor(b2Body* body, std::string name, float radius, float pos_x = 0.0f, float pos_y = 0.0f)
 	{
 		b2CircleShape shape;
-
+		shape.m_p.Set(pos_x / settings::PPM, pos_y / settings::PPM);
 		shape.m_radius = radius / settings::PPM;
-		shape.m_p.Set(pos_x, pos_y);
 		FixtureUserData* sesnor_name = new FixtureUserData;
 		sesnor_name->name = name;
 		b2FixtureDef fDef;

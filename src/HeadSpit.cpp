@@ -3,9 +3,9 @@
 #include "GameScreen.h"
 #include "BioBomb.h"
 
-HeadSpit::HeadSpit(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 10, 20 }, HSPIT)
+HeadSpit::HeadSpit(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 10, 20 }, HSPIT, b2_kinematicBody)
 {
-	sprite_offset_32 = { -10,-12 };
+	sprite_offset_32 = { -10,-13 };
 	InitAnimations();
 	m_max_hp = 20;
 	m_current_hp = m_max_hp;
@@ -19,8 +19,6 @@ HeadSpit::HeadSpit(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.
 	m_body->ResetMassData();
 	//player agro sensor
 	util::SimpleCircleSensor(m_body, "hspit_att", 150.0f, 0.0f, 0.0f);
-
-
 }
 
 HeadSpit::~HeadSpit()
@@ -30,6 +28,13 @@ HeadSpit::~HeadSpit()
 
 void HeadSpit::Update(float dt)
 {
+	if (upsidedown && !up_switched)
+	{
+		sprite_rotation = 180.0f;
+		sprite_offset_32 = { 32,32 }; 
+		m_body->SetTransform({ m_body->GetPosition().x - 16.0f/settings::PPM, m_body->GetPosition().y - 16.0f / settings::PPM }, 0.0f);
+		up_switched = true;
+	}
 
 	SwitchFrames(dt);
 
@@ -117,11 +122,11 @@ void HeadSpit::UpdateAttackingState(float dt)
 		shot = true;
 		PlaySound(SoundManager::sounds["splat4"]);
 
-		Rectangle rect = Rectangle{ center_pos().x , center_pos().y - 8.0f , 16, 16 };
+		Rectangle rect = Rectangle{ center_pos().x , center_pos().y + (upsidedown? 8.0f: -8.0f) , 16, 16};
 		LevelManager::level_entities_safe.push_back(std::make_unique<BioBomb>(rect));
 		BioBomb* bomb = reinterpret_cast<BioBomb*>(LevelManager::level_entities_safe.back().get());
 
-		ParticleEmitter* p = new ParticleEmitter({pos().x + 4.0f, pos().y - 10.0f});
+		ParticleEmitter* p = new ParticleEmitter({pos().x, pos().y - (upsidedown? -10.0f : 10.0f)});
 		GameScreen::Particles->Add(DefinedEmitter::acid_head_burst, p);
 		p->EmitParticles();
 

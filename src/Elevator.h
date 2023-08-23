@@ -18,6 +18,7 @@ enum class ElevatorState
     AT_SW,
     OPENING,
     CLOSING,
+    UNPOWERED,
 };
 
 
@@ -31,6 +32,7 @@ public:
     b2Fixture* walls_fixture;
     Texture2D* bgsprite;
     bool player_in_sensor = false;
+    bool powered = true;
 
     const ldtk::Entity& m_ldtk_elevator;
     void ResetY(int next_level);

@@ -10,7 +10,7 @@
 class GameScreen : public BaseScreen
 {
 public:
-    GameScreen();
+    GameScreen(bool in_new_game, int in_save_file_num);
     ~GameScreen();
 
     void UpdateCamera(float dt);
@@ -31,6 +31,9 @@ public:
     void Draw() override;
     void DebugShapes();
     static void add_trauma(float intensity);
+
+    int save_file_num;
+    bool new_game;
 
     Texture2D vignette;
     void DrawVignette();

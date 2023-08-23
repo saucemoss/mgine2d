@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+#include <fstream>
 #include "Entity.h"
 #include <raylib.h>
 #include "Animations.h"
@@ -20,14 +22,15 @@ enum class PlayerState
     Throwing,
     Hurting,
     InDialogue,
-    AxeReclaim
+    AxeReclaim,
+    MediPodSave
 };
 
 
 class Player : public Entity, public Animated, public Collidable
 {
 public:
-    Player();
+    Player(Vector2 pos);
     void NewBody();
     ~Player();
     
@@ -56,6 +59,7 @@ public:
     bool is_aiming = false;
     bool invincible = false;
     bool attack1 = true;
+    bool visible = true;
     float invincible_counter;
     float invincible_time = 1.0f;
     float speed = 7.0f;
@@ -123,6 +127,7 @@ public:
     void UpdateHurtingingState(float dt);
     void UpdateInDialogueState(float dt);
     void UpdateAxeReclaimState(float dt);
+    void UpdateMediPodSaveState(float dt);
     
 
 

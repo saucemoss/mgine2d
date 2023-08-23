@@ -24,7 +24,7 @@ enum class EnemyState
 class Enemy : public Entity, public Animated, public Collidable
 {
 public:
-    Enemy(const Rectangle& rectangle, ColliderTag tag);
+    Enemy(const Rectangle& rectangle, ColliderTag tag, b2BodyType body_type);
     virtual void Die(int death_option) = 0;
     void CheckTouchGround();
     virtual void TakeDmg(int dmg) = 0;
@@ -62,9 +62,11 @@ public:
     bool custom_pos = false;
     float spritePosX = 0.0f;
     float spritePosY = 0.0f;
+    float sprite_rotation;
     //Custom sprite positions
     Vector2 sprite_offset_32;
     Vector2 sprite_offset_96;
+    Vector2 sprite_offset_192;
     Vector2 sprite_offset_224;
 
 

@@ -4,7 +4,7 @@
 #include "Util.h"
 
 InfectedHazmat::InfectedHazmat(const Rectangle& rectangle, const ldtk::ArrayField<ldtk::IntPoint> path_points) :
-	Enemy({ rectangle.x,rectangle.y,12,26 }, INFECTED_H),
+	Enemy({ rectangle.x,rectangle.y,12,26 }, INFECTED_H, b2_dynamicBody),
 	m_path_points(path_points)
 {
 	if (m_path_points.size() > 0) m_next_point = m_path_points.at(0).value();

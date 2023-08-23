@@ -6,11 +6,11 @@
 class TitleScreen : public BaseScreen
 {
 private:
-	Texture2D* texture;
 
 public:
 	TitleScreen();
 	~TitleScreen();
+	bool key_pressed = false;
 
 	void Draw() override;
 	Screens Update(float dt) override;

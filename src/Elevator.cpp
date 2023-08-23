@@ -36,7 +36,7 @@ Elevator::Elevator(const Rectangle& rect, ldtk::ArrayField<int> levels, const ld
 	m_levels = levels;
 	for (int i = 0; i < m_levels.size(); i++)
 	{
-		m_levels.at(i) = m_levels.at(i).value() * settings::tileSize + settings::tileSize / 2;
+		m_levels.at(i) = m_levels.at(i).value() * settings::tileSize + settings::tileSize / 2 + 4.0f;
 	}
 
 	state = ElevatorState::START_LEVEL;
@@ -52,6 +52,30 @@ Elevator::~Elevator()
 void Elevator::Update(float dt)
 {
 	SwitchFrames(dt);
+
+
+	//debug
+	//	std::map<ElevatorState, std::string> StatesStrMap{
+	//	{ElevatorState::START_LEVEL,"START_LEVEL"},
+	//	{ElevatorState::GOING_DOWN,"GOING_DOWN"},
+	//	{ElevatorState::GOING_UP,"GOING_UP"},
+	//	{ElevatorState::GOING_TO_SW,"GOING_TO_SW"},
+	//	{ElevatorState::NEXT_LEVEL,"NEXT_LEVEL"},
+	//	{ElevatorState::PREVIOUS_LEVEL, "PREVIOUS_LEVEL"},
+	//	{ElevatorState::AT_SW, "AT_SW"},
+	//};
+	//std::string stateStr = "State: " + StatesStrMap[state];
+	//std::cout << stateStr << std::endl;
+	//std::cout << pos().y << std::endl;
+	//std::cout << m_levels[0].value() << std::endl;
+
+
+
+
+	if (!powered)
+	{
+		state = ElevatorState::UNPOWERED;
+	}
 
 	if (player_in_sensor && (state != ElevatorState::GOING_DOWN && state != ElevatorState::GOING_UP && state != ElevatorState::GOING_TO_SW))
 	{
@@ -186,7 +210,11 @@ void Elevator::Update(float dt)
 			PlaySound(SoundManager::sounds["call_sw"]);
 		}
 		break;
+	case ElevatorState::UNPOWERED:
+
+		break;
 	}
+	
 	
 }
 
@@ -194,7 +222,7 @@ void Elevator::ResetY(int next_level)
 {
 	StopSound(SoundManager::sounds["elevator"]);
 	PlaySound(SoundManager::sounds["elevator_stop"]);
-	m_body->SetTransform({ m_body->GetPosition().x, next_level / settings::PPM}, 0);
+	m_body->SetTransform({ m_body->GetPosition().x, (next_level / settings::PPM) }, 0);
 	m_body->SetLinearVelocity({ 0, 0 });
 	//open = true;
 }
@@ -217,7 +245,7 @@ void Elevator::MoveDown(float speed)
 void Elevator::MoveToSwitch(float y_in)
 {
 	
-	next_level = y_in;
+	next_level = y_in + 4.0f;
 	state = ElevatorState::GOING_TO_SW;
 	//open = false;
 }

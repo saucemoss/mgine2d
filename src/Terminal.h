@@ -1,8 +1,14 @@
 #pragma once
+
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "Entity.h"
 #include "Collidable.h"
 #include "Settings.h"
 #include "Animations.h"
+
+
 
 enum class TerminalState
 {
@@ -19,7 +25,7 @@ public:
     ~Terminal();
     TerminalState state;
     bool player_in_sensor;
-
+    bool saved = false;
 
     // Inherited via Entity
     virtual void Update(float dt) override;

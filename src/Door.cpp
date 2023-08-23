@@ -126,41 +126,46 @@ void Door::Update(float dt)
 	case DoorState::Locked:
 		terminal_unlocks = refs.size();
 		SetAnimation("D_LOCKED");
-		for (auto r : refs)
+
+		if (refs.size() != 0)
 		{
-			auto id =  r.value().entity_iid;
-			
-			for (auto& e : GameScreen::LevelMgr->level_entities_safe)
+			for (auto r : refs)
 			{
-				if (e.get()->m_ldtkID == id)
+				auto id = r.value().entity_iid;
+
+				for (auto& e : GameScreen::LevelMgr->level_entities_safe)
 				{
-					Terminal* t = static_cast<Terminal*>(e.get());
-					if (t->state == TerminalState::Pass)
+					if (e.get()->m_ldtkID == id)
 					{
-						terminal_unlocks--;
+						Terminal* t = static_cast<Terminal*>(e.get());
+						if (t->state == TerminalState::Pass)
+						{
+							terminal_unlocks--;
+						}
 					}
 				}
+
 			}
 
+			if (terminal_unlocks == 0)
+			{
+				if (!IsSoundPlaying(SoundManager::sounds["pc_work"]))
+				{
+					locked = false;
+					state = DoorState::Closed;
+					PlaySound(SoundManager::sounds["robo5"]);
+					FreezeFrame("D_CLOSE", 7);
+					GameScreen::add_trauma(1.0f);
+					ParticleEmitter* p = new ParticleEmitter({ pos().x, pos().y - 20 });
+					GameScreen::Particles->Add(DefinedEmitter::dust, p);
+					p->EmitParticles();
+					ParticleEmitter* p2 = new ParticleEmitter({ pos().x, pos().y + 20 });
+					GameScreen::Particles->Add(DefinedEmitter::dust, p2);
+					p2->EmitParticles();
+				}
+			}
 		}
 
-		if (terminal_unlocks == 0)
-		{
-			if (!IsSoundPlaying(SoundManager::sounds["pc_work"]))
-			{
-				locked = false;
-				state = DoorState::Closed;
-				PlaySound(SoundManager::sounds["robo5"]);
-				FreezeFrame("D_CLOSE", 7);
-				GameScreen::add_trauma(1.0f);
-				ParticleEmitter* p = new ParticleEmitter({pos().x, pos().y - 20});
-				GameScreen::Particles->Add(DefinedEmitter::dust, p);
-				p->EmitParticles();
-				ParticleEmitter* p2 = new ParticleEmitter({ pos().x, pos().y + 20 });
-				GameScreen::Particles->Add(DefinedEmitter::dust, p2);
-				p2->EmitParticles();
-			} 
-		}
 		break;
 	}
 

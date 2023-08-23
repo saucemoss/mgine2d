@@ -10,10 +10,10 @@ int main(void)
                 settings::fps,
                 settings::windowTitle };
 
-    while (!game.GameShouldClose())
+    while (!WindowShouldClose() && !game.exit_window)
     {
         game.Tick();
     }
-
+    CloseWindow();
     return 0;
 }

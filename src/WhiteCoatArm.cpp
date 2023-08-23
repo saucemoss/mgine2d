@@ -4,7 +4,7 @@
 #include "Util.h"
 
 WhiteCoatArm::WhiteCoatArm(const Rectangle& rectangle) :
-	Enemy({ rectangle.x,rectangle.y,12,26 }, WCARM)
+	Enemy({ rectangle.x,rectangle.y+8,12,26 }, WCARM, b2_kinematicBody)
 {
 
 	InitAnimations();

@@ -3,7 +3,7 @@
 #include "GameScreen.h"
 #include "Util.h"
 FlyingInfected::FlyingInfected(const Rectangle& rectangle) :
-	Enemy({ rectangle.x,rectangle.y,20,20 }, FLYING_INF)
+	Enemy({ rectangle.x,rectangle.y,20,20}, FLYING_INF, b2_dynamicBody)
 {
 	speed = 4.0f;
 	m_max_hp = 150;

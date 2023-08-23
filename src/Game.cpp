@@ -8,6 +8,8 @@
 #include "Dialogue.h"
 
 RenderTexture2D frameBuffer;
+bool Game::exit_window = false;
+
 
 Game::Game(int width, int height, int fps, std::string title)
 {
@@ -18,7 +20,7 @@ Game::Game(int width, int height, int fps, std::string title)
 	frameBuffer = LoadRenderTexture(width, height);
 	TextureLoader::LoadTextures();
 	ScreensManager::Initialize();
-	ScreensManager::SetCurrentScreen(Screens::GAME); //TO BE CHANGED TO TITLE
+	ScreensManager::SetCurrentScreen(Screens::TITLE); //TO BE CHANGED TO TITLE
 	DialogueManager::InitDialogues();
 	InitAudioDevice();
 	SoundManager::LoadSounds();
@@ -32,11 +34,6 @@ Game::~Game() noexcept
 	ScreensManager::Cleanup();
 	UnloadRenderTexture(frameBuffer);
 	CloseWindow();
-}
-
-bool Game::GameShouldClose() const
-{
-	return WindowShouldClose();
 }
 
 void Game::Tick()

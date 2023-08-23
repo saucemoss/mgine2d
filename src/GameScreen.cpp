@@ -25,15 +25,17 @@ bool GameScreen::lock_camera;
 
 
 
-GameScreen::GameScreen()
+GameScreen::GameScreen(bool in_new_game, int in_save_file_num)
 
 {
+	save_file_num = in_save_file_num;
+	new_game = in_new_game;
 	HideCursor();
 	srand(static_cast <unsigned> (time(0)));
 	shaders = new Shaders();
-	LevelMgr = new LevelManager();
+	LevelMgr = new LevelManager(new_game, save_file_num);
 	SoundMgr = new SoundManager();
-	player = new Player();
+	player = new Player(LevelMgr->new_player_pos);
 	Particles = new ParticlesManager();
 	
 	
@@ -278,13 +280,11 @@ void GameScreen::DebugShapes()
 				auto circleShape = (b2CircleShape*)shape;
 
 				auto pos = currentBody->GetPosition();
-
-				DrawCircleLines(pos.x * settings::PPM,
-					pos.y * settings::PPM,
+				
+				DrawCircleLines((pos.x + circleShape->m_p.x) * settings::PPM,
+					(pos.y + circleShape->m_p.y) * settings::PPM,
 					circleShape->m_radius * settings::PPM,
 					GREEN);
-
-
 			}
 			else
 			{

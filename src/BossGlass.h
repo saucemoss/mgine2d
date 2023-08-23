@@ -24,6 +24,8 @@ public:
 
     bool player_entered_sensor;
     bool boss_added = false;
+    bool level_unlocked = true;
+    float delay_timer;
 
     // Inherited via Entity
     virtual void Update(float dt) override;
