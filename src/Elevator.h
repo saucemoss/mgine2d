@@ -31,7 +31,6 @@ public:
     ElevatorState state;
     b2Fixture* walls_fixture;
     Texture2D* bgsprite;
-    bool player_in_sensor = false;
     bool powered = true;
 
     const ldtk::Entity& m_ldtk_elevator;

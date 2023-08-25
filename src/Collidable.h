@@ -15,7 +15,7 @@
 
 enum ColliderTag {
 	UNASSIGNED,
-	ENEMY, NPC,
+	ENEMY, NPC, NPC_DOC1,
 	SOLID,
 	PLAYER,
 	LEVEL_PORTAL,
@@ -23,7 +23,7 @@ enum ColliderTag {
 	ELEVATOR, ELEVATOR_CALL_SW,
 	M_BLOCK, M_BLOCK_TOP, W_CRATE, ACID,
 	INFECTED_H, FLYING_INF, RIBBS, LEGGY, FOOTB, HSPIT, WCARM, BOSSGLASS, FBOSS,
-	FIREAXE, BIOBOMB, SHARD, BOSSHOOK
+	FIREAXE, BIOBOMB, SHARD, BOSSHOOK, SFOG,
 };
 
 enum ContactGroup {
@@ -47,6 +47,7 @@ public:
 	b2PolygonShape m_box;
 	b2CircleShape m_circle;
 	static b2World* world;
+	bool player_in_sensor;
 
 	Collidable(const b2Vec2* verices, int vertices_count, b2BodyType type, ColliderTag collider_tag, const Rectangle& rectangle)
 	{

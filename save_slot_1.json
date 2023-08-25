@@ -1,12 +1,6 @@
 {
     "dialogue_used_lines": [
-        10,
-        6,
-        8,
-        9,
-        10,
-        10,
-        10
+        6
     ],
     "game_progress": 0,
     "level_data": {
@@ -14,29 +8,39 @@
             "visited": true
         },
         "Level_1": {
+            "secrets": {
+                "202b9230-3b70-11ee-9c52-8b1a81cb9d45": true,
+                "33169870-3b70-11ee-9c52-b138e98d70a5": true
+            },
+            "terminals": {
+                "605df6a0-3b70-11ee-9c52-9bfc6acacb1f": false
+            },
             "visited": true
         },
         "Level_2": {
             "terminals": {
                 "24664c50-3b70-11ee-b323-2ffa2017cfd2": false
             },
-            "visited": true
+            "visited": false
         },
         "Level_3": {
+            "secrets": {
+                "43272710-3b70-11ee-9502-9b39fa813106": true,
+                "5b387200-3b70-11ee-b142-ed2d979caaf4": true
+            },
             "terminals": {
-                "0264a780-1460-11ee-b55c-9fdcedee87c2": true,
-                "34c233c0-3b70-11ee-892e-2f2967ac2abd": true,
-                "367b2850-1460-11ee-b55c-79dea731b1fb": true,
-                "42dc6870-1460-11ee-b55c-531e29aca8cd": true,
+                "0264a780-1460-11ee-b55c-9fdcedee87c2": false,
+                "34c233c0-3b70-11ee-892e-2f2967ac2abd": false,
+                "367b2850-1460-11ee-b55c-79dea731b1fb": false,
                 "49f19c20-1460-11ee-b55c-978d5783690c": true,
-                "de41e390-3b70-11ee-af06-f1f029e960ad": true,
-                "f8604320-1460-11ee-b55c-cb6f31ce9baf": true
+                "de41e390-3b70-11ee-af06-f1f029e960ad": false,
+                "f8604320-1460-11ee-b55c-cb6f31ce9baf": false
             },
             "visited": true
         },
         "Level_4": {
             "switches": {
-                "747210c0-3b70-11ee-b323-a19bc94561db": true,
+                "747210c0-3b70-11ee-b323-a19bc94561db": false,
                 "7a4346a0-3b70-11ee-91d6-efedd4476184": false
             },
             "terminals": {
@@ -44,25 +48,28 @@
                 "df3c0330-3b70-11ee-b323-6bcd393fee8f": false,
                 "ecd48ad0-3b70-11ee-b323-39c03a1c8cd9": false
             },
-            "visited": true
+            "visited": false
         },
         "Level_5": {
             "switches": {
                 "3880d9a0-3b70-11ee-b323-99f98253e38c": false
             },
-            "visited": true
+            "visited": false
         },
         "Level_6": {
             "boss": {
                 "9c89b140-3b70-11ee-a1ad-4372584a07b6": false
             },
-            "visited": true
+            "secrets": {
+                "4b18dc70-3b70-11ee-9502-63491715186c": false
+            },
+            "visited": false
         },
         "Level_7": {
             "switches": {
                 "490cb700-3b70-11ee-af06-3f57c02f5033": false
             },
-            "visited": true
+            "visited": false
         }
     },
     "player": {
@@ -72,7 +79,7 @@
         "maxEnergy": 50,
         "maxHP": 50,
         "position": [
-            690.1072998046875,
+            708.964111328125,
             570.16015625
         ],
         "samples": 0,

@@ -21,6 +21,7 @@
 #include "FrogBoss.h"
 #include "BossHook.h"
 #include "MediPod.h"
+#include "SecretFog.h"
 
 std::map<ColliderTag, std::string> ContactListener::ColStrMap;
 
@@ -56,6 +57,7 @@ ContactListener::ContactListener()
 	ColStrMap[ColliderTag::FBOSS] = "FBOSS";
 	ColStrMap[ColliderTag::BOSSHOOK] = "BOSSHOOK";
 	ColStrMap[ColliderTag::MPOD] = "MPOD";
+	ColStrMap[ColliderTag::SFOG] = "SFOG";
 }
 
 void ContactListener::BeginContact(b2Contact* contact)
@@ -229,22 +231,11 @@ void ContactListener::BeginContact(b2Contact* contact)
 			GameScreen::player->new_pos = GameScreen::player->last_safe_pos;
 		}
 
-		if (other == "BOSSGLASS")
+		if (other_c != nullptr)
 		{
-			BossGlass* bg = static_cast<BossGlass*>(other_c);
-			bg->player_entered_sensor = true;
+			other_c->player_in_sensor = true;
 		}
 
-		if (other == "TERMNIAL" && subject == "PLAYER")
-		{
-			Terminal* t = static_cast<Terminal*>(other_c);
-			t->player_in_sensor = true;
-		}
-		if (other == "AXEPICKUP" && subject == "PLAYER")
-		{
-			AxePickup* t = static_cast<AxePickup*>(other_c);
-			t->player_in_sensor = true;
-		}
 
 	}
 	//infected hazmat 
@@ -417,33 +408,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 		}
 	}
 
-	//frog boss hook
-	{
-		std::string other = "";
-		std::string subject = "";
-		BossHook* e = nullptr;
-		if (c1->m_colliderTag == BOSSHOOK)
-		{
-			e = static_cast<BossHook*>(c1);
-			other = nameB;
-			subject = nameA;
-		}
-		else if (c2->m_colliderTag == BOSSHOOK)
-		{
-			e = static_cast<BossHook*>(c2);
-			other = nameA;
-			subject = nameB;
-		}
-		if (e != nullptr)
-		{
-			if (subject == "BOSSHOOK" && other == "PLAYER")
-			{
-				e->player_hit = true;
-				GameScreen::add_trauma(0.6f);
-			}
 
-		}
-	}
 	//ribbs 
 	{
 		std::string other = "";
@@ -696,44 +661,8 @@ void ContactListener::BeginContact(b2Contact* contact)
 			}
 		}
 	}
-	//Elevator 
-	{
-		std::string other = "";
-		Elevator* e = nullptr;
-		if (c1->m_colliderTag == ELEVATOR)
-		{
-			e = static_cast<Elevator*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == ELEVATOR)
-		{
-			e = static_cast<Elevator*>(c2);
-			other = nameA;
-		}
-		if (other == "PLAYER")
-		{
-			e->player_in_sensor = true;
-		}
-	}
-	//Elevator Switch
-	{
-		std::string other = "";
-		ElevatorCallSwitch* e = nullptr;
-		if (c1->m_colliderTag == ELEVATOR_CALL_SW)
-		{
-			e = static_cast<ElevatorCallSwitch*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == ELEVATOR_CALL_SW)
-		{
-			e = static_cast<ElevatorCallSwitch*>(c2);
-			other = nameA;
-		}
-		if (other == "PLAYER")
-		{
-			e->player_in_sensor = true;
-		}
-	}
+
+
 	//Door
 	{
 		std::string other = "";
@@ -756,28 +685,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			e->player_in_sensor = true;
 		}
 	}
-	//MediPod
-	{
-		std::string other = "";
-		std::string subject = "";
-		MediPod* e = nullptr;
-		if (c1->m_colliderTag == MPOD)
-		{
-			e = static_cast<MediPod*>(c1);
-			other = nameB;
-			subject = nameA;
-		}
-		else if (c2->m_colliderTag == MPOD)
-		{
-			e = static_cast<MediPod*>(c2);
-			other = nameA;
-			subject = nameB;
-		}
-		if (other == "PLAYER" && subject == "MPOD")
-		{
-			e->player_in_sensor = true;
-		}
-	}
+
 	//NPC
 	{
 		std::string other = "";
@@ -911,16 +819,11 @@ void ContactListener::EndContact(b2Contact* contact)
 				player_right_wall_contacts--;
 			}
 		}
-		if (other == "TERMNIAL" && subject == "PLAYER")
+		if (other_c != nullptr)
 		{
-			Terminal* t = static_cast<Terminal*>(other_c);
-			t->player_in_sensor = false;
+			other_c->player_in_sensor = false;
 		}
-		if (other == "AXEPICKUP" && subject == "PLAYER")
-		{
-			AxePickup* t = static_cast<AxePickup*>(other_c);
-			t->player_in_sensor = false;
-		}
+
 
 	}
 
@@ -1284,44 +1187,7 @@ void ContactListener::EndContact(b2Contact* contact)
 		}
 	}
 
-	//Elevator 
-	{
-		std::string other = "";
-		Elevator* e = nullptr;
-		if (c1->m_colliderTag == ELEVATOR)
-		{
-			e = static_cast<Elevator*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == ELEVATOR)
-		{
-			e = static_cast<Elevator*>(c2);
-			other = nameA;
-		}
-		if (other == "PLAYER")
-		{
-			e->player_in_sensor = false;
-		}
-	}
-	//Elevator Switch
-	{
-		std::string other = "";
-		ElevatorCallSwitch* e = nullptr;
-		if (c1->m_colliderTag == ELEVATOR_CALL_SW)
-		{
-			e = static_cast<ElevatorCallSwitch*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == ELEVATOR_CALL_SW)
-		{
-			e = static_cast<ElevatorCallSwitch*>(c2);
-			other = nameA;
-		}
-		if (other == "PLAYER")
-		{
-			e->player_in_sensor = false;
-		}
-	}
+	
 	//Door
 	{
 		std::string other = "";
@@ -1344,28 +1210,7 @@ void ContactListener::EndContact(b2Contact* contact)
 			e->player_in_sensor = false;
 		}
 	}
-	//MediPod
-	{
-		std::string other = "";
-		std::string subject = "";
-		MediPod* e = nullptr;
-		if (c1->m_colliderTag == MPOD)
-		{
-			e = static_cast<MediPod*>(c1);
-			other = nameB;
-			subject = nameA;
-		}
-		else if (c2->m_colliderTag == MPOD)
-		{
-			e = static_cast<MediPod*>(c2);
-			other = nameA;
-			subject = nameB;
-		}
-		if (other == "PLAYER" && subject == "MPOD")
-		{
-			e->player_in_sensor = false;
-		}
-	}
+	
 	//NPC
 	{
 		std::string other = "";
@@ -1424,6 +1269,56 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 	}
 
 
+	//axe
+	std::string other = "";
+	std::string subject = "";
+	Collidable* other_c = nullptr;
+	FixtureUserData* user_data = nullptr;
+	Enemy* e = nullptr;
+
+	if (c1->m_colliderTag == FIREAXE)
+	{
+		other = nameB;
+		subject = nameA;
+		other_c = c2;
+
+	}
+	else if (c2->m_colliderTag == FIREAXE)
+	{
+		other = nameA;
+		subject = nameB;
+		other_c = c1;
+	}
+	e = static_cast<Enemy*>(other_c);
+
+	if (e != nullptr )
+	{
+		user_data = reinterpret_cast<FixtureUserData*>(e->m_fixtureDef.userData.pointer);
+	}
+
+	if (e != nullptr && user_data != nullptr && user_data->tag == ENEMY_GROUP)
+	{
+		float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
+		if (dmg_impulse > 20)
+		{
+			e->TakeDmg(dmg_impulse);
+			GameScreen::add_trauma(0.6f);
+			b2WorldManifold worldManifold;
+			contact->GetWorldManifold(&worldManifold);
+			Vector2 contact_point = { worldManifold.points[0].x * settings::PPM ,
+										worldManifold.points[0].y * settings::PPM };
+			ParticleEmitter* p = new ParticleEmitter(contact_point);
+			GameScreen::Particles->Add(DefinedEmitter::dust, p);
+			for (int i = 0; i < 5; i++)
+			{
+				p->EmitParticles();
+
+			}
+		}
+	}
+
+
+
 	//wood crate
 	{
 		std::string other = "";
@@ -1443,17 +1338,17 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 		if (other == "FIREAXE"  &&
 			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
 		{
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
+		float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
 			if (dmg_impulse > 20)
 			{
-				e->TakeDmg(dmg_impulse/50);
+				e->TakeDmg(dmg_impulse);
 				GameScreen::add_trauma(0.6f);
 				b2WorldManifold worldManifold;
 				contact->GetWorldManifold(&worldManifold);
 				Vector2 contact_point = { worldManifold.points[0].x * settings::PPM ,
 											worldManifold.points[0].y * settings::PPM };
 				ParticleEmitter* p = new ParticleEmitter(contact_point);
-								GameScreen::Particles->Add(DefinedEmitter::dust, p);
+				GameScreen::Particles->Add(DefinedEmitter::dust, p);
 				for (int i = 0; i < 5; i++)
 				{
 					p->EmitParticles();
@@ -1490,228 +1385,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 		}
 	}
 
-	//Infected hazmat
-	{
-		std::string other = "";
-		InfectedHazmat* e = nullptr;
-		if (c1->m_colliderTag == INFECTED_H)
-		{
-			e = static_cast<InfectedHazmat*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == INFECTED_H)
-		{
-			e = static_cast<InfectedHazmat*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse);
-				GameScreen::add_trauma(0.6f);
-			}
-		}
-	}
-	//Ribbs
-	{
-		std::string other = "";
-		Ribbs* e = nullptr;
-		if (c1->m_colliderTag == RIBBS)
-		{
-			e = static_cast<Ribbs*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == RIBBS)
-		{
-			e = static_cast<Ribbs*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse);
-				GameScreen::add_trauma(0.6f);
-			}
-		}
-	}
-	//Leggy
-	{
-		std::string other = "";
-		Leggy* e = nullptr;
-		if (c1->m_colliderTag == LEGGY)
-		{
-			e = static_cast<Leggy*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == LEGGY)
-		{
-			e = static_cast<Leggy*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse);
-				GameScreen::add_trauma(0.6f);
-			}
-		}
-	}
-	//Flying infected
-	{
-		std::string other = "";
-		FlyingInfected* e = nullptr;
-		if (c1->m_colliderTag == FLYING_INF)
-		{
-			e = static_cast<FlyingInfected*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == FLYING_INF)
-		{
-			e = static_cast<FlyingInfected*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-			
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse * 1.5f);
-				GameScreen::add_trauma(0.6f);
-			}
-
-		}
-	}
-
-	// footb 
-	{
-		std::string other = "";
-		Football* e = nullptr;
-		if (c1->m_colliderTag == FOOTB)
-		{
-			e = static_cast<Football*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == FOOTB)
-		{
-			e = static_cast<Football*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse * 1.5f);
-				GameScreen::add_trauma(0.6f);
-			}
-
-		}
-	}
-
-	// head spit 
-	{
-		std::string other = "";
-		HeadSpit* e = nullptr;
-		if (c1->m_colliderTag == HSPIT)
-		{
-			e = static_cast<HeadSpit*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == HSPIT)
-		{
-			e = static_cast<HeadSpit*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse * 1.5f);
-				GameScreen::add_trauma(0.6f);
-			}
-
-		}
-	}
-
-	// wcarm
-	{
-		std::string other = "";
-		WhiteCoatArm* e = nullptr;
-		if (c1->m_colliderTag == WCARM)
-		{
-			e = static_cast<WhiteCoatArm*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == WCARM)
-		{
-			e = static_cast<WhiteCoatArm*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse * 1.5f);
-				GameScreen::add_trauma(0.6f);
-			}
-
-		}
-	}
-
-	// fboss 
-	{
-		std::string other = "";
-		FrogBoss* e = nullptr;
-		if (c1->m_colliderTag == FBOSS)
-		{
-			e = static_cast<FrogBoss*>(c1);
-			other = nameB;
-		}
-		else if (c2->m_colliderTag == FBOSS)
-		{
-			e = static_cast<FrogBoss*>(c2);
-			other = nameA;
-		}
-
-		if (other == "FIREAXE" && contact->IsTouching() &&
-			(!contact->GetFixtureA()->IsSensor() && !contact->GetFixtureB()->IsSensor()))
-		{
-
-			float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
-			if (dmg_impulse > 20)
-			{
-				e->TakeDmg(dmg_impulse * 1.5f);
-				GameScreen::add_trauma(0.6f);
-			}
-
-		}
-	}
+	
 	
 }
 

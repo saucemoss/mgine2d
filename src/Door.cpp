@@ -16,7 +16,6 @@ Door::Door(const Rectangle& rect, bool is_right)
 
 	EnitityManager::Add(this);
 
-
 }
 
 Door::~Door()

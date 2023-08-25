@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+#include <fstream>
 #include "Enemy.h"
 
 enum class FrogBossState
@@ -50,6 +52,7 @@ public:
 	//state flags/variables
 	float attack_counter;
 	float random_timer;
+	float roar_timer;
 	bool player_close = false;
 	bool player_mid = false;
 	bool player_far = false;

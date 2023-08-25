@@ -23,7 +23,6 @@ public:
     DoorState state;
     bool m_is_right = true;
     bool m_is_active = true;
-    bool player_in_sensor = false;
     bool locked = false;
     bool denied_played = false;
     int terminal_unlocks;

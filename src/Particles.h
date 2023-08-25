@@ -16,7 +16,7 @@ enum ParticleShape
 
 enum DefinedEmitter
 {
-    dust, blood, steam, fog, acid_bursts, acid_head_burst, acid_projectile, ambient_particles, acid_explosion, ambient_particles_foreground, glass_explosion
+    dust, blood, steam, fog, acid_bursts, acid_head_burst, acid_projectile, ambient_particles, acid_explosion, ambient_particles_foreground, glass_explosion, white_burst
 };
 
 struct Particle {
@@ -540,6 +540,21 @@ public:
             ptr->color({ 0,200,40,255 });
             ptr->howmany(50);
             ptr->spawn_radius(6.0f);
+            Add(ptr);
+            break;
+        case white_burst:
+            ptr->shape(ParticleShape::rectangle);
+            ptr->speed(20.0f);
+            ptr->spread(20.0f);
+            ptr->gravity(0.0f);
+            ptr->particle_lifetime(0.4f);
+            ptr->emmiter_lifetime(0.4f);
+            ptr->size(4.0f, 4.0f);
+            ptr->color(Fade(RAYWHITE, 0.7f));
+            ptr->howmany(100);
+            ptr->spawn_radius(1.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(0.6f);
             Add(ptr);
             break;
         case glass_explosion:

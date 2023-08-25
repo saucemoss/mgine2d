@@ -20,6 +20,8 @@ public:
     static Camera2D player_focused_cam;
     static Camera2D shake_cam;
     static bool lock_camera;
+    static float lock_cam_x;
+    static float lock_cam_y;
    
     static Player* player;
     static LevelManager* LevelMgr;

@@ -26,7 +26,7 @@ public:
     ~MediPod();
     MediPodState state;
 
-    bool player_in_sensor = false;
+
     bool saved = false;
     b2Fixture* sensor;
 

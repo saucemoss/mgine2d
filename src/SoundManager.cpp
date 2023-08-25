@@ -92,6 +92,7 @@ void SoundManager::LoadSounds()
 	sounds.emplace("elevator", LoadSound("res/sound/collected/elevator.wav"));
 	sounds.emplace("elevator_stop", LoadSound("res/sound/collected/elevator_stop.wav"));
 	sounds.emplace("door_close", LoadSound("res/sound/collected/door_close.wav"));
+	SetSoundVolume(sounds["door_close"], 0.7f);
 	sounds.emplace("light_ambient", LoadSound("res/sound/collected/lights_noise-01.wav"));
 	sounds.emplace("flicker", LoadSound("res/sound/collected/lights_noise-02.wav"));
 	sounds.emplace("glass_shatter", LoadSound("res/sound/collected/glass_shatter.wav"));
@@ -110,6 +111,15 @@ void SoundManager::LoadSounds()
 	sounds.emplace("electroswitch-02", LoadSound("res/sound/collected/electroswitch-02.wav"));
 	sounds.emplace("generator-01", LoadSound("res/sound/collected/generator-01.wav"));
 	sounds.emplace("generator-02", LoadSound("res/sound/collected/generator-02.wav"));
+	sounds.emplace("secret", LoadSound("res/sound/collected/hopefull.wav"));
+	sounds.emplace("secret2", LoadSound("res/sound/collected/hopefull2.wav"));
+	sounds.emplace("frog_run", LoadSound("res/sound/collected/frog_run.wav"));
+	sounds.emplace("whirl1", LoadSound("res/sound/collected/whirl-01.wav"));
+	sounds.emplace("whirl2", LoadSound("res/sound/collected/whirl-02.wav"));
+	sounds.emplace("hookshot", LoadSound("res/sound/collected/hookshot.wav"));
+	sounds.emplace("steam_thud", LoadSound("res/sound/collected/steam_thud.wav"));
+	sounds.emplace("steam", LoadSound("res/sound/collected/steam.wav"));
+	sounds.emplace("start_roar", LoadSound("res/sound/collected/start_roar.wav"));
 
 	//glass
 	sounds.emplace("glass_shatter", LoadSound("res/sound/collected/glass_shatter.wav"));
@@ -125,8 +135,11 @@ void SoundManager::LoadSounds()
 	sounds.emplace("step5", LoadSound("res/sound/steps/stepstone05.wav"));
 
 	sounds.emplace("woodhit1", LoadSound("res/sound/collected/wood_hit1.wav"));
+	SetSoundVolume(sounds["woodhit1"], 0.7f);
 	sounds.emplace("woodhit2", LoadSound("res/sound/collected/wood_hit2.wav"));
+	SetSoundVolume(sounds["woodhit2"], 0.7f);
 	sounds.emplace("woodhit3", LoadSound("res/sound/collected/wood_hit3.wav"));
+	SetSoundVolume(sounds["woodhit3"], 0.7f);
 	sounds.emplace("crate_break", LoadSound("res/sound/collected/crate_break.wav"));
 
 

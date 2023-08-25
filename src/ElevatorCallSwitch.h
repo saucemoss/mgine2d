@@ -31,7 +31,6 @@ public:
     // Inherited via Animated
     virtual void InitAnimations() override;
 
-    bool player_in_sensor = false;
 
 private:
 

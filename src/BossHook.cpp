@@ -52,8 +52,9 @@ void BossHook::Update(float dt)
 	GameScreen::Particles->Add(DefinedEmitter::acid_projectile, p);
 	p->EmitParticles();
 
-	if (player_hit)
+	if (player_in_sensor)
 	{
+		GameScreen::add_trauma(0.6f);
 		ParticleEmitter* p = new ParticleEmitter(pos());
 		GameScreen::Particles->Add(DefinedEmitter::acid_explosion, p);
 		p->EmitParticles();

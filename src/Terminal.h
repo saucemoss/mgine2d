@@ -24,7 +24,6 @@ public:
 
     ~Terminal();
     TerminalState state;
-    bool player_in_sensor;
     bool saved = false;
 
     // Inherited via Entity

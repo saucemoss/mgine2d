@@ -22,6 +22,8 @@ ParticlesManager* GameScreen::Particles;
 float GameScreen::shake;
 float GameScreen::trauma;
 bool GameScreen::lock_camera;
+float GameScreen::lock_cam_x;
+float GameScreen::lock_cam_y;
 
 
 
@@ -123,9 +125,9 @@ void GameScreen::UpdateCamera(float dt)
 	}
 	else
 	{
-		camera.target = { (float)LevelMgr->currentLdtkLevel->size.x / 2, (float)LevelMgr->currentLdtkLevel->size.y / 2 };
-		camera.offset.y = settings::screenHeight / 2;
-		camera.offset.x = settings::screenWidth / 2;
+		camera.target = { lock_cam_x, lock_cam_y };
+		//camera.offset.y = settings::screenHeight / 2;
+		//camera.offset.x = settings::screenWidth / 2;
 	}
 
 	//Camera shake

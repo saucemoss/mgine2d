@@ -53,6 +53,7 @@ class Animations
 public:
 	void InitializePlayerAnimations();
 	void InitializeElevatorAnimations();
+	void InitializeNPCDoc1Animations();
 	void InitializeMediPodAnimations();
 	void InitializeBoss1Animations();
 	void InitializeSwitchAnimations();

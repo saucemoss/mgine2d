@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClCompile Include="src\MediPod.cpp" />
     <ClCompile Include="src\MenuScreen.cpp" />
+    <ClCompile Include="src\NPCDoc1.cpp" />
     <ClCompile Include="src\OptionsScreen.cpp" />
     <ClCompile Include="src\ScreensManager.cpp" />
     <ClCompile Include="src\Acid.cpp" />
@@ -188,6 +189,7 @@
     <ClCompile Include="src\NPCSecurityGuy2.cpp" />
     <ClCompile Include="src\Platform.cpp" />
     <ClCompile Include="src\Ribbs.cpp" />
+    <ClCompile Include="src\SecretFog.cpp" />
     <ClCompile Include="src\Shaders.cpp" />
     <ClCompile Include="src\Shard.cpp" />
     <ClCompile Include="src\SolidTile.cpp" />
@@ -204,6 +206,8 @@
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\NPCDoc1.h" />
+    <ClInclude Include="src\SecretFog.h" />
     <ClInclude Include="src\MediPod.h" />
     <ClInclude Include="src\OptionsScreen.h" />
     <ClInclude Include="src\ContinueScreen.h" />

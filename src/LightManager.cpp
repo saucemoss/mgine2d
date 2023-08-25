@@ -23,7 +23,7 @@ void LightManager::SetupBoxes()
 		Collidable* c = dynamic_cast<Collidable*>(e.get());
 		if (c != nullptr)
 		{
-			if (c->m_colliderTag == M_BLOCK)
+			if (c->m_colliderTag == M_BLOCK || c->m_colliderTag == SFOG)
 			{
 				m_light_walls.push_back(&c->m_rectangle);
 			}

@@ -270,6 +270,12 @@
     <ClCompile Include="src\MediPod.cpp">
       <Filter>Pliki źródłowe\Entities\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\SecretFog.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NPCDoc1.cpp">
+      <Filter>Pliki źródłowe\Entities\NPCs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -439,6 +445,12 @@
     </ClInclude>
     <ClInclude Include="src\MediPod.h">
       <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SecretFog.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NPCDoc1.h">
+      <Filter>Pliki nagłówkowe\Entities\NPCs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

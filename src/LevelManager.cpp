@@ -37,6 +37,7 @@
 #include "BossGlass.h"
 #include "Switch.h"
 #include "MediPod.h"
+#include "SecretFog.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
@@ -128,11 +129,16 @@ void LevelManager::LoadLevel(std::string level_name)
 		ParticlesManager::Add(DefinedEmitter::ambient_particles_foreground, level_particles_foreground);
 	}
 	//Level fog
-	level_fog_on = currentLdtkLevel->getField<bool>("Fog").value();
+	level_fog_on = currentLdtkLevel->getField<bool>("Fog").value();  
 
 	GameScreen::lock_camera = currentLdtkLevel->getField<bool>("LockCamera").value();
+	if(GameScreen::lock_camera)
+	{
+		GameScreen::lock_cam_x = currentLdtkLevel->getArrayField<float>("CamTarget")[0].value();
+		GameScreen::lock_cam_y = currentLdtkLevel->getArrayField<float>("CamTarget")[1].value();
+	}
 
-
+	  
 	if (world == nullptr)
 	{
 		contacts = new ContactListener();
@@ -453,6 +459,13 @@ void LevelManager::LoadLevel(std::string level_name)
 							(float)entity.getSize().x ,
 							(float)entity.getSize().y  };
 
+		if (entity.getName() == "SecretFog")
+		{
+			level_entities_safe.push_back(std::make_unique<SecretFog>(rect));
+			level_entities_safe.back().get()->m_ldtkID = entity.iid;
+			level_entities_safe.back().get()->m_draw_layers = 0;
+		}
+
 		if (entity.getName() == "Door")
 		{
 			Rectangle r = { (float)entity.getPosition().x + 8.0f,
@@ -559,6 +572,7 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "BossGlass")
 		{
 			level_entities_safe.push_back(std::make_unique<BossGlass>(rect));
+			level_entities_safe.back().get()->m_ldtkID = entity.iid;
 		}
 		if (entity.getName() == "FireAxe")
 		{
@@ -710,6 +724,8 @@ void LevelManager::LoadSavedLevel()
 		{
 			// Access the current level object
 			json levelObject = it.value();
+
+
 			// Check if "terminals" key exists in the current level object
 			if (levelObject.find("terminals") != levelObject.end()) {
 				// Access the terminals object for the current level
@@ -755,6 +771,58 @@ void LevelManager::LoadSavedLevel()
 						{
 							Switch* t = static_cast<Switch*>(e.get());
 							t->state = switchValue ? SwitchState::On : SwitchState::Off;
+						}
+					}
+				}
+			}
+
+			// Check if "secrets" key exists in the current level object
+			if (levelObject.find("secrets") != levelObject.end()) {
+				// Access the terminals object for the current level
+				json secretObject = levelObject["secrets"];
+
+				// Iterate through each terminal in the terminals object
+				for (json::iterator secretIt = secretObject.begin(); secretIt != secretObject.end(); ++secretIt) {
+					std::string secretID = secretIt.key(); // Get the terminal ID
+					bool secretValue = secretIt.value();   // Get the terminal value (true/false)
+
+					// Print the terminal ID and value
+					std::cout << "Level: " << levelName << ", Switch ID: " << secretID
+						<< ", ON: " << (secretValue ? "true" : "false") << std::endl;
+
+					for (auto& e : level_entities_safe)
+					{
+						if (e.get()->m_ldtkID.str() == secretID)
+						{
+							SecretFog* s = static_cast<SecretFog*>(e.get());
+							s->revealed = secretValue ? true : false;
+							s->sound_played = s->revealed ? true : false;
+						}
+					}
+				}
+			}
+			// Check if "boss" key exists in the current level object
+			if (levelObject.find("boss") != levelObject.end()) {
+				// Access the terminals object for the current level
+				json bossObject = levelObject["boss"];
+
+				// Iterate through each terminal in the terminals object
+				for (json::iterator bossIt = bossObject.begin(); bossIt != bossObject.end(); ++bossIt) {
+					std::string bossID = bossIt.key(); // Get the boss ID
+					bool bossValue = bossIt.value();   // Get the boss value (true/false)
+
+					// Print the terminal ID and value
+					std::cout << "Level: " << levelName << ", Boss ID: " << bossID
+						<< ", ON: " << (bossValue ? "true" : "false") << std::endl;
+
+					for (auto& e : level_entities_safe)
+					{
+						if (e.get()->m_ldtkID.str() == bossID)
+						{
+							BossGlass* bs = static_cast<BossGlass*>(e.get());
+							bs->state = bossValue ? BossGlassState::Shattered : BossGlassState::Idle;
+							bs->level_unlocked = bossValue ? true : false;
+							GameScreen::lock_camera = bossValue ? false : true;
 						}
 					}
 				}
@@ -824,6 +892,11 @@ void LevelManager::UnloadLevel()
 
 	StopSound(SoundManager::sounds["light_ambient"]);
 	
+}
+
+void LevelManager::ResetLevel()
+{
+	next_level = currentLdtkLevel->name;
 }
 
 void LevelManager::Update(float dt)

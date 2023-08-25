@@ -24,6 +24,7 @@ public:
     void SaveLevel();
     void LoadSavedLevel();
     void UnloadLevel();
+    void ResetLevel();
     void Draw();
     void Update(float dt);
     static void RemoveEntityFromLevel(Entity& e);

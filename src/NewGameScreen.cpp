@@ -75,7 +75,14 @@ Screens NewGameScreen::Update(float dt)
                     { "visited", true }
                 } },
                 { "Level_1", {
-                    { "visited", false }
+                    { "visited", false },
+                    { "terminals", {
+                        { "605df6a0-3b70-11ee-9c52-9bfc6acacb1f", false }
+                    } },
+                    { "secrets", {
+                        { "202b9230-3b70-11ee-9c52-8b1a81cb9d45", false },
+                        { "33169870-3b70-11ee-9c52-b138e98d70a5", false }
+                    } }
                 } },
                 { "Level_2", {
                     { "visited", false },
@@ -92,6 +99,10 @@ Screens NewGameScreen::Update(float dt)
                         { "de41e390-3b70-11ee-af06-f1f029e960ad", false },
                         { "0264a780-1460-11ee-b55c-9fdcedee87c2", false },
                         { "f8604320-1460-11ee-b55c-cb6f31ce9baf", false }
+                    } },
+                    { "secrets", {
+                        { "43272710-3b70-11ee-9502-9b39fa813106", false },
+                        { "5b387200-3b70-11ee-b142-ed2d979caaf4", false }
                     } }
                 } },
                 { "Level_4", {
@@ -116,6 +127,9 @@ Screens NewGameScreen::Update(float dt)
                     { "visited", false },
                     { "boss", {
                         { "9c89b140-3b70-11ee-a1ad-4372584a07b6", false }
+                    } },
+                    { "secrets", {
+                        { "4b18dc70-3b70-11ee-9502-63491715186c", false }
                     } }
                 } },
                 { "Level_7", {

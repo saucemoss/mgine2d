@@ -32,6 +32,16 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("SWITCH", LoadTexture("res/level/switch.png"));
 	m_Textures.emplace("BOSS1", LoadTexture("res/enemies/boss1_sheet.png"));
 	m_Textures.emplace("MPOD", LoadTexture("res/level/medipod.png"));
+	m_Textures.emplace("NPC_DOC1", LoadTexture("res/NPCs/doc1.png"));
+}
+
+void Animations::InitializeNPCDoc1Animations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("NPC_DOC1");
+	animations.emplace("DOC1_WORK", *(new Animation(texture, 0, 13, 32, 0.08f)));
+	animations.emplace("DOC1_IDLE", *(new Animation(texture, 1, 9, 32, 0.08f)));
+	animations.emplace("DOC1_TALK", *(new Animation(texture, 2, 12, 32, 0.08f)));
+	animations.emplace("DOC1_RUN", *(new Animation(texture, 3, 5, 32, 0.08f)));
 }
 
 void Animations::InitializeMediPodAnimations()
@@ -40,8 +50,6 @@ void Animations::InitializeMediPodAnimations()
 	animations.emplace("MPOD_CLOSE", *(new Animation(texture, 0, 7, 64, 0.06f)));
 	animations.emplace("MPOD_OPEN", *(new Animation(texture, 1, 7, 64, 0.06f)));
 	animations.emplace("MPOD_SAVE", *(new Animation(texture, 2, 9, 64, 0.07f)));
-
-
 }
 
 void Animations::InitializeBoss1Animations()

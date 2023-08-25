@@ -10,5 +10,6 @@ public:
     OptionsScreen();
     void Draw() override;
     Screens Update(float dt) override;
+    bool options_option = true;
 };
 

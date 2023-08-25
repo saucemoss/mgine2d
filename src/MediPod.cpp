@@ -124,7 +124,6 @@ void MediPod::Update(float dt)
 		{
 			SaveGame();
 			saved = true;
-
 			PlayOnce("MPOD_OPEN");
 		}
 		if (animations->m_CurrentActiveAnimation == "MPOD_OPEN" && AnimationEnded())
@@ -134,6 +133,7 @@ void MediPod::Update(float dt)
 			GameScreen::player->visible = true;
 			GameScreen::player->current_hp = GameScreen::player->m_max_hp;
 			DialogueManager::StartDialogue(10, center_pos());
+
 		}
 
 		break;
