@@ -16,7 +16,9 @@ enum ParticleShape
 
 enum DefinedEmitter
 {
-    dust, blood, steam, fog, acid_bursts, acid_head_burst, acid_projectile, ambient_particles, acid_explosion, ambient_particles_foreground, glass_explosion, white_burst
+    dust, blood, steam, fog, acid_bursts, acid_head_burst, acid_projectile, 
+    ambient_particles, acid_explosion, ambient_particles_foreground, glass_explosion, white_burst,
+    energy_orb, breath_proj, breath_small_anticipation, dash_shadow, dash_shadow_left
 };
 
 struct Particle {
@@ -31,6 +33,9 @@ struct Particle {
     ParticleShape shape;
     bool fade;
     bool clockwise_rot = GetRandomValue(0, 1) == 0 ? true : false;
+    bool animated = false;
+    float frame_timer = 0.0f;
+    int currentFrame = 0;
 };
 
 class ParticleEmitter {
@@ -61,6 +66,7 @@ public:
         m_spawn_impulse = { 0,0 };
         m_spawn_impulse_min = { 0,0 };
         m_spawn_impulse_max = { 0,0 };
+        m_parallaxOffset = { 0,0 };
     }
     ~ParticleEmitter()
     {
@@ -170,6 +176,19 @@ public:
     {
         m_textrue = texture;
     }
+    void animated()
+    {
+        m_animated = true;
+    }
+    void random_texture_rect()
+    {
+        m_randomTextureRect = true;
+    }
+    void paralax_offset(float o)
+    {
+        m_parallaxOffset.x = o;
+        m_parallaxOffset.y = o;
+    }
 
     void EmitParticles() {
         for (int i = 0; i < m_maxParticles; ++i) {
@@ -190,6 +209,14 @@ public:
             particle.shape = m_shape;
             particle.color = m_color;
             particle.size = size();
+            particle.animated = m_animated;
+
+            if (m_shape == ParticleShape::texture && m_randomTextureRect) {
+                int frameWidth = m_textrue.width / 4;
+                int frameHeight = m_textrue.height / 1;
+                int randFrame = GetRandomValue(0, 4 * 1 - 1);
+                particle.currentFrame = randFrame;
+            }
 
             m_particles.push_back(particle);
         }
@@ -230,6 +257,15 @@ public:
             }
 
 
+            if (particle.animated)
+            {
+                particle.frame_timer += dt;
+                if (particle.frame_timer >= 0.08f)
+                {
+                    particle.frame_timer = 0.0f;
+                    particle.currentFrame > 4 ? particle.currentFrame = 0 : particle.currentFrame++;
+                }
+            }
 
             // Remove dead particles
             if (particle.lifetime <= 0) {
@@ -289,8 +325,23 @@ public:
                 break;
             case ParticleShape::texture:
       
-                Vector2 parallaxed = Vector2Multiply(cam_pos, { 0.55f,0.55f });
-                DrawTexturePro(m_textrue, { 0,0, (float)m_textrue.width, (float)m_textrue.height },
+                int frameWidth = m_textrue.width;
+                int frameHeight = m_textrue.height;
+                Rectangle sourceRect = { 0,0, frameWidth, frameHeight};
+                if (m_animated || m_randomTextureRect)
+                {
+                    frameWidth = m_textrue.width / 4;  // Adjust numFramesPerRow accordingly
+                    frameHeight = m_textrue.height / 1;  // Adjust numFramesPerCol accordingly
+                    sourceRect = {
+                        static_cast<float>(particle.currentFrame % 4) * frameWidth,
+                        static_cast<float>(particle.currentFrame / 1) * frameHeight,
+                        static_cast<float>(frameWidth),
+                        static_cast<float>(frameHeight)
+                    };
+                }
+
+                Vector2 parallaxed = Vector2Multiply(cam_pos, m_parallaxOffset);
+                DrawTexturePro(m_textrue, sourceRect,
                     { particle.position.x+parallaxed.x, particle.position.y + parallaxed.y, particle.size, particle.size },
                     Vector2{ particle.size / 2, particle.size / 2 }, particle.rotation, color);
                 break;
@@ -321,6 +372,9 @@ private:
     float m_emittion_clock;
     bool m_fade_in;
     bool m_fade_in_out;
+    bool m_animated = false;
+    bool m_randomTextureRect;
+    Vector2 m_parallaxOffset;
     Vector2 m_direction_vector;
     Vector2 m_spawn_impulse;
     Vector2 m_spawn_impulse_min;
@@ -474,10 +528,11 @@ public:
         case ambient_particles_foreground:
             ptr->shape(ParticleShape::texture);
             ptr->texture(*TextureLoader::GetTexture("DUST_TEST"));
+            ptr->random_texture_rect();
             ptr->size(10.0f, 150.0f);
             ptr->speed(0.1f);
             ptr->spread(3.0f);
-            ptr->color({ 120,200,200,60 });
+            ptr->color({ 120,200,200,50 });
             ptr->howmany(8);
             ptr->gravity(1.1f);
             ptr->set_forever(true);
@@ -488,6 +543,7 @@ public:
             ptr->rotation_speed(0.005f);
             ptr->emittion_counter(0.5f);
             ptr->direction_vector({ -0.1f, -0.1f });
+            ptr->paralax_offset(0.55f);
             Add(ptr);
             break;
         case acid_bursts:
@@ -561,16 +617,102 @@ public:
             ptr->shape(ParticleShape::texture);
             ptr->texture(*TextureLoader::GetTexture("GLASS"));
             ptr->speed(8.0f);
-            ptr->spread(6.0f);
-            ptr->gravity(5.0f);
-            ptr->particle_lifetime(2.2f);
-            ptr->emmiter_lifetime(2.2f);
-            ptr->size(2.0f, 16.0f);
+            ptr->spread(7.0f);
+            ptr->gravity(6.0f);
+            ptr->particle_lifetime(2.5f);
+            ptr->emmiter_lifetime(2.5f);
+            ptr->size(1.0f, 32.0f);
             ptr->color(Fade(WHITE, 0.8f));
-            ptr->howmany(800);
-            ptr->spawn_radius(64.0f);
+            ptr->howmany(200);
+            ptr->spawn_radius(32.0f);
             ptr->random_rotation(true);
             ptr->rotation_speed(0.1f);
+            ptr->random_texture_rect();
+            Add(ptr);
+            break;
+        case energy_orb:
+            ptr->shape(ParticleShape::texture);
+            ptr->texture(*TextureLoader::GetTexture("ORBS"));
+            ptr->speed(2.0f);
+            ptr->spread(2.0f);
+            ptr->gravity(4.0f);
+            ptr->particle_lifetime(1.0f);
+            ptr->emmiter_lifetime(1.0f);
+            ptr->size(3.0f, 5.0f);
+            ptr->color(WHITE);
+            ptr->howmany(1);
+            ptr->spawn_radius(1.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(0.5f);
+            ptr->animated();
+            ptr->random_texture_rect();
+            ptr->fade(true);
+            ptr->fade_in(false);
+            ptr->fade_in_out(false);
+            Add(ptr);
+            break;
+        case breath_proj:
+            ptr->shape(ParticleShape::rectangle);
+            ptr->speed(4.0f);
+            ptr->spread(4.0f);
+            ptr->gravity(5.0f);
+            ptr->particle_lifetime(2.5f);
+            ptr->emmiter_lifetime(2.5f);
+            ptr->size(1.0f, 4.0f);
+            ptr->color({ 52,28,39,255 });
+            ptr->howmany(10);
+            ptr->spawn_radius(3.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(5.0f);
+            Add(ptr);
+            break;
+        case breath_small_anticipation:
+            ptr->shape(ParticleShape::rectangle);
+            ptr->speed(4.0f);
+            ptr->spread(4.0f);
+            ptr->gravity(5.0f);
+            ptr->particle_lifetime(2.5f);
+            ptr->emmiter_lifetime(2.5f);
+            ptr->size(1.0f, 4.0f);
+            ptr->color({ 52,28,39,255 });
+            ptr->howmany(1);
+            ptr->spawn_radius(3.0f);
+            ptr->random_rotation(true);
+            ptr->rotation_speed(5.0f);
+            Add(ptr);
+            break;
+        case dash_shadow:
+            ptr->shape(ParticleShape::texture);
+            ptr->texture(*TextureLoader::GetTexture("DASH"));
+            ptr->speed(0.0f);
+            ptr->spread(0.0f);
+            ptr->gravity(8.0f);
+            ptr->particle_lifetime(0.6f);
+            ptr->emmiter_lifetime(0.6f);
+            ptr->size(32.0f, 32.0f);
+            ptr->color(Fade(WHITE, 0.8f));
+            ptr->howmany(1);
+            ptr->spawn_radius(0.0f);
+            ptr->fade(true);
+            ptr->fade_in(false);
+            ptr->fade_in_out(false);
+            Add(ptr);
+            break;
+        case dash_shadow_left:
+            ptr->shape(ParticleShape::texture);
+            ptr->texture(*TextureLoader::GetTexture("DASHL"));
+            ptr->speed(0.0f);
+            ptr->spread(0.0f);
+            ptr->gravity(8.0f);
+            ptr->particle_lifetime(0.6f);
+            ptr->emmiter_lifetime(0.6f);
+            ptr->size(32.0f, 32.0f);
+            ptr->color(Fade(WHITE, 0.8f));
+            ptr->howmany(1);
+            ptr->spawn_radius(0.0f);
+            ptr->fade(true);
+            ptr->fade_in(false);
+            ptr->fade_in_out(false);
             Add(ptr);
             break;
         }

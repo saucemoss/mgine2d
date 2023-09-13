@@ -1,6 +1,8 @@
 #include "WoodCrate.h"
 #include "Shard.h"
 #include "SoundManager.h"
+#include "EnergyOrb.h"
+#include "GameScreen.h"
 
 
 WoodCrate::WoodCrate(const Rectangle& rect)
@@ -49,8 +51,8 @@ void WoodCrate::Update(float dt)
 		
 		m_destroy = true;
 		PlaySound(SoundManager::sounds["crate_break"]);
+		SpawnOrbs(2, center_pos());
 	}
-
 
 	m_rectangle =
 	{
@@ -76,6 +78,7 @@ void WoodCrate::TakeDmg(int i)
 	dmg += i;
 	std::string dmgs[] = { "woodhit1","woodhit2","woodhit3" };
 	SoundManager::PlayRandSounds(dmgs, 3);
+	SpawnOrbs(1, center_pos());
 
 }
 

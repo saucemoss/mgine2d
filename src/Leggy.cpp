@@ -89,6 +89,7 @@ void Leggy::Die(int death_option)
 	PlaySound(SoundManager::sounds["hurt12"]);
 	PlaySound(SoundManager::sounds["slime2short"]);
 	state = EnemyState::Dying;
+	SpawnOrbs(3, center_pos());
 }
 
 void Leggy::TakeDmg(int dmg)
@@ -101,6 +102,7 @@ void Leggy::TakeDmg(int dmg)
 		state = EnemyState::Hurting;
 		SetAnimation("LEGGY_DMG");
 		bleed_particles();
+		SpawnOrbs(1, center_pos());
 	}
 }
 

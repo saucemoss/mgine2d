@@ -19,7 +19,7 @@ void ContinueScreen::Draw()
 
     for (int i = 0; i < 3; ++i)
     {
-        DrawRectangleRec(slotRectangles[i], (i == selectedSlot) ? Fade(GREEN, 0.8f) : Fade(DARKGREEN, 0.8f));
+        DrawRectangleRec(slotRectangles[i], (i == selectedSlot) ? GREEN: DARKGREEN);
         DrawRectangleLines(slotRectangles[i].x, slotRectangles[i].y, slotRectangles[i].width, slotRectangles[i].height, GREEN);
         DrawText(("Slot " + std::to_string(i + 1)).c_str(), slotRectangles[i].x + 10, slotRectangles[i].y + 10, 20, BLACK);
         DrawText(saveFileExists[i] ? "Occupied" : "Empty", slotRectangles[i].x + 10, slotRectangles[i].y + 30, 16, saveFileExists[i] ? RED : RAYWHITE);

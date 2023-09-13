@@ -5,13 +5,14 @@
 #include "Leggy.h"
 #include "BioBomb.h"
 #include "BossHook.h"
+#include "BioBreath.h"
 
 using json = nlohmann::json;
 
 FrogBoss::FrogBoss(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 40, 40 }, FBOSS, b2_dynamicBody)
 {
 	InitAnimations();
-	m_max_hp = 100;
+	m_max_hp = 1000;
 	m_current_hp = m_max_hp;
 	//Physics body cfg
 	//add more mass 
@@ -28,7 +29,7 @@ FrogBoss::FrogBoss(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.
 	//feet sensor
 	m_feet_sensor = util::SimpleSensor(m_body, "fboss_feet", 1.0f, 0.3f, 0, 1.1f);
 
-	m_body->SetLinearDamping(linear_dumping);
+	m_body->SetLinearDamping(5.0f);
 	standing_sensor = util::SimpleSensor(m_body, "fb_stand_body", 1.0f, 2.0f, 0.0f, -1.0f);
 	speed = 8.0f;
 	
@@ -43,6 +44,9 @@ FrogBoss::FrogBoss(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.
 	StatesStrMap[FrogBossState::Roar] = "Roar";
 	StatesStrMap[FrogBossState::Run] = "Run";
 	StatesStrMap[FrogBossState::SpawnBalls] = "SpawnBalls";
+
+	prev_states_num[0] = 0;
+	prev_states_num[1] = 0;
 
 }
 
@@ -126,6 +130,7 @@ void FrogBoss::Die(int death_option)
 	PlaySound(SoundManager::sounds["start_roar"]);
 	PlaySound(SoundManager::sounds["slime2short"]);
 	boss_state = FrogBossState::Dying;
+	SpawnOrbs(10, center_pos());
 }
 
 void FrogBoss::TakeDmg(int dmg)
@@ -147,6 +152,7 @@ void FrogBoss::TakeDmg(int dmg)
 		{
 			PlaySound(SoundManager::sounds["hurt3"]);
 		}
+		SpawnOrbs(1, center_pos());
 	}
 
 }
@@ -210,6 +216,7 @@ void FrogBoss::UpdateRun(float dt)
 		m_body->DestroyFixture(running_sensor);
 		standing_sensor = util::SimpleSensor(m_body, "fb_stand_body", 1.0f, 2.0f, 0.0f, -1.0f);
 		boss_state = FrogBossState::Jump;
+		SetAnimation("FB_SW_JMP");
 		StopSound(SoundManager::sounds["frog_run"]);
 		player_attacked = false;
 	}
@@ -222,6 +229,7 @@ void FrogBoss::UpdateRun(float dt)
 		m_body->DestroyFixture(running_sensor);
 		standing_sensor = util::SimpleSensor(m_body, "fb_stand_body", 1.0f, 2.0f, 0.0f, -1.0f);
 		boss_state = FrogBossState::Jump;
+		SetAnimation("FB_SW_JMP");
 		StopSound(SoundManager::sounds["frog_run"]);
 		player_attacked = false;
 	}
@@ -236,35 +244,44 @@ void FrogBoss::UpdateJump(float dt)
 		PlaySound(SoundManager::sounds["steam"]);
 		if (!looking_right)
 		{
-			m_body->ApplyForce(b2Vec2(GetRandomValue(0, 10) * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 10.0f), m_body->GetWorldCenter(), true);
+			m_body->ApplyForce(b2Vec2(8 * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 15.0f), m_body->GetWorldCenter(), true);
 
 		}
 		else
 		{
-			m_body->ApplyForce(b2Vec2(GetRandomValue(-10, 0) * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 10.0f), m_body->GetWorldCenter(), true);
+			m_body->ApplyForce(b2Vec2(8 * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 15.0f), m_body->GetWorldCenter(), true);
 
 		}
 		jumped = true;
 	}
 	if (is_touching_floor)
 	{
-		boss_state = FrogBossState::Decide;
-		jumped = false;
+		if (GetRandomValue(1, 4) != 4)
+		{
+			boss_state = FrogBossState::Decide;
+			jumped = false;
+		}
+		else
+		{
+			m_body->ApplyForce(b2Vec2(0.0f, -world->GetGravity().y * m_body->GetMass() * 15.0f), m_body->GetWorldCenter(), true);
+		}
 	}
 	else if (GameScreen::player->state == PlayerState::Hurting)
 	{
+		PlaySound(SoundManager::sounds["steam"]);
 		if (!looking_right)
 		{
-			m_body->ApplyForce(b2Vec2(GetRandomValue(0, 10) * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 10.0f), m_body->GetWorldCenter(), true);
+			m_body->ApplyForce(b2Vec2(8 * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 16.0f), m_body->GetWorldCenter(), true);
 
 		}
 		else
 		{
-			m_body->ApplyForce(b2Vec2(GetRandomValue(-10, 0) * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 10.0f), m_body->GetWorldCenter(), true);
+			m_body->ApplyForce(b2Vec2(8 * m_body->GetMass() * 100.0f, -world->GetGravity().y * m_body->GetMass() * 16.0f), m_body->GetWorldCenter(), true);
 
 		}
 		jumped = true;
 	}
+
 
 }
 
@@ -280,7 +297,6 @@ void FrogBoss::UpdateAnticipationCloseAttack(float dt)
 
 void FrogBoss::UpdateAttack(float dt)
 {
-	looking_right = side_looking_at_att_start;
 	if (!IsSoundPlaying(SoundManager::sounds["whirl2"]))PlaySound(SoundManager::sounds["whirl2"]);
 	if (!IsSoundPlaying(SoundManager::sounds["hookshot"]))PlaySound(SoundManager::sounds["hookshot"]);
 	if (animation->GetCurrentFrameNum() > 1 && player_in_dmg_zone)
@@ -312,6 +328,7 @@ void FrogBoss::UpdateAttack(float dt)
 	if (attack_counter >= random_timer)
 	{
 		boss_state = FrogBossState::Jump;
+		SetAnimation("FB_SW_JMP");
 		m_body->DestroyFixture(close_att_sensor);
 		attack_counter = 0.0f;
 		player_attacked = false;
@@ -376,6 +393,7 @@ void FrogBoss::UpdateSwirlAttack(float dt)
 	attack_counter += dt;
 	if (attack_counter >= random_timer)
 	{
+		SetAnimation("FB_SW_JMP");
 		boss_state = FrogBossState::Jump;
 		StopSound(SoundManager::sounds["whirl2"]);
 		m_body->DestroyFixture(swirl_att_sensor);
@@ -407,20 +425,30 @@ void FrogBoss::UpdateHook(float dt)
 void FrogBoss::UpdatePound(float dt)
 {
 
+	for (int i = 0; i < 3; i++)
+	{
+		ParticleEmitter* p1 = new ParticleEmitter({ center_pos().x - i * 32.0f + 4, center_pos().y + 40.0f });
+		GameScreen::Particles->Add(DefinedEmitter::breath_small_anticipation, p1);
+		p1->EmitParticles();
+		ParticleEmitter* p2 = new ParticleEmitter({ center_pos().x + i * 32.0f + 4, center_pos().y + 40.0f });
+		GameScreen::Particles->Add(DefinedEmitter::breath_small_anticipation, p2);
+		p2->EmitParticles();
+	}
+
 	if (animation->GetCurrentFrameNum() == 7 && !pound)
 	{
 		pound = true;
 		PlaySound(SoundManager::sounds["steam_thud"]);
+
 		Rectangle rect;
 		Rectangle rect2;
-		
 		GameScreen::add_trauma(0.8f);
 		for (int i = 0; i < 3; i++)
 		{
 			rect = Rectangle{ center_pos().x + i * 32.0f, center_pos().y + 40.0f  , 16, 16 };
-			LevelManager::level_entities_safe.push_back(std::make_unique<BioBomb>(rect));
+			LevelManager::level_entities_safe.push_back(std::make_unique<BioBreath>(rect, Vector2{0, -0.6f}));
 			rect2 = Rectangle{ center_pos().x - i * 32.0f, center_pos().y + 40.0f  , 16, 16 };
-			LevelManager::level_entities_safe.push_back(std::make_unique<BioBomb>(rect2));
+			LevelManager::level_entities_safe.push_back(std::make_unique<BioBreath>(rect2, Vector2{ 0, -0.6f}));
 		}
 	}
 
@@ -434,15 +462,25 @@ void FrogBoss::UpdatePound(float dt)
 void FrogBoss::UpdateBalls(float dt)
 {
 	attack_counter += dt;
-	if (attack_counter > 1.0f)
+	if (attack_counter > 0.3f)
 	{
 		PlaySound(SoundManager::sounds["splat4"]);
 
-		Rectangle rect = Rectangle{ center_pos().x + (looking_right ? -20.0f : 20.0f), center_pos().y - 32.0f  , 16, 16 };
+		Rectangle rect = Rectangle{ center_pos().x + (looking_right ? 0.0f : 40.0f), center_pos().y - 32.0f  , 16, 16 };
 		LevelManager::level_entities_safe.push_back(std::make_unique<BioBomb>(rect));
 		BioBomb* bomb = reinterpret_cast<BioBomb*>(LevelManager::level_entities_safe.back().get());
 
-		ParticleEmitter* p = new ParticleEmitter({ center_pos().x + (looking_right ? -20.0f : 20.0f), center_pos().y - 32.0f });
+		float m_size_min_x = -32.0f;
+		float m_size_max_x = 32.0f;
+		float m_size_min_y = -16.0f;
+		float m_size_max_y = -64.0f;
+		float posX = m_size_min_x / 2 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_size_max_x / 2 - m_size_min_x / 4)));
+		float posY = m_size_min_y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_size_max_y - m_size_min_y)));
+		Vector2 random_spread_impulse = { posX,posY };
+
+		bomb->random_spread_impulse = random_spread_impulse;
+
+		ParticleEmitter* p = new ParticleEmitter({ center_pos().x + (looking_right ? 0.0f : 40.0f), center_pos().y - 32.0f });
 		GameScreen::Particles->Add(DefinedEmitter::acid_head_burst, p);
 		p->EmitParticles();
 		attack_counter = 0.0f;
@@ -454,6 +492,17 @@ void FrogBoss::UpdateBalls(float dt)
 void FrogBoss::UpdateDie(float dt)
 {
 	taking_dmg = false;
+
+	//clean up spawned projectiles // to do
+	//for (auto& bb : GameScreen::LevelMgr->level_entities_safe)
+	//{
+	//	BioBomb* bomb = static_cast<BioBomb*>(bb.get());
+	//	if (bomb != nullptr)
+	//	{
+	//		bomb->m_destroy = true;
+	//	}
+	//}
+
 
 	Vector2 particle_rand_pos{ static_cast<float>(GetRandomValue(pos().x - 32.0f, pos().x + 32.0f)),
 									static_cast<float>(GetRandomValue(pos().y - 32.0f, pos().y + 32.0f)) };
@@ -546,6 +595,10 @@ void FrogBoss::SelectAction()
 	//std::cout << out << std::endl;
 
 	int rand = GetRandomValue(1, 5);
+
+	RerollStatesNums(rand);
+
+
 	if (player_far)
 	{
 		switch (rand)
@@ -569,7 +622,7 @@ void FrogBoss::SelectAction()
 		{
 		case 1: 
 			boss_state = FrogBossState::Jump;
-			SetAnimation("FB_ROAR");
+			SetAnimation("FB_SW_JMP");
 			break;
 		case 2:
 			boss_state = FrogBossState::SwirlAttackAnticipation;
@@ -611,10 +664,20 @@ void FrogBoss::SelectAction()
 			break;
 		case 5:
 			boss_state = FrogBossState::Jump;
-			SetAnimation("FB_ROAR");
+			SetAnimation("FB_SW_JMP");
 			break;
 		}
 	}
+}
+
+void FrogBoss::RerollStatesNums(int& rand)
+{
+	while(rand == prev_states_num[0] && rand == prev_states_num[1])
+	{
+		rand = GetRandomValue(1, 5);
+	}
+	prev_states_num[0] = prev_states_num[1];
+	prev_states_num[1] = rand;
 }
 
 void FrogBoss::SetRun()

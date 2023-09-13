@@ -79,6 +79,7 @@ void Football::TakeDmg(int dmg)
 		state = EnemyState::Hurting;
 		SetAnimation("FOOTB_DMG");
 		bleed_particles();
+		SpawnOrbs(2, center_pos());
 	}
 }
 

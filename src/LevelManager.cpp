@@ -38,13 +38,17 @@
 #include "Switch.h"
 #include "MediPod.h"
 #include "SecretFog.h"
+#include "NPCDoc1.h"
+#include "Entangeler.h"
+#include "Ivan.h"
+#include "Rollo.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
 const ldtk::Level* LevelManager::currentLdtkLevel;
 float LevelManager::m_darkness_strength;
 std::vector<std::unique_ptr<Entity>> LevelManager::level_entities_safe;
-std::vector<Entity*> LevelManager::queue_entities;
+std::vector<physics_queue_obj> LevelManager::queue_entities;
 std::vector<std::unique_ptr<Collidable>> LevelManager::solid_tiles;
 using json = nlohmann::json;
 
@@ -62,6 +66,7 @@ LevelManager::LevelManager(bool is_new_game, int in_save_file_num)
 	ldtkProject = p;
 
 	laboratorySolidsSpriteAtlas = LoadTexture("res\\level\\lab4.png");
+	caveSolidsSpriteAtlas = LoadTexture("res\\level\\cave_tiles.png");
 	ldtkWorld = &ldtkProject->getWorld();
 	contact_filter = new ContactFilter();
 	contacts = new ContactListener();
@@ -103,7 +108,6 @@ LevelManager::~LevelManager()
 }
 
 void LevelManager::LoadLevel(std::string level_name)
-
 {
 	if (currentLdtkLevel != nullptr)
 	{
@@ -174,14 +178,15 @@ void LevelManager::LoadLevel(std::string level_name)
 	std::string prefix = "res/level/";
 	std::string final = prefix + path;
 	baseBackgroundSpriteAtlas = LoadTexture(final.c_str());
-	baseBackgroundRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+
 	//
 	//Tiles Texture
 	laboratorySolidsRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
 	//
 	//Paralax Textures
-	paralaxBackgroundRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
-	paralaxedBackgroundSpriteAtlas = LoadTexture("res//level//bg.png");
+	paralaxBackgroundRenderTexture1 = LoadRenderTexture(levelSize.x, levelSize.y);
+	paralaxBackgroundRenderTexture2 = LoadRenderTexture(levelSize.x, levelSize.y);
+
 
 	paralaxedForegroundRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
 	paralaxedForegroundSpriteAtlas = LoadTexture("res//level//mothman.png");
@@ -206,20 +211,33 @@ void LevelManager::LoadLevel(std::string level_name)
 	//Draw render texture logic and objects setup
 	
 	//Static background draw
-	BeginTextureMode(baseBackgroundRenderTexture);
-	if (currentLdtkLevel->hasBgImage())
+	if (!currentLdtkLevel->getField<bool>("BGIsScreenSize").value()) // tiled static background
 	{
-		// tile background texture to cover the whole frame buffer
-		for (int i = 0; i <= (levelSize.x / baseBackgroundSpriteAtlas.width); i++)
+		baseBackgroundRenderTexture = LoadRenderTexture(levelSize.x, levelSize.y);
+		BeginTextureMode(baseBackgroundRenderTexture);
+		if (currentLdtkLevel->hasBgImage())
 		{
-			for (int j = 0; j <= (levelSize.y / baseBackgroundSpriteAtlas.height); j++)
+			// tile background texture to cover the whole frame buffer
+			for (int i = 0; i <= (levelSize.x / baseBackgroundSpriteAtlas.width); i++)
 			{
-				DrawTextureV(baseBackgroundSpriteAtlas, { float(i * baseBackgroundSpriteAtlas.width), float(j * baseBackgroundSpriteAtlas.height) }, WHITE);
+				for (int j = 0; j <= (levelSize.y / baseBackgroundSpriteAtlas.height); j++)
+				{
+					DrawTextureV(baseBackgroundSpriteAtlas, { float(i * baseBackgroundSpriteAtlas.width), float(j * baseBackgroundSpriteAtlas.height) }, WHITE);
+				}
 			}
 		}
+		EndTextureMode();
+		baseBackgroundRenderedLevelTexture = baseBackgroundRenderTexture.texture;
 	}
-	EndTextureMode();
-	baseBackgroundRenderedLevelTexture = baseBackgroundRenderTexture.texture;
+	else	// screenview backgroud
+	{
+		baseBackgroundRenderTexture = LoadRenderTexture(settings::viewSizeWidth, settings::viewSizeHeight);
+		BeginTextureMode(baseBackgroundRenderTexture);
+		DrawTexture(baseBackgroundSpriteAtlas, 0, 0, WHITE);
+		EndTextureMode();
+		baseBackgroundRenderedLevelTexture = baseBackgroundRenderTexture.texture;
+	}
+
 
 	//Tiles Draw
 	BeginTextureMode(laboratorySolidsRenderTexture);
@@ -251,6 +269,13 @@ void LevelManager::LoadLevel(std::string level_name)
 					DrawTextureRec(laboratorySolidsSpriteAtlas, source_rect, target_pos, WHITE);
 				}
 
+				//collision rectangles
+				if (layer.getName() == "CaveSolids")
+				{
+					Rectangle rec = { tile.getPosition().x, tile.getPosition().y, tile_size, tile_size };
+					DrawTextureRec(caveSolidsSpriteAtlas, source_rect, target_pos, WHITE);
+				}
+
 				if (layer.getName() == "Slopes")
 				{
 					Rectangle rec = { (float)tile.getPosition().x ,
@@ -278,7 +303,8 @@ void LevelManager::LoadLevel(std::string level_name)
 	EndTextureMode();
 	laboratorySolidsRenderedLevelTexture = laboratorySolidsRenderTexture.texture;
 
-	SolidTilesToBigBoxes();
+	SolidTilesToBigBoxes("LabSolids");
+	SolidTilesToBigBoxes("CaveSolids");
 
 	//Decoration Draw
 	BeginTextureMode(decorationRenderTexture);
@@ -353,7 +379,7 @@ void LevelManager::LoadLevel(std::string level_name)
 	//FrontPlayerDecorElements
 	Shader darken_shader = LoadShader(0, TextFormat("res/shaders/glsl%i/darken.fs", GLSL_VERSION));
 	int darknessFactorLoc = GetShaderLocation(darken_shader, "darknessFactor");
-	float darkness_factor = 0.6f;
+	float darkness_factor = 1.0f - m_darkness_strength;
 	SetShaderValue(darken_shader, darknessFactorLoc, &darkness_factor, SHADER_UNIFORM_FLOAT);
 	BeginTextureMode(decorationRenderTextureFront);
 	BeginShaderMode(darken_shader);
@@ -421,12 +447,13 @@ void LevelManager::LoadLevel(std::string level_name)
 	paralaxedForegroundRenderedLevelTexture = paralaxedForegroundRenderTexture.texture;
 
 	//Paralax Layers Draw
-	BeginTextureMode(paralaxBackgroundRenderTexture);
+	BeginTextureMode(paralaxBackgroundRenderTexture1);
 
 	for (auto&& layer : currentLdtkLevel->allLayers())
 	{
 		if (layer.getName() == "BGTiles")
 		{
+			paralaxedBackgroundSpriteAtlas1 = LoadTexture("res//level//bg.png");
 			for (auto&& tile : layer.allTiles())
 			{
 				auto source_pos = tile.getTextureRect();
@@ -442,22 +469,70 @@ void LevelManager::LoadLevel(std::string level_name)
 					(float)tile.getPosition().x ,
 					(float)tile.getPosition().y
 				};
-				DrawTextureRec(paralaxedBackgroundSpriteAtlas, source_rect, target_paralax_pos, WHITE);
+				DrawTextureRec(paralaxedBackgroundSpriteAtlas1, source_rect, target_paralax_pos, WHITE);
+
+			}
+		}
+
+		if (layer.getName() == "CaveBg1")
+		{
+			paralaxedBackgroundSpriteAtlas1 = LoadTexture("res//level//cave_bg1.png");
+			for (auto&& tile : layer.allTiles())
+			{
+				auto source_pos = tile.getTextureRect();
+				auto tile_size = float(layer.getTileset().tile_size);
+				Rectangle source_rect = {
+					float(source_pos.x),
+					float(source_pos.y),
+					(tile.flipX ? -tile_size : tile_size),
+					(tile.flipY ? -tile_size : tile_size)
+				};
+
+				Vector2 target_paralax_pos = {
+					(float)tile.getPosition().x ,
+					(float)tile.getPosition().y
+				};
+				DrawTextureRec(paralaxedBackgroundSpriteAtlas1, source_rect, target_paralax_pos, WHITE);
 
 			}
 		}
 	}
 	EndTextureMode();
-	paralaxedBackgroundRenderedLevelTexture = paralaxBackgroundRenderTexture.texture;
+	paralaxedBackgroundRenderedLevelTexture1 = paralaxBackgroundRenderTexture1.texture;
+	BeginTextureMode(paralaxBackgroundRenderTexture2);
+	for (auto&& layer : currentLdtkLevel->allLayers())
+	{
+		if (layer.getName() == "CaveBg2")
+		{
+			paralaxedBackgroundSpriteAtlas2 = LoadTexture("res//level//cave_bg2.png");
+			for (auto&& tile : layer.allTiles())
+			{
+				auto source_pos = tile.getTextureRect();
+				auto tile_size = float(layer.getTileset().tile_size);
+				Rectangle source_rect = {
+					float(source_pos.x),
+					float(source_pos.y),
+					(tile.flipX ? -tile_size : tile_size),
+					(tile.flipY ? -tile_size : tile_size)
+				};
 
-	
+				Vector2 target_paralax_pos = {
+					(float)tile.getPosition().x ,
+					(float)tile.getPosition().y
+				};
+				DrawTextureRec(paralaxedBackgroundSpriteAtlas2, source_rect, target_paralax_pos, WHITE);
+			}
+		}
+	}
+	EndTextureMode();
+	paralaxedBackgroundRenderedLevelTexture2 = paralaxBackgroundRenderTexture2.texture;
 	//Load entities
 	for (auto&& entity : currentLdtkLevel->getLayer("Entities").allEntities())
 	{
-		Rectangle rect = {	(float)entity.getPosition().x,
+		Rectangle rect = { (float)entity.getPosition().x,
 							(float)entity.getPosition().y,
 							(float)entity.getSize().x ,
-							(float)entity.getSize().y  };
+							(float)entity.getSize().y };
 
 		if (entity.getName() == "SecretFog")
 		{
@@ -469,9 +544,9 @@ void LevelManager::LoadLevel(std::string level_name)
 		if (entity.getName() == "Door")
 		{
 			Rectangle r = { (float)entity.getPosition().x + 8.0f,
-					(float)entity.getPosition().y -4,
+					(float)entity.getPosition().y - 4,
 					(float)entity.getSize().x ,
-					(float)entity.getSize().y +8};
+					(float)entity.getSize().y + 8 };
 
 			level_entities_safe.push_back(std::make_unique<Door>(r, true));
 
@@ -541,6 +616,11 @@ void LevelManager::LoadLevel(std::string level_name)
 		{
 			level_entities_safe.push_back(std::make_unique<MediPod>(rect));
 		}
+		if (entity.getName() == "Entangeler")
+		{
+			level_entities_safe.push_back(std::make_unique<Entangeler>(rect));
+			level_entities_safe.back().get()->m_ldtkID = entity.iid;
+		}
 		if (entity.getName() == "Gate")
 		{
 			level_entities_safe.push_back(std::make_unique<Gate>(rect));
@@ -591,6 +671,16 @@ void LevelManager::LoadLevel(std::string level_name)
 			level_entities_safe.push_back(std::make_unique<InfectedHazmat>(rect, entity.getArrayField<ldtk::IntPoint>("Path")));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
+		if (entity.getName() == "Ivan")
+		{
+			level_entities_safe.push_back(std::make_unique<Ivan>(rect, entity.getArrayField<ldtk::IntPoint>("Path")));
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
+		if (entity.getName() == "Rollo")
+		{
+			level_entities_safe.push_back(std::make_unique<Rollo>(rect, entity.getArrayField<ldtk::IntPoint>("Path")));
+			level_entities_safe.back().get()->m_draw_layers = 1;
+		}
 		if (entity.getName() == "WCArm")
 		{
 			level_entities_safe.push_back(std::make_unique<WhiteCoatArm>(rect));
@@ -619,6 +709,11 @@ void LevelManager::LoadLevel(std::string level_name)
 			level_entities_safe.push_back(std::make_unique<FlyingInfected>(rect));
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
+		if (entity.getName() == "NPCDoc1")
+		{
+			level_entities_safe.push_back(std::make_unique<NPCDoc1>(rect));
+			level_entities_safe.back().get()->m_ldtkID = entity.iid;
+		}
 		if (entity.getName() == "NPCSec1")
 		{
 			level_entities_safe.push_back(std::make_unique<NPCSecurityGuy>(rect));
@@ -632,7 +727,7 @@ void LevelManager::LoadLevel(std::string level_name)
 			std::string target_lvl = entity.getField<std::string>("ToLevelStr").value();
 			ldtk::IID portal_out = entity.getField<ldtk::EntityRef>("LevelPortal_out").value().entity_iid;
 			level_entities_safe.push_back(std::make_unique<LevelPortal>(rect, target_lvl, portal_out));
-			
+
 		}
 		if (entity.getName() == "Footb")
 		{
@@ -644,13 +739,13 @@ void LevelManager::LoadLevel(std::string level_name)
 			level_entities_safe.back().get()->m_draw_layers = 1;
 		}
 	}
-	
+
 	//Light walls
 	lights->SetupBoxes();
 
 
 	LoadSavedLevel();
-
+	
 }
 
 void LevelManager::SaveLevel()
@@ -664,10 +759,6 @@ void LevelManager::SaveLevel()
 			loadFile >> save_data;
 			loadFile.close();
 		}
-
-		// Update the current level and player position
-		//save_data["player"]["currentLevel"] = currentLdtkLevel->name;
-		//save_data["player"]["position"] = { new_player_pos.x,  new_player_pos.y };
 
 		save_data["level_data"][currentLdtkLevel->name]["visited"] = true;
 
@@ -821,7 +912,6 @@ void LevelManager::LoadSavedLevel()
 						{
 							BossGlass* bs = static_cast<BossGlass*>(e.get());
 							bs->state = bossValue ? BossGlassState::Shattered : BossGlassState::Idle;
-							bs->level_unlocked = bossValue ? true : false;
 							GameScreen::lock_camera = bossValue ? false : true;
 						}
 					}
@@ -861,18 +951,21 @@ void LevelManager::UnloadLevel()
 
 
 	UnloadTexture(laboratorySolidsRenderedLevelTexture);
-	UnloadTexture(paralaxedBackgroundRenderedLevelTexture);
+	UnloadTexture(paralaxedBackgroundRenderedLevelTexture1);
+	UnloadTexture(paralaxedBackgroundRenderedLevelTexture2);
 	UnloadTexture(paralaxedForegroundRenderedLevelTexture);
 	UnloadTexture(baseBackgroundSpriteAtlas);
 	UnloadTexture(decorationRenderedLevelTexture);
 	UnloadTexture(decorationSpriteAtlas);
-	UnloadTexture(paralaxedBackgroundSpriteAtlas);
+	UnloadTexture(paralaxedBackgroundSpriteAtlas1);
+	UnloadTexture(paralaxedBackgroundSpriteAtlas2);
 	UnloadTexture(paralaxedForegroundSpriteAtlas);
 	UnloadTexture(decorationRenderedLevelTextureFront);
 	UnloadTexture(GameScreen::shaders->PerlinTexture);
 	UnloadRenderTexture(GameScreen::shaders->RenderPerlinTexture);
 	UnloadRenderTexture(decorationRenderTextureFront);
-	UnloadRenderTexture(paralaxBackgroundRenderTexture);
+	UnloadRenderTexture(paralaxBackgroundRenderTexture1);
+	UnloadRenderTexture(paralaxBackgroundRenderTexture2);
 	UnloadRenderTexture(paralaxedForegroundRenderTexture);
 	UnloadRenderTexture(laboratorySolidsRenderTexture);
 	UnloadRenderTexture(decorationRenderTexture);
@@ -910,25 +1003,40 @@ void LevelManager::Update(float dt)
 	lights->UpdateLights(dt);
 	if(level_particles_on) level_ambient_particles->position(GameScreen::player->center_pos());
 
-	for (auto& e : level_entities_safe)
+	if (!world->IsLocked())
 	{
-		if(e->queue_entity_add)
-		EnitityManager::Add(e.get());
-		e->queue_entity_add = false;
-	}
-	if (next_level != "")
-	{
-		LoadLevel(next_level);
-		next_level = "";
+		for (auto& e : level_entities_safe)
+		{
+			if (e->queue_entity_add)
+				EnitityManager::Add(e.get());
+			e->queue_entity_add = false;
+		}
+
+		for (auto& e : queue_entities)
+		{
+			if (e.name == "EOrb")
+			{
+				Rectangle rect = Rectangle{ e.pos.x , e.pos.y, 16, 16 };
+				GameScreen::LevelMgr->level_entities_safe.push_back(std::make_unique<EnergyOrb>(rect));
+			}
+		}
+
+		queue_entities.clear();
+
+		if (next_level != "")
+		{
+			LoadLevel(next_level);
+			next_level = "";
+		}
 	}
 
 }
 
-void LevelManager::SolidTilesToBigBoxes()
+void LevelManager::SolidTilesToBigBoxes(std::string layer_name)
 {
 	int tiles = 0;
 	std::vector<Rectangle> x_line;
-	auto& layer = currentLdtkLevel->getLayer("LabSolids");
+	auto& layer = currentLdtkLevel->getLayer(layer_name);
 	int grid_x = layer.getGridSize().x;
 	int grid_y = layer.getGridSize().y;
 
@@ -1034,33 +1142,53 @@ void LevelManager::DrawInFrontOfPlayer()
 		{ 0,0 }, 0, WHITE);
 }
 
+void LevelManager::DrawFixedBg()
+{
+	////Draw static background
+	if (currentLdtkLevel->hasBgImage())
+	{
+		DrawTexturePro(baseBackgroundSpriteAtlas,
+			{ 0, 0, (float)baseBackgroundSpriteAtlas.width, (float)-baseBackgroundSpriteAtlas.height },
+			{ 0, 0, (float)settings::screenWidth ,(float)settings::screenHeight },
+			{ 0,0 }, 0, WHITE);
+	}
+}
+
 void LevelManager::Draw()
 {
 
 	Player& p = *GameScreen::player;
 	Camera2D c = GameScreen::camera;
 
+	float bg_paralax = currentLdtkLevel->getField<float>("BGParalax").value();
 
 	Vector2 c_position = { (c.offset.x / c.zoom - c.target.x) , (c.offset.y / c.zoom - c.target.y) };
 
-	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
-	Vector2 parallaxed_far = Vector2Multiply(c_position, { 0.02f,0.02f });
-
+	Vector2 parallaxed = Vector2Multiply(c_position, { -0.02f,-0.02f });
+	Vector2 parallaxed_far = Vector2Multiply(c_position, { -0.05f,-0.05f });
+	Vector2 parallaxed_extra_far = Vector2Multiply(c_position, { -bg_paralax,-bg_paralax });
 
 	////Draw static background
 	if (currentLdtkLevel->hasBgImage())
 	{
 		DrawTexturePro(baseBackgroundRenderedLevelTexture,
 			{ 0, 0, (float)baseBackgroundRenderedLevelTexture.width, (float)-baseBackgroundRenderedLevelTexture.height },
-			{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
+			{ parallaxed_extra_far.x, parallaxed_extra_far.y, (float)levelSize.x ,(float)levelSize.y  },
 			{ 0,0 }, 0, WHITE);
 	}
 
 	//Draw paralaxed background elements
-	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture,
-		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture.width, (float)-paralaxedBackgroundRenderedLevelTexture.height },//source
+	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture1,
+		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture1.width, (float)-paralaxedBackgroundRenderedLevelTexture1.height },//source
 		{ parallaxed_far.x ,parallaxed_far.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
 		{ 0,0 }, 0, WHITE);
+
+	//Draw paralaxed background elements
+	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture2,
+		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture2.width, (float)-paralaxedBackgroundRenderedLevelTexture2.height },//source
+		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y }, //dest
+		{ 0,0 }, 0, WHITE);
+
 
 	//Draw level solids
 	DrawTexturePro(laboratorySolidsRenderedLevelTexture,
@@ -1074,8 +1202,6 @@ void LevelManager::Draw()
 		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
 		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
 		{ 0,0 }, 0, WHITE);
-
-
 
 }
 

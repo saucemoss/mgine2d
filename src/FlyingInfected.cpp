@@ -90,6 +90,7 @@ void FlyingInfected::Die(int death_option)
 	PlaySound(SoundManager::sounds["hurt4"]);
 	SetAnimation("FLY_I_DEAD");
 	state = EnemyState::Dying;
+	SpawnOrbs(2, center_pos());
 }
 
 void FlyingInfected::CheckAgroSensor()
@@ -115,7 +116,7 @@ void FlyingInfected::TakeDmg(int dmg)
 	state = EnemyState::Hurting;
 	SetAnimation("FLY_I_DMG");
 	bleed_particles();
-
+	SpawnOrbs(2, center_pos());
 }
 
 

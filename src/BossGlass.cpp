@@ -26,6 +26,7 @@ void BossGlass::Update(float dt)
 	SwitchFrames(dt);
 
 	int anim_num = animation->GetCurrentFrameNum();
+	if (player_in_sensor)player_entered_sensor = true;
 
 	switch (state)
 	{
@@ -98,9 +99,14 @@ void BossGlass::Update(float dt)
 			PlaySound(SoundManager::sounds["glass_thud"]);
 			PlaySound(SoundManager::sounds["glass_thud2"]);
 
-			ParticleEmitter* p = new ParticleEmitter({ pos().x + 64.0f, pos().y});
-			GameScreen::Particles->Add(DefinedEmitter::glass_explosion, p);
-			p->EmitParticles();
+			for (int i = 0; i < 6; i++)
+			{
+				ParticleEmitter* p = new ParticleEmitter({ pos().x - 16.0f + i * 16.0f, pos().y - 8.0f });
+				GameScreen::Particles->Add(DefinedEmitter::glass_explosion, p);
+				p->EmitParticles();
+			}
+
+
 			state = BossGlassState::Shattered;
 
 			if (!boss_added)

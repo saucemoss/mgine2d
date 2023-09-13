@@ -106,6 +106,9 @@ void SoundManager::LoadSounds()
 	sounds.emplace("beep-03", LoadSound("res/sound/collected/beep-03.wav"));
 	sounds.emplace("beep-04", LoadSound("res/sound/collected/beep-04.wav"));
 	sounds.emplace("beep-05", LoadSound("res/sound/collected/beep-05.wav"));
+	sounds.emplace("energy_orb1", LoadSound("res/sound/collected/energy_orb-01.wav"));
+	sounds.emplace("energy_orb2", LoadSound("res/sound/collected/energy_orb-02.wav"));	
+	sounds.emplace("energy_orb3", LoadSound("res/sound/collected/energy_orb-03.wav"));
 	sounds.emplace("creepy_whistle", LoadSound("res/sound/collected/creepy_whistle.wav"));
 	sounds.emplace("electroswitch-01", LoadSound("res/sound/collected/electroswitch-01.wav"));
 	sounds.emplace("electroswitch-02", LoadSound("res/sound/collected/electroswitch-02.wav"));

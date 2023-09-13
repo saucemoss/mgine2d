@@ -276,6 +276,21 @@
     <ClCompile Include="src\NPCDoc1.cpp">
       <Filter>Pliki źródłowe\Entities\NPCs</Filter>
     </ClCompile>
+    <ClCompile Include="src\EnergyOrb.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Entangeler.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ivan.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BioBreath.cpp">
+      <Filter>Pliki źródłowe\Entities\Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rollo.cpp">
+      <Filter>Pliki źródłowe\Entities\Enemies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -451,6 +466,21 @@
     </ClInclude>
     <ClInclude Include="src\NPCDoc1.h">
       <Filter>Pliki nagłówkowe\Entities\NPCs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EnergyOrb.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Entangeler.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ivan.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BioBreath.h">
+      <Filter>Pliki nagłówkowe\Entities\Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rollo.h">
+      <Filter>Pliki nagłówkowe\Entities\Enemies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

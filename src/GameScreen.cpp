@@ -26,7 +26,6 @@ float GameScreen::lock_cam_x;
 float GameScreen::lock_cam_y;
 
 
-
 GameScreen::GameScreen(bool in_new_game, int in_save_file_num)
 
 {
@@ -182,9 +181,11 @@ Screens GameScreen::Update(float dt)
 void GameScreen::Draw()
 {
 	Vector2 c_position = { (camera.offset.x / camera.zoom - camera.target.x) , (camera.offset.y / camera.zoom - camera.target.y) };
-	BeginMode2D(trauma > 0.0f ? shake_cam : camera);				
-	
+
 	////////////////////////////////////////////////// THE HOLY DRAW ORDER: //////////////////////////////////////////////////////
+
+	LevelMgr->DrawFixedBg();
+	BeginMode2D(trauma > 0.0f ? shake_cam : camera);				
 
 	LevelMgr->Draw();								// Level layers (Static Background -> Paralax Background -> Solid tiles -> Level Decorations)
 	EnitityManager::Draw(0);						// Entities/Objects behind player
@@ -193,8 +194,8 @@ void GameScreen::Draw()
 	player->Draw(0);								// Player		
 	EnitityManager::Draw(1);						// Entities/Objects in front of player
 	LevelMgr->DrawInFrontOfPlayer();				// Decoration Level elements in front of player
-	LevelMgr->lights->DrawLightMask();				// Darkness and lights
 	LevelMgr->DrawForeGround();						// Paralaxed foreground Level layer
+	LevelMgr->lights->DrawLightMask();				// Darkness and lights
 	shaders->Pixelize();							// Pixelised particles
 
 	EndMode2D();									// Vignette
@@ -225,7 +226,10 @@ void GameScreen::Draw()
 
 	
 	std::string hp = "HP: " + std::to_string(player->current_hp) + " / " + std::to_string(player->m_max_hp);
-	DrawText(hp.c_str(), 40, 40, 40, GREEN);
+	DrawText(hp.c_str(), 40, 40, 30, GREEN);
+	std::string en = "EN: " + std::to_string(player->current_energy) + " / " + std::to_string(player->m_max_energy);
+	DrawText(en.c_str(), 40, 70, 30, RAYWHITE);
+
 	DrawFPS(5, 5);
 	//DEBUG:
 	if (debug)

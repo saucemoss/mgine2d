@@ -47,6 +47,7 @@ void Gate::Update(float dt)
 		gate_shards = new Shards(sprite, r, pos(), 5, 1.5f, 10.0f);
 
 		m_destroy = true;
+		SpawnOrbs(2, center_pos());
 		PlaySound(SoundManager::sounds["metal_fall"]);
 	}
 
@@ -67,6 +68,7 @@ void Gate::TakeDmg(int i)
 	dmg += i;
 	PlaySound(SoundManager::sounds["metal_hit"]);
 	PlaySound(SoundManager::sounds["axe_solid_hit"]);
+	SpawnOrbs(1, center_pos());
 
 }
 

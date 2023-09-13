@@ -17,6 +17,11 @@ BioBomb::BioBomb(const Rectangle& rect) :
 	InitAnimations();
 	queue_entity_add = true;
 	time_to_live = 5.0f;
+	float m_size_min = -16.0f;
+	float m_size_max = 16.0f;
+	float posX = m_size_min / 2 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_size_max / 2 - m_size_min / 4)));
+	float posY = m_size_min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_size_max - m_size_min)));
+	random_spread_impulse = { posX,posY };
 }
 
 BioBomb::~BioBomb()
@@ -54,7 +59,8 @@ void BioBomb::Update(float dt)
 
 	Vector2 direction = Vector2Subtract(target, center_pos());
 	direction = Vector2Normalize(direction);
-	Vector2 move = Vector2Scale(direction, projectileSpeed);
+	random_spread_impulse = Vector2Scale(random_spread_impulse, 0.90f);
+	Vector2 move = Vector2Add(Vector2Scale(direction, projectileSpeed), random_spread_impulse);
 	b2Vec2 vel = { move.x, move.y };
 	m_body->SetLinearVelocity(vel);
 

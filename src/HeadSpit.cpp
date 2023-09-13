@@ -82,6 +82,7 @@ void HeadSpit::TakeDmg(int dmg)
 		state = EnemyState::Hurting;
 		SetAnimation("HSPIT_DMG");
 		bleed_particles();
+		SpawnOrbs(2, center_pos());
 	}
 }
 
@@ -125,6 +126,16 @@ void HeadSpit::UpdateAttackingState(float dt)
 		Rectangle rect = Rectangle{ center_pos().x , center_pos().y + (upsidedown? 8.0f: -8.0f) , 16, 16};
 		LevelManager::level_entities_safe.push_back(std::make_unique<BioBomb>(rect));
 		BioBomb* bomb = reinterpret_cast<BioBomb*>(LevelManager::level_entities_safe.back().get());
+
+		float m_size_min_x = -4.0f;
+		float m_size_max_x = 4.0f;
+		float m_size_min_y = upsidedown ? 4.0f : -4.0f;
+		float m_size_max_y = upsidedown ? 16.0f : -16.0f;
+		float posX = m_size_min_x / 2 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_size_max_x / 2 - m_size_min_x / 4)));
+		float posY = m_size_min_y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (m_size_max_y - m_size_min_y)));
+		Vector2 random_spread_impulse = { posX,posY };
+
+		bomb->random_spread_impulse = random_spread_impulse;
 
 		ParticleEmitter* p = new ParticleEmitter({pos().x, pos().y - (upsidedown? -10.0f : 10.0f)});
 		GameScreen::Particles->Add(DefinedEmitter::acid_head_burst, p);

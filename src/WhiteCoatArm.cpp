@@ -86,6 +86,7 @@ void WhiteCoatArm::Die(int death_option)
 	SetAnimation("WCARM_DEAD");
 	state = EnemyState::Dying;
 	PlaySound(SoundManager::sounds["hurt7"]);
+	SpawnOrbs(2, center_pos());
 }
 
 void WhiteCoatArm::CheckAgroSensor()
@@ -108,9 +109,13 @@ void WhiteCoatArm::TakeDmg(int dmg)
 	SoundManager::PlayRandSounds(dmgs, 3);
 	PlaySound(SoundManager::sounds["hurt6"]);
 	m_current_hp -= dmg;
-	state = EnemyState::Hurting;
 	SetAnimation("WCARM_HURT");
 	bleed_particles();
+	SpawnOrbs(1, center_pos());
+	if (m_current_hp <= 0)
+	{
+		Die(1);
+	}
 
 }
 
@@ -166,23 +171,7 @@ void WhiteCoatArm::UpdateAttackingState(float dt)
 
 void WhiteCoatArm::UpdateHurtingState(float dt)
 {
-	if (AnimationEnded())
-	{
-		if (m_current_hp < -100)
-		{
-			Die(2);
-		}
-		else if (m_current_hp <= 0)
-		{
-			Die(1);
-		}
-		else
-		{
-			SetAnimation("WCARM_IDLE");
-			state = EnemyState::Idle;
-		}
 
-	}
 }
 
 void WhiteCoatArm::UpdateDyingState(float dt)

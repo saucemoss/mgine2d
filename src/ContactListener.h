@@ -11,6 +11,8 @@ public:
     int player_floor_contacts = 0;
     int player_left_wall_contacts = 0;
     int player_right_wall_contacts = 0;
+    int player_left_grab_contacts = 0;
+    int player_right_grab_contacts = 0;
 
 private:
     void BeginContact(b2Contact* contact);

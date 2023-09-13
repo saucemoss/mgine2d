@@ -26,6 +26,7 @@ public:
     bool locked = false;
     bool denied_played = false;
     int terminal_unlocks;
+    bool player_in_sensor = false;
 
     ldtk::ArrayField<ldtk::EntityRef> refs;
 

@@ -13,6 +13,7 @@
 #include "Util.h"
 
 
+
 enum ColliderTag {
 	UNASSIGNED,
 	ENEMY, NPC, NPC_DOC1,
@@ -20,10 +21,10 @@ enum ColliderTag {
 	PLAYER,
 	LEVEL_PORTAL,
 	DOOR, TERMNIAL, AXEPICKUP, GATE, SWITCH, MPOD,
-	ELEVATOR, ELEVATOR_CALL_SW,
-	M_BLOCK, M_BLOCK_TOP, W_CRATE, ACID,
-	INFECTED_H, FLYING_INF, RIBBS, LEGGY, FOOTB, HSPIT, WCARM, BOSSGLASS, FBOSS,
-	FIREAXE, BIOBOMB, SHARD, BOSSHOOK, SFOG,
+	ELEVATOR, ELEVATOR_CALL_SW, ENTANGELER,
+	M_BLOCK, M_BLOCK_TOP, W_CRATE, ACID, EORB,
+	INFECTED_H, FLYING_INF, RIBBS, LEGGY, FOOTB, HSPIT, WCARM, BOSSGLASS, FBOSS, IVAN, ROLLO,
+	FIREAXE, BIOBOMB, BIOBREATH, SHARD, BOSSHOOK, SFOG,
 };
 
 enum ContactGroup {
@@ -34,6 +35,12 @@ struct FixtureUserData
 {
 	std::string name;
 	ContactGroup tag;
+};
+
+struct physics_queue_obj
+{
+	std::string name;
+	Vector2 pos;
 };
 
 class Collidable

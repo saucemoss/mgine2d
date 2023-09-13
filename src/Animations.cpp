@@ -23,7 +23,14 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("NPC_S_GUY1", LoadTexture("res/NPCs/NPCSecurityGuy.png"));
 	m_Textures.emplace("NPC_S_GUY2", LoadTexture("res/NPCs/NPCSecutiry2.png"));
 	m_Textures.emplace("WCARM", LoadTexture("res/enemies/wcarm.png"));
+	m_Textures.emplace("IVAN", LoadTexture("res/enemies/ivan.png"));
 	m_Textures.emplace("CROSS", LoadTexture("res/particles/cross.png"));
+	//m_Textures.emplace("obr1", LoadTexture("res/particles/orb1.png"));
+	//m_Textures.emplace("obr2", LoadTexture("res/particles/orb2.png"));
+	//m_Textures.emplace("obr3", LoadTexture("res/particles/orb3.png"));
+	m_Textures.emplace("ORBS", LoadTexture("res/particles/orbs.png"));
+	m_Textures.emplace("DASH", LoadTexture("res/particles/dash.png"));
+	m_Textures.emplace("DASHL", LoadTexture("res/particles/dash_l.png"));
 	m_Textures.emplace("DUST_TEST", LoadTexture("res/particles/dust_test.png"));
 	m_Textures.emplace("GLASS", LoadTexture("res/particles/glass.png"));
 	m_Textures.emplace("TERMINAL", LoadTexture("res/level/terminal.png"));
@@ -33,6 +40,34 @@ void TextureLoader::LoadTextures()
 	m_Textures.emplace("BOSS1", LoadTexture("res/enemies/boss1_sheet.png"));
 	m_Textures.emplace("MPOD", LoadTexture("res/level/medipod.png"));
 	m_Textures.emplace("NPC_DOC1", LoadTexture("res/NPCs/doc1.png"));
+	m_Textures.emplace("ENTANG", LoadTexture("res/level/entangeler.png"));
+	m_Textures.emplace("ROLLO", LoadTexture("res/enemies/rollo.png"));
+}
+
+void Animations::InitializeRolloAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("ROLLO");
+	animations.emplace("ROL_IDLE", *(new Animation(texture, 0, 2, 96, 0.08f)));
+	animations.emplace("ROL_WALK", *(new Animation(texture, 1, 3, 96, 0.08f)));
+	animations.emplace("ROL_ATT1", *(new Animation(texture, 2, 8, 96, 0.08f)));
+	animations.emplace("ROL_ROLL", *(new Animation(texture, 3, 4, 96, 0.08f)));
+	animations.emplace("ROL_DEAD", *(new Animation(texture, 4, 4, 96, 0.08f)));
+}
+
+void Animations::InitializeIvanAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("IVAN");
+	animations.emplace("IVAN_ATT1", *(new Animation(texture, 0, 13, 96, 0.08f)));
+	animations.emplace("IVAN_ATT2", *(new Animation(texture, 3, 17, 32, 0.10f)));
+	animations.emplace("IVAN_IDLE", *(new Animation(texture, 4, 2, 32, 0.08f)));
+	animations.emplace("IVAN_RUN", *(new Animation(texture, 5, 2, 32, 0.08f)));
+	animations.emplace("IVAN_DEAD", *(new Animation(texture, 6, 6, 32, 0.08f)));
+}
+
+void Animations::InitializeEntanglerAnimations()
+{
+	Texture2D* texture = TextureLoader::GetTexture("ENTANG");
+	animations.emplace("ENTANG", *(new Animation(texture, 0, 24, 64, 0.10f)));
 }
 
 void Animations::InitializeNPCDoc1Animations()
@@ -42,6 +77,7 @@ void Animations::InitializeNPCDoc1Animations()
 	animations.emplace("DOC1_IDLE", *(new Animation(texture, 1, 9, 32, 0.08f)));
 	animations.emplace("DOC1_TALK", *(new Animation(texture, 2, 12, 32, 0.08f)));
 	animations.emplace("DOC1_RUN", *(new Animation(texture, 3, 5, 32, 0.08f)));
+	animations.emplace("DOC1_WORK2", *(new Animation(texture, 4, 9, 32, 0.12f)));
 }
 
 void Animations::InitializeMediPodAnimations()
@@ -69,6 +105,7 @@ void Animations::InitializeBoss1Animations()
 	animations.emplace("FB_SHOOT", *(new Animation(texture, 8, 13, 96, 0.12f)));
 	animations.emplace("FB_SW_ANT", *(new Animation(texture, 9, 11, 96, 0.08f)));
 	animations.emplace("FB_SW_ATT", *(new Animation(texture, 10, 6, 96, 0.08f)));
+	animations.emplace("FB_SW_JMP", *(new Animation(texture, 11, 4, 96, 0.04f)));
 
 }
 
@@ -260,6 +297,10 @@ void Animations::InitializeDecorAnimations()
 	animations.emplace("W_CRATE", *(new Animation(texture, 15, 5, 32, 0.50f)));
 
 	animations.emplace("DECOR_529", *(new Animation(texture, 16, 9, 32, 0.08f)));
+
+	animations.emplace("DECOR_742", *(new Animation(texture, 20, 5, 32, 0.08f)));
+	animations.emplace("DECOR_782", *(new Animation(texture, 21, 9, 32, 0.08f)));
+	animations.emplace("DECOR_822", *(new Animation(texture, 22, 5, 32, 0.08f)));
 	
 }
 
@@ -299,6 +340,7 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_MELT", *(new Animation(texture, 10, 16, 32, 0.06f)));
 	animations.emplace("P_SHOOT", *(new Animation(texture, 11, 1, 32, 0.16f)));
 	animations.emplace("P_AXE_PICK", *(new Animation(texture, 13, 1, 32, 0.16f)));
+
 	
 	
 	Animation* P_AXE_THROW1 = new Animation(texture, 14, 16, 32, 0.09f);
@@ -334,6 +376,8 @@ void Animations::InitializePlayerAnimations()
 	jump_anim->SetCustomFrameTime(3, 0.5f);
 	animations.emplace("P_JUMP", *jump_anim);
 
+	animations.emplace("P_DASH", *(new Animation(texture, 27, 1, 32, 0.08f)));
+	animations.emplace("P_W_GRB", *(new Animation(texture, 28, 3, 32, 0.25f)));
 
 	Animation* P_ATT1 = new Animation(texture, 6, 5, 96, 0.02f);
 	P_ATT1->SetCustomFrameTime(1, 0.05f);
@@ -352,7 +396,15 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_ATT2", *P_ATT2);
 
 
-
+	Animation* PWR_ATT = new Animation(texture, 8, 11, 96, 0.08f);
+	PWR_ATT->SetCustomFrameTime(1, 0.08f);
+	PWR_ATT->SetCustomFrameTime(2, 0.10f);
+	PWR_ATT->SetCustomFrameTime(3, 0.10f);
+	PWR_ATT->SetCustomFrameTime(4, 0.12f);
+	PWR_ATT->SetCustomFrameTime(5, 0.12f);
+	PWR_ATT->SetCustomFrameTime(6, 0.12f);
+	PWR_ATT->SetCustomFrameTime(7, 0.10f);
+	animations.emplace("PWR_ATT", *PWR_ATT);
 
 
 }

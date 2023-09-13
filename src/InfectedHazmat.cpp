@@ -10,7 +10,7 @@ InfectedHazmat::InfectedHazmat(const Rectangle& rectangle, const ldtk::ArrayFiel
 	if (m_path_points.size() > 0) m_next_point = m_path_points.at(0).value();
 	InitAnimations();
 	state = EnemyState::Idle;
-	m_max_hp = 100;
+	m_max_hp = 70;
 	m_current_hp = m_max_hp;
 	sprite_offset_96 = { -42,-37 };
 	sprite_offset_32 = { -10 ,-6 };
@@ -91,6 +91,7 @@ void InfectedHazmat::Die(int death_option)
 		SetAnimation("IH_DEATH");
 		PlaySound(SoundManager::sounds["hurt12"]);
 		PlaySound(SoundManager::sounds["slime2short"]);
+		SpawnOrbs(1, center_pos());
 		break;
 	case 2:
 		solid_contacts < 2 ? SetAnimation("IH_DEATH3") : SetAnimation("IH_DEATH2");
@@ -98,9 +99,10 @@ void InfectedHazmat::Die(int death_option)
 		PlaySound(SoundManager::sounds["splat5"]);
 		PlaySound(SoundManager::sounds["splat1"]);
 		PlaySound(SoundManager::sounds["slime1"]);
+		SpawnOrbs(3, center_pos());
 		break;
 	}
-	
+
 	state = EnemyState::Dying;
 }
 
@@ -123,9 +125,18 @@ void InfectedHazmat::TakeDmg(int dmg)
 	std::string dmgs[] = { "hit2","hit3","hit4" };
 	SoundManager::PlayRandSounds(dmgs, 3);
 	m_current_hp -= dmg;
-	state = EnemyState::Hurting;
 	SetAnimation("IH_DMG");
 	bleed_particles();
+	SpawnOrbs(1, center_pos());
+
+	if (m_current_hp < -100)
+	{
+		Die(2);
+	}
+	else if (m_current_hp <= 0)
+	{
+		Die(1);
+	}
 	
 }
 
@@ -233,23 +244,7 @@ void InfectedHazmat::UpdateAttackingState(float dt)
 
 void InfectedHazmat::UpdateHurtingState(float dt)
 {
-	if (AnimationEnded())
-	{
-		if (m_current_hp < -100)
-		{
-			Die(2);
-		}
-		else if (m_current_hp <= 0)
-		{
-			Die(1);
-		}
-		else
-		{
-			SetAnimation("IH_IDLE");
-			state = EnemyState::Idle;
-		}
 
-	}
 }
 
 void InfectedHazmat::UpdateDyingState(float dt)

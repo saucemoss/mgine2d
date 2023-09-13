@@ -1,4 +1,8 @@
 #pragma once
+#pragma once
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "Entity.h"
 #include "Collidable.h"
 #include "Settings.h"
@@ -18,7 +22,6 @@ public:
 
     ~AxePickup();
     AxePickupState state;
-    bool player_in_sensor;
 
 
     // Inherited via Entity

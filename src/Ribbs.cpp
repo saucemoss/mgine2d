@@ -105,6 +105,7 @@ void Ribbs::TakeDmg(int dmg)
 		std::string dmgs[] = { "hit2","hit3","hit4" };
 		SoundManager::PlayRandSounds(dmgs, 3);
 		bleed_particles();
+		SpawnOrbs(1, center_pos());
 		if (m_current_hp <= 0)
 		{
 

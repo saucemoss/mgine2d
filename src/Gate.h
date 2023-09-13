@@ -3,10 +3,11 @@
 #include "Collidable.h"
 #include "Animations.h"
 #include "Shard.h"
+#include "EnergyOrb.h"
 
 
 
-class Gate : public Entity, public Collidable, public Animated
+class Gate : public Entity, public Collidable, public Animated, public EnergyEmitter
 {
 public:
 	Gate(const Rectangle& rect);

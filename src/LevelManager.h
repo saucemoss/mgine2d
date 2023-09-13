@@ -13,8 +13,6 @@
 #include "LightManager.h"
 #include "Particles.h"
 
-
-
 class LevelManager
 {
 public:
@@ -48,7 +46,7 @@ public:
     //physics
     static b2World* world;
     b2Vec2 gravity = b2Vec2(0.0f, 80.0f);
-    void SolidTilesToBigBoxes();
+    void SolidTilesToBigBoxes(std::string layer_name);
     ContactListener* contacts;
     DestructionListener* destruction_listener;
     ContactFilter* contact_filter;
@@ -58,6 +56,10 @@ public:
     Texture2D baseBackgroundSpriteAtlas;
     RenderTexture2D baseBackgroundRenderTexture;
     Texture2D baseBackgroundRenderedLevelTexture;
+    //static view background
+    Texture2D viewBackgroundSpriteAtlas;
+    RenderTexture2D viewBackgroundRenderTexture;
+    Texture2D viewBackgroundRenderedLevelTexture;
     //decors,platforms
     Texture2D decorationSpriteAtlas;
     RenderTexture2D decorationRenderTexture;
@@ -67,16 +69,21 @@ public:
     Texture2D decorationRenderedLevelTextureFront;
     //solids
     Texture2D laboratorySolidsSpriteAtlas;
+    Texture2D caveSolidsSpriteAtlas;
     RenderTexture2D laboratorySolidsRenderTexture;
     Texture2D laboratorySolidsRenderedLevelTexture;
     //paralaxed foreground
     Texture2D paralaxedForegroundSpriteAtlas;
     RenderTexture2D paralaxedForegroundRenderTexture;
     Texture2D paralaxedForegroundRenderedLevelTexture;
-    //paralaxed bg
-    Texture2D paralaxedBackgroundSpriteAtlas;
-    RenderTexture2D paralaxBackgroundRenderTexture;
-    Texture2D paralaxedBackgroundRenderedLevelTexture;
+    //paralaxed bg l1
+    Texture2D paralaxedBackgroundSpriteAtlas1;
+    RenderTexture2D paralaxBackgroundRenderTexture1;
+    Texture2D paralaxedBackgroundRenderedLevelTexture1;
+    //paralaxed bg l2
+    Texture2D paralaxedBackgroundSpriteAtlas2;
+    RenderTexture2D paralaxBackgroundRenderTexture2;
+    Texture2D paralaxedBackgroundRenderedLevelTexture2;
     
     
     //perlin noise 
@@ -87,6 +94,7 @@ public:
     //Layer draw
     void DrawForeGround();
     void DrawInFrontOfPlayer();
+    void DrawFixedBg();
     float layer_scroll = 0.0f;
 
     //Level Particles
@@ -97,9 +105,7 @@ public:
     //Object containers
     static std::vector<std::unique_ptr<Collidable>> solid_tiles;
     static std::vector<std::unique_ptr<Entity>> level_entities_safe;
-    static std::vector<Entity*> queue_entities;
-
-
+    static std::vector<physics_queue_obj> queue_entities;
 
 };
 

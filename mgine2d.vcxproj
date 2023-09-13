@@ -153,10 +153,15 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BioBreath.cpp" />
+    <ClCompile Include="src\EnergyOrb.cpp" />
+    <ClCompile Include="src\Entangeler.cpp" />
+    <ClCompile Include="src\Ivan.cpp" />
     <ClCompile Include="src\MediPod.cpp" />
     <ClCompile Include="src\MenuScreen.cpp" />
     <ClCompile Include="src\NPCDoc1.cpp" />
     <ClCompile Include="src\OptionsScreen.cpp" />
+    <ClCompile Include="src\Rollo.cpp" />
     <ClCompile Include="src\ScreensManager.cpp" />
     <ClCompile Include="src\Acid.cpp" />
     <ClCompile Include="src\AxePickup.cpp" />
@@ -206,6 +211,11 @@
     <ClCompile Include="src\WoodCrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Rollo.h" />
+    <ClInclude Include="src\BioBreath.h" />
+    <ClInclude Include="src\Ivan.h" />
+    <ClInclude Include="src\Entangeler.h" />
+    <ClInclude Include="src\EnergyOrb.h" />
     <ClInclude Include="src\NPCDoc1.h" />
     <ClInclude Include="src\SecretFog.h" />
     <ClInclude Include="src\MediPod.h" />

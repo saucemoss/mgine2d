@@ -22,6 +22,9 @@
 #include "BossHook.h"
 #include "MediPod.h"
 #include "SecretFog.h"
+#include "NPCDoc1.h"
+#include "Ivan.h"
+#include "Rollo.h"
 
 std::map<ColliderTag, std::string> ContactListener::ColStrMap;
 
@@ -58,6 +61,9 @@ ContactListener::ContactListener()
 	ColStrMap[ColliderTag::BOSSHOOK] = "BOSSHOOK";
 	ColStrMap[ColliderTag::MPOD] = "MPOD";
 	ColStrMap[ColliderTag::SFOG] = "SFOG";
+	ColStrMap[ColliderTag::IVAN] = "IVAN";
+	ColStrMap[ColliderTag::BIOBREATH] = "BIOBREATH";
+	ColStrMap[ColliderTag::ROLLO] = "ROLLO";
 }
 
 void ContactListener::BeginContact(b2Contact* contact)
@@ -114,7 +120,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			other_fixture = contact->GetFixtureA();
 		}
 
-		if (subject == "p_axe_att" )
+		if (subject == "p_axe_att")
 		{
 			
 			if (other == "SOLID" || other == "M_BLOCK" || other == "ELEVATOR")
@@ -139,6 +145,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			}
 			if (other == "GATE")
 			{
+				std::cout << "gate hit wtf" << std::endl;
 				Gate* g = static_cast<Gate*>(other_c);
 				g->TakeDmg(1);
 				ParticleEmitter* p = new ParticleEmitter(g->pos());
@@ -197,6 +204,14 @@ void ContactListener::BeginContact(b2Contact* contact)
 			{
 				player_right_wall_contacts++;
 			}
+			if (subject == "p_lg_s")
+			{
+				player_left_grab_contacts++;
+			}
+			if (subject == "p_rg_s")
+			{
+				player_right_grab_contacts++;
+			}
 		}
 
 		if (other == "FIREAXE" && subject == "PLAYER" && !GameScreen::player->m_has_axe && !GameScreen::player->axe_just_thrown)
@@ -216,7 +231,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			}
 		}
 
-		if (other == "ACID")
+		if (subject == "PLAYER" && other == "ACID")
 		{
 			GameScreen::player->take_dmg(10);
 			ParticleEmitter* p = new ParticleEmitter(GameScreen::player->pos());
@@ -229,6 +244,13 @@ void ContactListener::BeginContact(b2Contact* contact)
 			GameScreen::add_trauma(0.6f);
 			if(GameScreen::player->current_hp > 0)
 			GameScreen::player->new_pos = GameScreen::player->last_safe_pos;
+		}
+
+		if (subject == "PLAYER" && other == "BIOBREATH")
+		{
+			GameScreen::player->take_dmg(10);
+			ParticleEmitter* p = new ParticleEmitter(GameScreen::player->pos());
+			GameScreen::Particles->Add(DefinedEmitter::dust, p);
 		}
 
 		if (other_c != nullptr)
@@ -263,7 +285,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 			{
 				e->TakeDmg(GameScreen::player->axe_dmg);
 				GameScreen::add_trauma(0.6f);
-			
+				
 			}
 
 			if (other == "SOLID" && subject == "proxi")
@@ -299,6 +321,127 @@ void ContactListener::BeginContact(b2Contact* contact)
 		}
 	}
 
+	//ivan
+	{
+		std::string other = "";
+		std::string subject = "";
+		Ivan* e = nullptr;
+		if (c1->m_colliderTag == IVAN)
+		{
+			e = static_cast<Ivan*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == IVAN)
+		{
+			e = static_cast<Ivan*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+
+
+		if (e != nullptr)
+		{
+			if (subject == "IVAN" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
+			{
+				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.6f);
+
+			}
+
+			if (other == "SOLID" && subject == "proxi")
+			{
+				e->solid_contacts++;
+			}
+
+			if (subject == "ih_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts++;
+			}
+
+			if (other == "PLAYER")
+			{
+				if (subject == "ih_agro")
+				{
+					PlaySound(SoundManager::sounds["agro1"]);
+					e->player_in_agro = true;
+				}
+				if (subject == "ih_att")
+				{
+					e->player_in_dmg_zone = true;
+				}
+				if (subject == "ih_r_s")
+				{
+					e->right_player_touch = true;
+				}
+				if (subject == "ih_l_s")
+				{
+					e->left_player_touch = true;
+				}
+			}
+		}
+	}
+
+	//rollo
+	{
+		std::string other = "";
+		std::string subject = "";
+		Rollo* e = nullptr;
+		if (c1->m_colliderTag == ROLLO)
+		{
+			e = static_cast<Rollo*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == ROLLO)
+		{
+			e = static_cast<Rollo*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+
+
+		if (e != nullptr)
+		{
+			if (subject == "ROLLO" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
+			{
+				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.6f);
+
+			}
+
+			if (other == "SOLID" && subject == "proxi")
+			{
+				e->solid_contacts++;
+			}
+
+			if (subject == "rol_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts++;
+			}
+
+			if (other == "PLAYER")
+			{
+				if (subject == "rol_agro")
+				{
+					PlaySound(SoundManager::sounds["agro1"]);
+					e->player_in_agro = true;
+				}
+				if (subject == "rol_att")
+				{
+					e->player_in_dmg_zone = true;
+				}
+				if (subject == "rol_r_s")
+				{
+					e->right_player_touch = true;
+				}
+				if (subject == "rol_l_s")
+				{
+					e->left_player_touch = true;
+				}
+			}
+		}
+	}
 
 	//WCARM 
 	{
@@ -388,7 +531,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 				}
 				if (subject == "fboss_feet")
 				{
-					e->player_in_dmg_zone = true;
+					//e->player_in_dmg_zone = true;
 				}
 				if (subject == "fb_swirl_att")
 				{
@@ -686,7 +829,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 		}
 	}
 
-	//NPC
+	//NPC security guy
 	{
 		std::string other = "";
 		std::string subject = "";
@@ -713,6 +856,30 @@ void ContactListener::BeginContact(b2Contact* contact)
 			e->enemy_in_sensor = true;
 		}
 	}
+
+	//NPC doc 1
+	{
+		std::string other = "";
+		std::string subject = "";
+		NPCDoc1* e = nullptr;
+		if (c1->m_colliderTag == NPC_DOC1)
+		{
+			e = static_cast<NPCDoc1*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == NPC_DOC1)
+		{
+			e = static_cast<NPCDoc1*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "npc_sensor")
+		{
+			e->player_in_sensor = true;
+		}
+	}
+
 	//Fireaxe
 	{
 		std::string other = "";
@@ -818,6 +985,14 @@ void ContactListener::EndContact(b2Contact* contact)
 			{
 				player_right_wall_contacts--;
 			}
+			if (subject == "p_lg_s")
+			{
+				player_left_grab_contacts--;
+			}
+			if (subject == "p_rg_s")
+			{
+				player_right_grab_contacts--;
+			}
 		}
 		if (other_c != nullptr)
 		{
@@ -866,7 +1041,7 @@ void ContactListener::EndContact(b2Contact* contact)
 				}
 				if (subject == "fboss_feet")
 				{
-					e->player_in_dmg_zone = false;
+					//e->player_in_dmg_zone = false;
 				}
 				if (subject == "fb_swirl_att")
 				{
@@ -880,7 +1055,8 @@ void ContactListener::EndContact(b2Contact* contact)
 		}
 	}
 
-	#pragma region infected hazmat 
+	//infected hazmat 
+	{
 		std::string other = "";
 		std::string subject = "";
 		InfectedHazmat* e = nullptr;
@@ -911,7 +1087,7 @@ void ContactListener::EndContact(b2Contact* contact)
 
 			if (other == "PLAYER")
 			{
-				
+
 				if (subject == "ih_agro")
 				{
 					e->player_in_agro = false;
@@ -930,214 +1106,329 @@ void ContactListener::EndContact(b2Contact* contact)
 				}
 			}
 		}
+	}
 
-	#pragma endregion
-
-		//leggy 
+	//ivan
+	{
+		std::string other = "";
+		std::string subject = "";
+		Ivan* e = nullptr;
+		if (c1->m_colliderTag == IVAN)
 		{
-			std::string other = "";
-			std::string subject = "";
-			Leggy* e = nullptr;
-			if (c1->m_colliderTag == LEGGY)
+			e = static_cast<Ivan*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == IVAN)
+		{
+			e = static_cast<Ivan*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+
+
+		if (e != nullptr)
+		{
+
+			if (other == "SOLID" && subject == "proxi")
 			{
-				e = static_cast<Leggy*>(c1);
-				other = nameB;
-				subject = nameA;
+				e->solid_contacts--;
 			}
-			else if (c2->m_colliderTag == LEGGY)
+
+			if (subject == "ih_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
 			{
-				e = static_cast<Leggy*>(c2);
-				other = nameA;
-				subject = nameB;
+				e->ground_contacts--;
 			}
 
-
-			if (e != nullptr)
+			if (other == "PLAYER")
 			{
-				if (subject == "LEGGY" && other == "p_axe_att" && e->state != EnemyState::Hurting)
+				if (subject == "ih_agro")
 				{
-					e->TakeDmg(GameScreen::player->axe_dmg);
+					PlaySound(SoundManager::sounds["agro1"]);
+					e->player_in_agro = false;
 				}
-
-				if (subject == "leg_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+				if (subject == "ih_att")
 				{
-					e->ground_contacts--;
+					e->player_in_dmg_zone = false;
 				}
-
-				if (other == "PLAYER")
+				if (subject == "ih_r_s")
 				{
-					if (subject == "leg_agro")
-					{
-						e->player_in_agro = false;
-					}
-					if (subject == "leg_att")
-					{
-						e->player_in_dmg_zone = false;
-					}
+					e->right_player_touch = false;
+				}
+				if (subject == "ih_l_s")
+				{
+					e->left_player_touch = false;
 				}
 			}
 		}
+	}
 
-		// hspit 
+	//rollo
+	{
+		std::string other = "";
+		std::string subject = "";
+		Rollo* e = nullptr;
+		if (c1->m_colliderTag == ROLLO)
 		{
-			std::string other = "";
-			std::string subject = "";
-			HeadSpit* e = nullptr;
-			if (c1->m_colliderTag == HSPIT)
-			{
-				e = static_cast<HeadSpit*>(c1);
-				other = nameB;
-				subject = nameA;
-			}
-			else if (c2->m_colliderTag == HSPIT)
-			{
-				e = static_cast<HeadSpit*>(c2);
-				other = nameA;
-				subject = nameB;
-			}
+			e = static_cast<Rollo*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == ROLLO)
+		{
+			e = static_cast<Rollo*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
 
 
-			if (e != nullptr)
+		if (e != nullptr)
+		{
+			if (subject == "ROLLO" && other == "p_axe_att" && (e->state != EnemyState::Hurting && e->state != EnemyState::Dying))
 			{
-				if (other == "PLAYER")
+				e->TakeDmg(GameScreen::player->axe_dmg);
+				GameScreen::add_trauma(0.6f);
+
+			}
+
+			if (other == "SOLID" && subject == "proxi")
+			{
+				e->solid_contacts--;
+			}
+
+			if (subject == "rol_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts--;
+			}
+
+			if (other == "PLAYER")
+			{
+				if (subject == "rol_agro")
 				{
-					if (subject == "hspit_att")
-					{
-						e->player_in_dmg_zone = false;
-					}
+					PlaySound(SoundManager::sounds["agro1"]);
+					e->player_in_agro = false;
+				}
+				if (subject == "rol_att")
+				{
+					e->player_in_dmg_zone = false;
+				}
+				if (subject == "rol_r_s")
+				{
+					e->right_player_touch = false;
+				}
+				if (subject == "rol_l_s")
+				{
+					e->left_player_touch = false;
 				}
 			}
 		}
+	}
 
-		// footb 
+	//leggy 
+	{
+		std::string other = "";
+		std::string subject = "";
+		Leggy* e = nullptr;
+		if (c1->m_colliderTag == LEGGY)
 		{
-			std::string other = "";
-			std::string subject = "";
-			Football* e = nullptr;
-			if (c1->m_colliderTag == FOOTB)
-			{
-				e = static_cast<Football*>(c1);
-				other = nameB;
-				subject = nameA;
-			}
-			else if (c2->m_colliderTag == FOOTB)
-			{
-				e = static_cast<Football*>(c2);
-				other = nameA;
-				subject = nameB;
-			}
+			e = static_cast<Leggy*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == LEGGY)
+		{
+			e = static_cast<Leggy*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
 
 
-			if (e != nullptr)
+		if (e != nullptr)
+		{
+			if (subject == "LEGGY" && other == "p_axe_att" && e->state != EnemyState::Hurting)
 			{
-				if (subject == "FOOTB" && other == "p_axe_att" && e->state != EnemyState::Hurting)
+				e->TakeDmg(GameScreen::player->axe_dmg);
+			}
+
+			if (subject == "leg_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts--;
+			}
+
+			if (other == "PLAYER")
+			{
+				if (subject == "leg_agro")
 				{
-					e->TakeDmg(GameScreen::player->axe_dmg);
+					e->player_in_agro = false;
 				}
-
-				if (other == "PLAYER")
+				if (subject == "leg_att")
 				{
-					if (subject == "footb_att")
-					{
-						e->player_in_dmg_zone = false;
-					}
+					e->player_in_dmg_zone = false;
 				}
 			}
 		}
+	}
 
-		//WCARM 
+	// hspit 
+	{
+		std::string other = "";
+		std::string subject = "";
+		HeadSpit* e = nullptr;
+		if (c1->m_colliderTag == HSPIT)
 		{
-			std::string other = "";
-			std::string subject = "";
-			WhiteCoatArm* e = nullptr;
-			if (c1->m_colliderTag == WCARM)
-			{
-				e = static_cast<WhiteCoatArm*>(c1);
-				other = nameB;
-				subject = nameA;
-			}
-			else if (c2->m_colliderTag == WCARM)
-			{
-				e = static_cast<WhiteCoatArm*>(c2);
-				other = nameA;
-				subject = nameB;
-			}
+			e = static_cast<HeadSpit*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == HSPIT)
+		{
+			e = static_cast<HeadSpit*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
 
 
-			if (e != nullptr)
+		if (e != nullptr)
+		{
+			if (other == "PLAYER")
 			{
-
-				if (subject == "wca_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+				if (subject == "hspit_att")
 				{
-					e->ground_contacts--;
-				}
-
-				if (other == "PLAYER")
-				{
-					if (subject == "wca_agro")
-					{
-						e->player_in_agro = false;
-					}
-					if (subject == "wca_att")
-					{
-						e->player_in_dmg_zone = false;
-					}
+					e->player_in_dmg_zone = false;
 				}
 			}
 		}
+	}
 
-		//ribbs 
+	// footb 
+	{
+		std::string other = "";
+		std::string subject = "";
+		Football* e = nullptr;
+		if (c1->m_colliderTag == FOOTB)
 		{
-			std::string other = "";
-			std::string subject = "";
-			Ribbs* e = nullptr;
-			if (c1->m_colliderTag == RIBBS)
+			e = static_cast<Football*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == FOOTB)
+		{
+			e = static_cast<Football*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+
+
+		if (e != nullptr)
+		{
+			if (subject == "FOOTB" && other == "p_axe_att" && e->state != EnemyState::Hurting)
 			{
-				e = static_cast<Ribbs*>(c1);
-				other = nameB;
-				subject = nameA;
+				e->TakeDmg(GameScreen::player->axe_dmg);
 			}
-			else if (c2->m_colliderTag == RIBBS)
+
+			if (other == "PLAYER")
 			{
-				e = static_cast<Ribbs*>(c2);
-				other = nameA;
-				subject = nameB;
-			}
-
-
-			if (e != nullptr)
-			{
-				if (subject == "RIBBS" && other == "p_axe_att" && !(e->state == EnemyState::Hurting))
+				if (subject == "footb_att")
 				{
-					e->TakeDmg(GameScreen::player->axe_dmg);
-				}
-
-				if (subject == "rib_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
-				{
-					e->ground_contacts--;
-				}
-
-				if (other == "PLAYER")
-				{
-					if (subject == "rib_agro")
-					{
-						e->player_in_agro = false;
-					}
-					if (subject == "rib_att")
-					{
-						e->player_in_dmg_zone = false;
-					}
-					if (subject == "rib_r_s")
-					{
-						e->right_player_touch = false;
-					}
-					if (subject == "rib_l_s")
-					{
-						e->left_player_touch = false;
-					}
+					e->player_in_dmg_zone = false;
 				}
 			}
 		}
+	}
+
+	//WCARM 
+	{
+		std::string other = "";
+		std::string subject = "";
+		WhiteCoatArm* e = nullptr;
+		if (c1->m_colliderTag == WCARM)
+		{
+			e = static_cast<WhiteCoatArm*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == WCARM)
+		{
+			e = static_cast<WhiteCoatArm*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+
+
+		if (e != nullptr)
+		{
+
+			if (subject == "wca_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts--;
+			}
+
+			if (other == "PLAYER")
+			{
+				if (subject == "wca_agro")
+				{
+					e->player_in_agro = false;
+				}
+				if (subject == "wca_att")
+				{
+					e->player_in_dmg_zone = false;
+				}
+			}
+		}
+	}
+
+	//ribbs 
+	{
+		std::string other = "";
+		std::string subject = "";
+		Ribbs* e = nullptr;
+		if (c1->m_colliderTag == RIBBS)
+		{
+			e = static_cast<Ribbs*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == RIBBS)
+		{
+			e = static_cast<Ribbs*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+
+
+		if (e != nullptr)
+		{
+			if (subject == "RIBBS" && other == "p_axe_att" && !(e->state == EnemyState::Hurting))
+			{
+				e->TakeDmg(GameScreen::player->axe_dmg);
+			}
+
+			if (subject == "rib_feet" && (other == "SOLID" || other == "M_BLOCK" || other == "W_CRATE" || other == "ELEVATOR"))
+			{
+				e->ground_contacts--;
+			}
+
+			if (other == "PLAYER")
+			{
+				if (subject == "rib_agro")
+				{
+					e->player_in_agro = false;
+				}
+				if (subject == "rib_att")
+				{
+					e->player_in_dmg_zone = false;
+				}
+				if (subject == "rib_r_s")
+				{
+					e->right_player_touch = false;
+				}
+				if (subject == "rib_l_s")
+				{
+					e->left_player_touch = false;
+				}
+			}
+		}
+	}
 
 	//flying infected
 	{
@@ -1211,7 +1502,7 @@ void ContactListener::EndContact(b2Contact* contact)
 		}
 	}
 	
-	//NPC
+	//NPC security guy
 	{
 		std::string other = "";
 		std::string subject = "";
@@ -1234,10 +1525,47 @@ void ContactListener::EndContact(b2Contact* contact)
 			e->player_in_sensor = false;
 		}
 	}
+
+	//NPC doc 1
+	{
+		std::string other = "";
+		std::string subject = "";
+		NPCDoc1* e = nullptr;
+		if (c1->m_colliderTag == NPC_DOC1)
+		{
+			e = static_cast<NPCDoc1*>(c1);
+			other = nameB;
+			subject = nameA;
+		}
+		else if (c2->m_colliderTag == NPC_DOC1)
+		{
+			e = static_cast<NPCDoc1*>(c2);
+			other = nameA;
+			subject = nameB;
+		}
+		if (other == "PLAYER" && subject == "npc_sensor")
+		{
+			e->player_in_sensor = false;
+		}
+	}
 }
 
 void ContactListener::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
+	if (GameScreen::player->is_dashing)
+	{
+		auto bodyUserData1 = contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+		auto bodyUserData2 = contact->GetFixtureB()->GetBody()->GetUserData().pointer;
+		auto c1 = reinterpret_cast<Collidable*>(bodyUserData1);
+		auto c2 = reinterpret_cast<Collidable*>(bodyUserData2);
+
+		if(c1->m_colliderTag==PLAYER && c2->m_colliderTag!=SOLID)
+
+		contact->SetEnabled(false);
+		
+	}
+
+
 }
 
 void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
@@ -1301,7 +1629,7 @@ void ContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impu
 		float dmg_impulse = std::fmaxf(impulse->normalImpulses[0], impulse->normalImpulses[1]);
 		if (dmg_impulse > 20)
 		{
-			e->TakeDmg(dmg_impulse);
+			e->TakeDmg(dmg_impulse * 1.4f);
 			GameScreen::add_trauma(0.6f);
 			b2WorldManifold worldManifold;
 			contact->GetWorldManifold(&worldManifold);
@@ -1456,14 +1784,12 @@ bool ContactFilter::ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB)
 			subject = nameB;
 			other_c = c1;
 		}
-		//if (subject == "PLAYER" && other != "SOLID" && GameScreen::player->invincible)
-		//{
-		//	return false;
-		//}
-		if (subject == "PLAYER" && other == "FOOTB")
+
+		if (subject == "PLAYER" && (other == "FOOTB" || other == "SHARD" || other == "FBOSS"))
 		{
 			return false;
-		} else if (subject == "PLAYER" && other == "SHARD")
+		}
+		if (subject == "PLAYER" && other != "SOLID" && GameScreen::player->is_dashing)
 		{
 			return false;
 		}

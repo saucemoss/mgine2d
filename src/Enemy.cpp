@@ -3,6 +3,7 @@
 #include "FrogBoss.h"
 
 
+
 Enemy::Enemy(const Rectangle& rectangle, ColliderTag tag, b2BodyType body_type) :
 	Collidable({ rectangle.x,rectangle.y,rectangle.width,rectangle.height}, body_type, tag)
 {

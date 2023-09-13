@@ -6,6 +6,7 @@
 #include "Collidable.h"
 #include <map>
 #include <box2d.h>
+#include "EnergyOrb.h"
 
 
 enum class EnemyState
@@ -21,7 +22,7 @@ enum class EnemyState
 };
 
 
-class Enemy : public Entity, public Animated, public Collidable
+class Enemy : public Entity, public Animated, public Collidable, public EnergyEmitter
 {
 public:
     Enemy(const Rectangle& rectangle, ColliderTag tag, b2BodyType body_type);

@@ -13,6 +13,7 @@ public:
 
 	bool axed = false;
 	float time_to_live;
+	Vector2 random_spread_impulse;
 	// Inherited via Entity
 	virtual void Draw(int l) override;
 	virtual void Update(float dt) override;

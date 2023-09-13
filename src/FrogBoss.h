@@ -62,10 +62,12 @@ public:
 	bool changed_sides;
 	bool pound;
 	int wall_contacts;
+	int prev_states_num[2];
 	Vector2 player_pos;
 
 	//	other methods
 	void SelectAction();
+	void RerollStatesNums(int& rand);
 	void SetRun();
 	void RunSensor();
 	void LookingRight(Vector2 player_pos);
