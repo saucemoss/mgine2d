@@ -63,6 +63,7 @@ Screens NewGameScreen::Update(float dt)
                     { "axe_throwing", false },
                     { "axe_pwr_attack", false },
                     { "axe_dash_slash", false },
+                    { "wall_grab", false },
                     { "tnt", false }
                 } }
             } },

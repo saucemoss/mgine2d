@@ -38,6 +38,7 @@ public:
     ~Player();
     
     void Update(float dt) override;
+    void CountInvincibility(float dt);
     void CheckTouchGround();
     void CheckWallTouch();
     void set_velocity_x(float vx);
@@ -158,7 +159,7 @@ public:
 
 
     void UpdateIdleState(float dt);
-    void Jump();
+    void Jump(float dt);
     void UpdateRunningState(float dt);
     void UpdateJumpingState(float dt);
     void UpdateFallingState(float dt);

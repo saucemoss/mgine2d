@@ -3,6 +3,7 @@
 #include "Animations.h"
 #include "Game.h"
 
+
 MenuScreen::MenuScreen() : selectedOption(MenuOption::NewGame), optionIndex(0) {}
 
 void MenuScreen::Draw()
@@ -23,6 +24,7 @@ void MenuScreen::Draw()
 
 Screens MenuScreen::Update(float dt)
 {
+
     // Handle input to navigate through menu options
     if (IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP))
     {

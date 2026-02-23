@@ -379,21 +379,38 @@ void Animations::InitializePlayerAnimations()
 	animations.emplace("P_DASH", *(new Animation(texture, 27, 1, 32, 0.08f)));
 	animations.emplace("P_W_GRB", *(new Animation(texture, 28, 3, 32, 0.25f)));
 
-	Animation* P_ATT1 = new Animation(texture, 6, 5, 96, 0.02f);
-	P_ATT1->SetCustomFrameTime(1, 0.05f);
-	P_ATT1->SetCustomFrameTime(2, 0.05f);
-	P_ATT1->SetCustomFrameTime(3, 0.07f);
-	P_ATT1->SetCustomFrameTime(4, 0.08f);
-	P_ATT1->SetCustomFrameTime(5, 0.09f);
+	Animation* P_ATT1_F = new Animation(texture, 6, 5, 96, 0.02f);
+	P_ATT1_F->SetCustomFrameTime(1, 0.05f);
+	P_ATT1_F->SetCustomFrameTime(2, 0.05f);
+	P_ATT1_F->SetCustomFrameTime(3, 0.07f);
+	P_ATT1_F->SetCustomFrameTime(4, 0.08f);
+	P_ATT1_F->SetCustomFrameTime(5, 0.09f);
+	animations.emplace("P_ATT1_F", *P_ATT1_F);
+
+	Animation* P_ATT2_F = new Animation(texture, 7, 5, 96, 0.02f);
+	P_ATT2_F->SetCustomFrameTime(1, 0.05f);
+	P_ATT2_F->SetCustomFrameTime(2, 0.05f);
+	P_ATT2_F->SetCustomFrameTime(3, 0.07f);
+	P_ATT2_F->SetCustomFrameTime(4, 0.08f);
+	P_ATT2_F->SetCustomFrameTime(5, 0.09f);
+	animations.emplace("P_ATT2_F", *P_ATT2_F);
+
+	Animation* P_ATT1 = new Animation(texture, 6, 5, 96, 0.04f);
+	P_ATT1->SetCustomFrameTime(1, 0.08f);
+	P_ATT1->SetCustomFrameTime(2, 0.08f);
+	P_ATT1->SetCustomFrameTime(3, 0.10f);
+	P_ATT1->SetCustomFrameTime(4, 0.10f);
+	P_ATT1->SetCustomFrameTime(5, 0.12f);
 	animations.emplace("P_ATT1", *P_ATT1);
 
-	Animation* P_ATT2 = new Animation(texture, 7, 5, 96, 0.02f);
-	P_ATT2->SetCustomFrameTime(1, 0.05f);
-	P_ATT2->SetCustomFrameTime(2, 0.05f);
-	P_ATT2->SetCustomFrameTime(3, 0.07f);
-	P_ATT2->SetCustomFrameTime(4, 0.08f);
-	P_ATT2->SetCustomFrameTime(5, 0.09f);
+	Animation* P_ATT2 = new Animation(texture, 7, 5, 96, 0.04f);
+	P_ATT2->SetCustomFrameTime(1, 0.08f);
+	P_ATT2->SetCustomFrameTime(2, 0.08f);
+	P_ATT2->SetCustomFrameTime(3, 0.10f);
+	P_ATT2->SetCustomFrameTime(4, 0.10f);
+	P_ATT2->SetCustomFrameTime(5, 0.12f);
 	animations.emplace("P_ATT2", *P_ATT2);
+
 
 
 	Animation* PWR_ATT = new Animation(texture, 8, 11, 96, 0.08f);

@@ -92,7 +92,7 @@ void SoundManager::LoadSounds()
 	sounds.emplace("elevator", LoadSound("res/sound/collected/elevator.wav"));
 	sounds.emplace("elevator_stop", LoadSound("res/sound/collected/elevator_stop.wav"));
 	sounds.emplace("door_close", LoadSound("res/sound/collected/door_close.wav"));
-	SetSoundVolume(sounds["door_close"], 0.7f);
+	SetSoundVolume(sounds["door_close"], 0.2f);
 	sounds.emplace("light_ambient", LoadSound("res/sound/collected/lights_noise-01.wav"));
 	sounds.emplace("flicker", LoadSound("res/sound/collected/lights_noise-02.wav"));
 	sounds.emplace("glass_shatter", LoadSound("res/sound/collected/glass_shatter.wav"));
@@ -136,6 +136,12 @@ void SoundManager::LoadSounds()
 	sounds.emplace("step3", LoadSound("res/sound/steps/stepstone03.wav"));
 	sounds.emplace("step4", LoadSound("res/sound/steps/stepstone04.wav"));
 	sounds.emplace("step5", LoadSound("res/sound/steps/stepstone05.wav"));
+
+	//music
+	sounds.emplace("b1", LoadSound("res/sound/music/b1.wav"));
+	//sounds.emplace("menu_theme", LoadSound("res/sound/music/menu_theme.wav"));
+	sounds.emplace("idlew", LoadSound("res/sound/music/idlew.wav"));
+	sounds.emplace("ambient_music", LoadSound("res/sound/music/ambient_theme_music1.wav"));
 
 	sounds.emplace("woodhit1", LoadSound("res/sound/collected/wood_hit1.wav"));
 	SetSoundVolume(sounds["woodhit1"], 0.7f);

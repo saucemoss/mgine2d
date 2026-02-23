@@ -83,7 +83,7 @@ void Shaders::DrawPerlin()
 	DrawTexturePro(PerlinTexture,
 		{ 0, 0, (float)PerlinTexture.width, -(float)PerlinTexture.height },
 		{ 0, 0, (float)PerlinTexture.width, (float)PerlinTexture.height },
-		{ 0, 0 }, 0.0f, Fade(WHITE, 0.3f));
+		{ 0, 0 }, 0.0f, Fade(WHITE, 0.15f));
 }
 
 void Shaders::Pixelize()

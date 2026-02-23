@@ -13,13 +13,15 @@ namespace ldtk {
 
     class Tile {
     public:
-        const Layer* layer = nullptr;
+        const Layer* const layer;
 
         const int coordId = 0;
         const int tileId  = 0;
 
         const bool flipX = false;
         const bool flipY = false;
+
+        const float alpha;
 
         auto getPosition() const -> IntPoint;
         auto getGridPosition() const -> IntPoint;
@@ -31,7 +33,7 @@ namespace ldtk {
 
         static const Tile None;
 
-        Tile(const Layer* l, IntPoint pos, int tile_id, int flips);
+        Tile(const Layer* l, IntPoint pos, int tile_id, int flips, float a);
     };
 
     auto operator==(const Tile& l, const Tile& r) -> bool;

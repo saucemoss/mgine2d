@@ -12,7 +12,7 @@ using json = nlohmann::json;
 FrogBoss::FrogBoss(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.y, 40, 40 }, FBOSS, b2_dynamicBody)
 {
 	InitAnimations();
-	m_max_hp = 1000;
+	m_max_hp = 600;
 	m_current_hp = m_max_hp;
 	//Physics body cfg
 	//add more mass 
@@ -48,6 +48,8 @@ FrogBoss::FrogBoss(const Rectangle& rectangle) : Enemy({ rectangle.x, rectangle.
 	prev_states_num[0] = 0;
 	prev_states_num[1] = 0;
 
+	PlaySound(SoundManager::sounds["b1"]);
+
 }
 
 FrogBoss::~FrogBoss()
@@ -57,6 +59,9 @@ FrogBoss::~FrogBoss()
 
 void FrogBoss::Update(float dt)
 {
+	if (IsSoundPlaying(SoundManager::sounds["idlew"]))StopSound(SoundManager::sounds["idlew"]);
+	if(!IsSoundPlaying(SoundManager::sounds["b1"]))PlaySound(SoundManager::sounds["b1"]);
+
 	SwitchFrames(dt);
 	dmg_counter += dt;
 	if (dmg_counter >= 0.6f)
@@ -492,7 +497,7 @@ void FrogBoss::UpdateBalls(float dt)
 void FrogBoss::UpdateDie(float dt)
 {
 	taking_dmg = false;
-
+	if (IsSoundPlaying(SoundManager::sounds["b1"]))StopSound(SoundManager::sounds["b1"]);
 	//clean up spawned projectiles // to do
 	//for (auto& bb : GameScreen::LevelMgr->level_entities_safe)
 	//{

@@ -12,6 +12,7 @@
 #include "LDtkLoader/defs/FieldDef.hpp"
 #include "LDtkLoader/DataTypes.hpp"
 #include "LDtkLoader/Enum.hpp"
+#include "LDtkLoader/Layer.hpp"
 #include "LDtkLoader/Utils.hpp"
 
 namespace ldtk {
@@ -24,13 +25,17 @@ namespace ldtk {
         Entity(Entity&&) = default;
         auto operator=(const Entity&) -> Entity& = delete;
 
+        const Layer* const layer;
         const IID iid;
 
         auto getName() const -> const std::string&;
         auto getSize() const -> const IntPoint&;
+        auto getColor() const -> const Color&;
+
         auto getPosition() const -> const IntPoint&;
         auto getGridPosition() const -> const IntPoint&;
-        auto getColor() const -> const Color&;
+        auto getWorldPosition() const -> IntPoint;
+
         auto getPivot() const -> const FloatPoint&;
 
         auto hasSprite() const -> bool;
@@ -45,17 +50,17 @@ namespace ldtk {
 
         auto allFields() const -> const std::vector<FieldDef>&;
 
-        explicit Entity(const nlohmann::json& j, const World* w);
+        explicit Entity(const nlohmann::json& j, const World* w, const Layer* l);
 
     private:
-        const EntityDef* m_definition = nullptr;
+        const EntityDef* const m_definition;
 
         const IntPoint m_size;
         const IntPoint m_position;
         const IntPoint m_grid_pos;
         const Color m_color;
 
-        const Tileset* m_tileset = nullptr;
+        const Tileset* const m_tileset;
         const IntRect m_texture_rect;
     };
 

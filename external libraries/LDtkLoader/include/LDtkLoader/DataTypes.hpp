@@ -42,6 +42,11 @@ namespace ldtk {
         return (lhs.x == rhs.x && lhs.y == rhs.y && lhs.width == rhs.width && lhs.height == rhs.height);
     }
 
+    template <typename T>
+    auto operator!=(const Rect<T>& lhs, const Rect<T>& rhs) -> bool {
+        return !(lhs == rhs);
+    }
+
     using FloatRect = Rect<float>;
     using IntRect = Rect<int>;
 
@@ -95,9 +100,16 @@ namespace ldtk {
     enum class Dir {
         None,
         North,
+        NorthEast,
         East,
+        SouthEast,
         South,
-        West
+        SouthWest,
+        West,
+        NorthWest,
+        Overlap,
+        Over,
+        Under,
     };
 
     class FilePath : std::string {

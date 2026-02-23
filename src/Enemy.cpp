@@ -105,6 +105,8 @@ void Enemy::Draw(int l)
 		sprite_rotation,
 		c);
 
+	DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);
+
 	if (GameScreen::debug)
 	{
 		DrawText(std::to_string(m_current_hp).c_str(), center_pos().x, center_pos().y - 10, 10, RED);

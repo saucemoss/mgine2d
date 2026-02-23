@@ -42,6 +42,7 @@
 #include "Entangeler.h"
 #include "Ivan.h"
 #include "Rollo.h"
+#include "ScreensManager.h"
 
 b2World* LevelManager::world = nullptr;
 b2World* Collidable::world = nullptr;
@@ -56,6 +57,8 @@ void LevelManager::RemoveEntityFromLevel(Entity& e)
 {
 	e.m_destroy = true;
 }
+
+
 
 LevelManager::LevelManager(bool is_new_game, int in_save_file_num)
 {
@@ -173,6 +176,9 @@ void LevelManager::LoadLevel(std::string level_name)
 
 	//Textures setup:
 	// 
+	// 
+
+
 	//Background Texture
 	std::string path = currentLdtkLevel->getBgImage().path.c_str();
 	std::string prefix = "res/level/";
@@ -233,7 +239,8 @@ void LevelManager::LoadLevel(std::string level_name)
 	{
 		baseBackgroundRenderTexture = LoadRenderTexture(settings::viewSizeWidth, settings::viewSizeHeight);
 		BeginTextureMode(baseBackgroundRenderTexture);
-		DrawTexture(baseBackgroundSpriteAtlas, 0, 0, WHITE);
+		ClearBackground(BLACK);
+		DrawTextureV(baseBackgroundSpriteAtlas, { 0.0f,0.0f }, WHITE);
 		EndTextureMode();
 		baseBackgroundRenderedLevelTexture = baseBackgroundRenderTexture.texture;
 	}
@@ -744,7 +751,9 @@ void LevelManager::LoadLevel(std::string level_name)
 	lights->SetupBoxes();
 
 
-	LoadSavedLevel();
+	LoadSavedLevelData();
+
+	ApplyCustomLevelEvents();
 	
 }
 
@@ -782,7 +791,7 @@ void LevelManager::SaveLevel()
 	}
 }
 
-void LevelManager::LoadSavedLevel()
+void LevelManager::LoadSavedLevelData()
 {
 	std::ifstream loadFile("save_slot_" + std::to_string(save_file_num + 1) + ".json");
 	json save_data;
@@ -1030,6 +1039,26 @@ void LevelManager::Update(float dt)
 		}
 	}
 
+	//turn off menu music
+	if (IsSoundPlaying(ScreensManager::menu_theme))
+	{
+		StopSound(ScreensManager::menu_theme);
+	}
+	//play game music
+	if (!IsSoundPlaying(SoundManager::sounds["ambient_music"]))
+	{
+		PlaySound(SoundManager::sounds["ambient_music"]);
+	}
+
+	if (currentLdtkLevel->name == "Level_6")
+	{
+		if (IsSoundPlaying(SoundManager::sounds["ambient_music"]))StopSound(SoundManager::sounds["ambient_music"]);
+	}
+	else
+	{
+		if (IsSoundPlaying(SoundManager::sounds["b1"]))StopSound(SoundManager::sounds["b1"]);
+	}
+
 }
 
 void LevelManager::SolidTilesToBigBoxes(std::string layer_name)
@@ -1122,6 +1151,15 @@ void LevelManager::SolidTilesToBigBoxes(std::string layer_name)
 
 }
 
+
+void LevelManager::ApplyCustomLevelEvents()
+{
+
+
+
+}
+
+
 void LevelManager::DrawForeGround()
 {
 	Camera2D c = GameScreen::camera;
@@ -1129,17 +1167,17 @@ void LevelManager::DrawForeGround()
 	Vector2 parallaxed = Vector2Multiply(c_position, { 0.05f,0.05f });
 	//Draw paralaxed foreground elements
 	DrawTexturePro(paralaxedForegroundRenderedLevelTexture,
-		{ 0, 0, (float)paralaxedForegroundRenderedLevelTexture.width, (float)-paralaxedForegroundRenderedLevelTexture.height },//source
+		{ 0.0f, 0.0f, (float)paralaxedForegroundRenderedLevelTexture.width, (float)-paralaxedForegroundRenderedLevelTexture.height },//source
 		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y }, //dest
-		{ 0,0 }, 0, WHITE);
+		{ 0.0f,0.0f }, 0.0f, WHITE);
 }
 
 void LevelManager::DrawInFrontOfPlayer()
 {
 	DrawTexturePro(decorationRenderedLevelTextureFront,
-		{ 0, 0, (float)decorationRenderedLevelTextureFront.width, (float)-decorationRenderedLevelTextureFront.height },
-		{ 0, 0, (float)levelSize.x ,(float)levelSize.y },
-		{ 0,0 }, 0, WHITE);
+		{ 0.0f, 0.0f, (float)decorationRenderedLevelTextureFront.width, (float)-decorationRenderedLevelTextureFront.height },
+		{ 0.0f, 0.0f, (float)levelSize.x ,(float)levelSize.y },
+		{ 0.0f,0.0f }, 0.0f, WHITE);
 }
 
 void LevelManager::DrawFixedBg()
@@ -1148,16 +1186,14 @@ void LevelManager::DrawFixedBg()
 	if (currentLdtkLevel->hasBgImage())
 	{
 		DrawTexturePro(baseBackgroundSpriteAtlas,
-			{ 0, 0, (float)baseBackgroundSpriteAtlas.width, (float)-baseBackgroundSpriteAtlas.height },
-			{ 0, 0, (float)settings::screenWidth ,(float)settings::screenHeight },
-			{ 0,0 }, 0, WHITE);
+			{ 0.0f, 0.0f, (float)baseBackgroundSpriteAtlas.width, (float)-baseBackgroundSpriteAtlas.height },
+			{ 0.0f, 0.0f, (float)settings::screenWidth ,(float)settings::screenHeight },
+			{ 0.0f,0.0f }, 0.0f, WHITE);
 	}
 }
 
 void LevelManager::Draw()
 {
-
-	Player& p = *GameScreen::player;
 	Camera2D c = GameScreen::camera;
 
 	float bg_paralax = currentLdtkLevel->getField<float>("BGParalax").value();
@@ -1172,36 +1208,34 @@ void LevelManager::Draw()
 	if (currentLdtkLevel->hasBgImage())
 	{
 		DrawTexturePro(baseBackgroundRenderedLevelTexture,
-			{ 0, 0, (float)baseBackgroundRenderedLevelTexture.width, (float)-baseBackgroundRenderedLevelTexture.height },
+			{ 0.0f, 0.0f, (float)baseBackgroundRenderedLevelTexture.width, (float)-baseBackgroundRenderedLevelTexture.height },
 			{ parallaxed_extra_far.x, parallaxed_extra_far.y, (float)levelSize.x ,(float)levelSize.y  },
-			{ 0,0 }, 0, WHITE);
+			{ 0.0f,0.0f }, 0.0f, WHITE);
 	}
 
 	//Draw paralaxed background elements
 	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture1,
-		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture1.width, (float)-paralaxedBackgroundRenderedLevelTexture1.height },//source
+		{ 0.0f, 0.0f, (float)paralaxedBackgroundRenderedLevelTexture1.width, (float)-paralaxedBackgroundRenderedLevelTexture1.height },//source
 		{ parallaxed_far.x ,parallaxed_far.y, (float)levelSize.x ,(float)levelSize.y  }, //dest
-		{ 0,0 }, 0, WHITE);
+		{ 0.0f,0.0f }, 0.0f, WHITE);
 
 	//Draw paralaxed background elements
 	DrawTexturePro(paralaxedBackgroundRenderedLevelTexture2,
-		{ 0, 0, (float)paralaxedBackgroundRenderedLevelTexture2.width, (float)-paralaxedBackgroundRenderedLevelTexture2.height },//source
+		{ 0.0f, 0.0f, (float)paralaxedBackgroundRenderedLevelTexture2.width, (float)-paralaxedBackgroundRenderedLevelTexture2.height },//source
 		{ parallaxed.x ,parallaxed.y, (float)levelSize.x ,(float)levelSize.y }, //dest
-		{ 0,0 }, 0, WHITE);
-
+		{ 0.0f,0.0f }, 0.0f, WHITE);
 
 	//Draw level solids
 	DrawTexturePro(laboratorySolidsRenderedLevelTexture,
-		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
-		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  }, 
-		{ 0,0 }, 0, WHITE);
-
+		{ 0.0f, 0.0f, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
+		{ 0.0f, 0.0f, (float)levelSize.x ,(float)levelSize.y  }, 
+		{ 0.0f,0.0f }, 0.0f, WHITE);
 
 	//Draw decorations
 	DrawTexturePro(decorationRenderedLevelTexture,
-		{ 0, 0, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
-		{ 0, 0, (float)levelSize.x ,(float)levelSize.y  },
-		{ 0,0 }, 0, WHITE);
+		{ 0.0f, 0.0f, (float)laboratorySolidsRenderedLevelTexture.width, (float)-laboratorySolidsRenderedLevelTexture.height },
+		{ 0.0f, 0.0f, (float)levelSize.x ,(float)levelSize.y  },
+		{ 0.0f,0.0f }, 0.0f, WHITE);
 
 }
 

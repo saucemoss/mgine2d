@@ -512,7 +512,7 @@ public:
             ptr->speed(2.0f);
             ptr->spread(8.0f);
             ptr->color({ 170,255,255,60 });
-            ptr->howmany(25);
+            ptr->howmany(20);
             ptr->gravity(1.0f);
             ptr->set_forever(true);
             ptr->particle_lifetime(7.0f);
@@ -533,7 +533,7 @@ public:
             ptr->speed(0.1f);
             ptr->spread(3.0f);
             ptr->color({ 120,200,200,50 });
-            ptr->howmany(8);
+            ptr->howmany(4);
             ptr->gravity(1.1f);
             ptr->set_forever(true);
             ptr->particle_lifetime(10.0f);

@@ -88,30 +88,7 @@ void Player::Update(float dt)
 
 	GenerateOrbs(dt);
 
-	if (GameScreen::debug)
-	{
-		contact_debug_str = "";
-		if (m_body->GetContactList() != nullptr)
-		{
-			auto con = m_body->GetContactList()->contact;
-			while (con != nullptr)
-			{
-				auto obj1 = reinterpret_cast<Collidable*>(con->GetFixtureA()->GetBody()->GetUserData().pointer);
-				auto obj2 = reinterpret_cast<Collidable*>(con->GetFixtureB()->GetBody()->GetUserData().pointer);
-				contact_debug_str += ColStrMap[obj1->m_colliderTag];
-				contact_debug_str += ", ";
-				contact_debug_str += ColStrMap[obj2->m_colliderTag];
-				contact_debug_str += "\n";
-				con = con->GetNext();
-			}
-		}
-	}
-
-	invincible_counter += dt;
-	if (invincible_counter >= invincible_time)
-	{
-		invincible = false;
-	}
+	CountInvincibility(dt);
 
 	// Update player in one possible state
 	switch (state)
@@ -161,6 +138,15 @@ void Player::Update(float dt)
 	case PlayerState::WallGrabbing:
 		UpdateWallGrabbingState(dt);
 		break;
+	}
+}
+
+void Player::CountInvincibility(float dt)
+{
+	invincible_counter += dt;
+	if (invincible_counter >= invincible_time)
+	{
+		invincible = false;
 	}
 }
 
@@ -314,17 +300,17 @@ void Player::Draw(int l)
 																	CurrentFrame().y,
 																	CurrentFrame().width * -1,
 																	CurrentFrame().height};
-	auto spritePosX = center_pos().x - 10;
-	auto spritePosY = center_pos().y - 14;
+	float spritePosX = center_pos().x - 10.0f;
+	float spritePosY = center_pos().y - 14.0f;
 
-	auto axe_spritePosX = center_pos().x +8;
-	auto axe_spritePosY = center_pos().y +4;
+	float axe_spritePosX = center_pos().x +8.0f;
+	float axe_spritePosY = center_pos().y +4.0f;
 
 
 	if(CurrentFrame().width==96)
 	{
-		spritePosX = center_pos().x - 43;
-		spritePosY = center_pos().y - 44;
+		spritePosX = center_pos().x - 43.0f;
+		spritePosY = center_pos().y - 44.0f;
 	}
 
 	Color c = WHITE;
@@ -345,7 +331,7 @@ void Player::Draw(int l)
 	{
 		DrawTexturePro(*axe_sprite,
 			{
-				10 * 32, 7 * 32,settings::tileSize,settings::tileSize
+				10.0f * 32.0f, 7.0f * 32.0f,settings::tileSize,settings::tileSize
 			},
 			Rectangle{ axe_spritePosX,axe_spritePosY,settings::tileSize,settings::tileSize },
 			{ settings::tileSize / 2,settings::tileSize / 2 },
@@ -357,7 +343,7 @@ void Player::Draw(int l)
 	DrawTexturePro(*animation->GetTexture(),
 		cframe,
 		Rectangle{ spritePosX,spritePosY,CurrentFrame().width,CurrentFrame().height },
-		{ 0,0 },
+		{ 0.0f,0.0f },
 		0.0f,
 		c);
 
@@ -388,15 +374,15 @@ void Player::DrawUI()
 			
 			if (i > 46 && (fabs(axe_velocity.x) + fabs(axe_velocity.y)) >= 300.0f)
 			{
-				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1 + (float(i) * 0.04f), 1 + (float(i) * 0.04f), RED);
+				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1.0f + (float(i) * 0.04f), 1.0f + (float(i) * 0.04f), RED);
 			}	
 			else if (i > 35 && (fabs(axe_velocity.x) + fabs(axe_velocity.y)) >= 250.0f)
 			{
-				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1 + (float(i) * 0.04f), 1 + (float(i) * 0.04f), YELLOW);
+				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1.0f + (float(i) * 0.04f), 1.0f + (float(i) * 0.04f), YELLOW);
 			}
 			else
 			{
-				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1 + (float(i) * 0.04f), 1 + (float(i) * 0.04f), GREEN);
+				DrawRectangle(trajectoryPosition.x, trajectoryPosition.y, 1.0f + (float(i) * 0.04f), 1.0f + (float(i) * 0.04f), GREEN);
 			}
 		}
 		//EndShaderMode();
@@ -485,7 +471,7 @@ void Player::UpdateIdleState(float dt)
 	if ((IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
 		&& is_touching_floor)
 	{
-		Jump();
+		Jump(dt);
 	}
 	else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || std::fabs(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)) > pad_sensitivity_threshold)
 	{
@@ -537,7 +523,7 @@ void Player::UpdateIdleState(float dt)
 
 }
 
-void Player::Jump()
+void Player::Jump(float dt)
 {
 	PlaySound(SoundManager::sounds["jump"]);
 	set_velocity_y(-jump_force);
@@ -587,7 +573,7 @@ void Player::UpdateRunningState(float dt)
 	if ((IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
 		&& (is_touching_floor || coyote_time_counter > 0))
 	{
-		Jump();
+		Jump(dt);
 	}
 	else if ((!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT) && !IsGamepadAvailable(0)) ||
 		fabs(GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X)) == 0.0f)
@@ -905,7 +891,6 @@ void Player::SetThrowing()
 	state = PlayerState::Throwing;
 }
 
-
 b2Vec2 Player::GetTrajectoryPoint(b2Vec2& startingPosition, b2Vec2& startingVelocity, float n)
 {
 	//velocity and gravity are given per second but we want time step values here
@@ -1071,8 +1056,6 @@ void Player::SetPwrAttack()
 	}
 
 }
-
-
 
 void Player::UpdatePowerAttackingState(float dt)
 {
@@ -1273,8 +1256,6 @@ void Player::SetDashing()
 
 }
 
-
-
 void Player::UpdateDashingState(float dt)
 {
 	m_body->SetLinearVelocity({ (looking_right ? speed * 4 : speed * 4 * -1), 0.0f });
@@ -1366,7 +1347,7 @@ void Player::UpdateWallGrabbingState(float dt)
 		ParticleEmitter* p = new ParticleEmitter({ center_pos().x + (looking_right ? +12 : -12), center_pos().y });
 		GameScreen::Particles->Add(DefinedEmitter::dust, p);
 		p->EmitParticles();
-		Jump();
+		Jump(dt);
 
 	}
 

@@ -2,13 +2,15 @@
 
 int ScreensManager::save_slot_num;
 bool ScreensManager::is_new_game;
-
+bool ScreensManager::is_game_screen;
+Sound ScreensManager::menu_theme;
 
 BaseScreen* ScreensManager::currentScreen = nullptr;
 
 void ScreensManager::Initialize()
 {
 	ScreensManager::SetCurrentScreen(UNSET);
+	menu_theme = LoadSound("res/sound/music/menu_theme.wav");
 }
 
 void ScreensManager::SetCurrentScreen(Screens screen)
@@ -23,7 +25,7 @@ void ScreensManager::SetCurrentScreen(Screens screen)
 		delete ScreensManager::currentScreen;
 		ScreensManager::currentScreen = nullptr;
 	}
-
+	is_game_screen = false;
 	switch (screen)
 	{
 	case UNSET:
@@ -40,6 +42,7 @@ void ScreensManager::SetCurrentScreen(Screens screen)
 		break;
 	case GAME:
 		ScreensManager::currentScreen = new GameScreen(is_new_game, save_slot_num);
+		is_game_screen = true;
 		break;
 	case CONTINUE:
 		ScreensManager::currentScreen = new ContinueScreen();
@@ -55,6 +58,11 @@ void ScreensManager::SetCurrentScreen(Screens screen)
 
 void ScreensManager::Update(float dt)
 {
+	if (!IsSoundPlaying(menu_theme))
+	{
+		PlaySound(menu_theme);
+	}
+
 	if (ScreensManager::currentScreen != nullptr)
 	{
 		Screens result = ScreensManager::currentScreen->Update(dt);

@@ -1,6 +1,7 @@
 #include "ContinueScreen.h"
 #include "ScreensManager.h"
 
+
 ContinueScreen::ContinueScreen() : selectedSlot(0)
 {
     for (int i = 0; i < 3; ++i)
@@ -30,6 +31,7 @@ void ContinueScreen::Draw()
 
 Screens ContinueScreen::Update(float dt)
 {
+    if (!IsSoundPlaying(SoundManager::sounds["menu_theme"]))PlaySound(SoundManager::sounds["menu_theme"]);
     if (IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP))
     {
         selectedSlot = (selectedSlot - 1 + 3) % 3;

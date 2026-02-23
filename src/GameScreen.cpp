@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include "ScreensManager.h"
 #include <vector>
 #include "Util.h"
 #include "GameScreen.h"
@@ -7,6 +8,7 @@
 #include <raymath.h>
 #include "rlgl.h"
 #include "Dialogue.h"
+
 
 
 Shaders* GameScreen::shaders;
@@ -63,15 +65,16 @@ GameScreen::~GameScreen()
 
 void GameScreen::UpdateCamera(float dt)
 {
+
 	float y_offset = 32.0f;
 	// Camera stuff
 	// 
 	// Camera zoom controls
 	player_focused_cam.target = { player->pos().x,player->pos().y - y_offset };
-	camera.zoom += ((float)GetMouseWheelMove() * 0.05f);
+	//camera.zoom += ((float)GetMouseWheelMove() * 0.05f);
 
-	if (camera.zoom > 30.0f) camera.zoom = 30.0f;
-	else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
+//	if (camera.zoom > 30.0f) camera.zoom = 30.0f;
+//	else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
 
 	//// Camera reset (zoom and rotation)
 	//if (IsKeyPressed(KEY_R))
@@ -80,7 +83,7 @@ void GameScreen::UpdateCamera(float dt)
 	//	camera.rotation = 0.0f;
 	//}
 
-	static float minSpeed = 1.0f;
+	static float minSpeed = 4.0f;
 	static float minEffectLength = 4.0f;
 	static float fractionSpeed = 4.0f;
 
@@ -103,23 +106,23 @@ void GameScreen::UpdateCamera(float dt)
 		Vector2 min = GetWorldToScreen2D({ minX, minY }, camera);
 		if (max.x < settings::screenWidth)
 		{
-			camera.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
-			player_focused_cam.offset.x = settings::screenWidth - (max.x - settings::screenWidth / 2);
+			camera.offset.x = settings::screenWidth - (float)(max.x - settings::screenWidth / 2.0f);
+			player_focused_cam.offset.x = settings::screenWidth - (float)(max.x - settings::screenWidth / 2.0f);
 		}
 		if (max.y < settings::screenHeight)
 		{
-			camera.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
-			player_focused_cam.offset.y = settings::screenHeight - (max.y - settings::screenHeight / 2);
+			camera.offset.y = settings::screenHeight - (float)(max.y - settings::screenHeight / 2.0f);
+			player_focused_cam.offset.y = settings::screenHeight - (float)(max.y - settings::screenHeight / 2.0f);
 		}
-		if (min.x > 0)
+		if (min.x > 0.0f)
 		{
-			camera.offset.x = settings::screenWidth / 2 - min.x;
-			player_focused_cam.offset.x = settings::screenWidth / 2 - min.x;
+			camera.offset.x = settings::screenWidth / 2.0f - min.x;
+			player_focused_cam.offset.x = settings::screenWidth / 2.0f - min.x;
 		}
-		if (min.y > 0)
+		if (min.y > 0.0f)
 		{
-			camera.offset.y = settings::screenHeight / 2 - min.y;
-			player_focused_cam.offset.y = settings::screenHeight / 2 - min.y;
+			camera.offset.y = settings::screenHeight / 2.0f - min.y;
+			player_focused_cam.offset.y = settings::screenHeight / 2.0f - min.y;
 		}
 	}
 	else
@@ -153,6 +156,7 @@ void GameScreen::UpdateCamera(float dt)
 
 Screens GameScreen::Update(float dt)
 {
+	
 	//full screen at current screensize
 	if (IsKeyPressed(KEY_F11) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_LEFT))
 	{
@@ -163,6 +167,8 @@ Screens GameScreen::Update(float dt)
 	{
 		debug = !debug;
 	}
+
+
 	
 	player->Update(dt);
 	UpdateCamera(dt);
@@ -180,10 +186,7 @@ Screens GameScreen::Update(float dt)
 
 void GameScreen::Draw()
 {
-	Vector2 c_position = { (camera.offset.x / camera.zoom - camera.target.x) , (camera.offset.y / camera.zoom - camera.target.y) };
-
 	////////////////////////////////////////////////// THE HOLY DRAW ORDER: //////////////////////////////////////////////////////
-
 	LevelMgr->DrawFixedBg();
 	BeginMode2D(trauma > 0.0f ? shake_cam : camera);				
 
@@ -199,7 +202,7 @@ void GameScreen::Draw()
 	shaders->Pixelize();							// Pixelised particles
 
 	EndMode2D();									// Vignette
-	DrawVignette();									// Vignette
+	DrawVignette();								// Vignette
 	BeginMode2D(trauma > 0.0f ? shake_cam : camera);// Vignette
 	 
 	player->DrawUI();								// Player UI
@@ -221,7 +224,7 @@ void GameScreen::Draw()
 		//DrawText(player->contact_debug_str.c_str(), player->pos().x, player->pos().y - 100, 1, GREEN);
 		DebugShapes();
 	}
-
+	
 	EndMode2D();									// END 2D Cam mode
 
 	
@@ -246,6 +249,8 @@ void GameScreen::Draw()
 		}
 	}
 	shaders->ResetShaders();			// Have to reset shaders here or nothing else is drawn after shaders...
+
+	
 }
 
 void GameScreen::DebugShapes()
@@ -336,7 +341,7 @@ void GameScreen::DrawVignette()
 	DrawTexturePro(vignette, 
 		{ 0,0, (float)vignette.width,(float)vignette.height }, 
 		{ 0,0, settings::screenWidth, settings::screenHeight},
-		{ 0,0 }, 0.0f, Fade(WHITE, 0.3f));
+		{ 0,0 }, 0.0f, Fade(WHITE, 0.1f));
 }
 
 

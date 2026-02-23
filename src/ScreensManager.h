@@ -12,7 +12,7 @@
 #include "BaseScreen.h"
 #include "MenuScreen.h"
 #include "Screens.h"
-
+#include "SoundManager.h"
 
 class ScreensManager
 {
@@ -29,6 +29,9 @@ public:
 
 	static int save_slot_num;
 	static bool is_new_game;
+	static bool is_game_screen;
+
+	static Sound menu_theme;
 };
 
 #endif
